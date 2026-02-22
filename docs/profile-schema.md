@@ -56,12 +56,12 @@ All fields are optional — the probe collects what it can based on browser API 
 
 ## RenderingHints (derived)
 
-| Field                   | Type      | When `true`                                   |
-| ----------------------- | --------- | --------------------------------------------- |
-| `deferHeavyComponents`  | `boolean` | Low-end device, slow connection, or low battery |
-| `serveMinimalCSS`       | `boolean` | Low-end device                                |
+| Field                   | Type      | When `true`                                            |
+| ----------------------- | --------- | ------------------------------------------------------ |
+| `deferHeavyComponents`  | `boolean` | Low-end device, slow connection, or low battery        |
+| `serveMinimalCSS`       | `boolean` | Low-end device                                         |
 | `reduceAnimations`      | `boolean` | Low-end device, prefers reduced motion, or low battery |
-| `useImagePlaceholders`  | `boolean` | Slow connection (2g/3g)                       |
-| `disableAutoplay`       | `boolean` | Low-end device, slow connection, or low battery |
-| `preferServerRendering` | `boolean` | Low-end device                                |
-| `disable3dEffects`      | `boolean` | No GPU or software renderer                   |
+| `useImagePlaceholders`  | `boolean` | Slow connection (2g/3g)                                |
+| `disableAutoplay`       | `boolean` | Low-end device, slow connection, or low battery        |
+| `preferServerRendering` | `boolean` | Low-end device                                         |
+| `disable3dEffects`      | `boolean` | No GPU or software renderer                            |

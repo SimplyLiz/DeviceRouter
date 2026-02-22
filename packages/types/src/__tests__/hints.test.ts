@@ -107,10 +107,7 @@ describe('deriveHints', () => {
   });
 
   it('does not change behavior when battery signal is absent', () => {
-    const hints = deriveHints(
-      { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' },
-      {},
-    );
+    const hints = deriveHints({ cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' }, {});
     expect(hints.deferHeavyComponents).toBe(false);
     expect(hints.reduceAnimations).toBe(false);
     expect(hints.disableAutoplay).toBe(false);

@@ -1,0 +1,77 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { MemoryStorageAdapter } from '../memory.js';
+import type { DeviceProfile } from '@device-router/types';
+
+const makeProfile = (token: string): DeviceProfile => ({
+  schemaVersion: 1,
+  sessionToken: token,
+  createdAt: new Date().toISOString(),
+  expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+  signals: { hardwareConcurrency: 4 },
+});
+
+describe('MemoryStorageAdapter', () => {
+  let adapter: MemoryStorageAdapter;
+
+  beforeEach(() => {
+    adapter = new MemoryStorageAdapter();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    adapter.clear();
+    vi.useRealTimers();
+  });
+
+  it('stores and retrieves a profile', async () => {
+    const profile = makeProfile('tok1');
+    await adapter.set('tok1', profile, 3600);
+    const result = await adapter.get('tok1');
+    expect(result).toEqual(profile);
+  });
+
+  it('returns null for non-existent key', async () => {
+    expect(await adapter.get('missing')).toBeNull();
+  });
+
+  it('deletes a profile', async () => {
+    const profile = makeProfile('tok2');
+    await adapter.set('tok2', profile, 3600);
+    await adapter.delete('tok2');
+    expect(await adapter.get('tok2')).toBeNull();
+  });
+
+  it('checks existence', async () => {
+    const profile = makeProfile('tok3');
+    expect(await adapter.exists('tok3')).toBe(false);
+    await adapter.set('tok3', profile, 3600);
+    expect(await adapter.exists('tok3')).toBe(true);
+  });
+
+  it('expires entries after TTL', async () => {
+    const profile = makeProfile('tok4');
+    await adapter.set('tok4', profile, 1);
+
+    expect(await adapter.get('tok4')).toEqual(profile);
+
+    vi.advanceTimersByTime(1500);
+    expect(await adapter.get('tok4')).toBeNull();
+  });
+
+  it('overwrites existing entry', async () => {
+    const p1 = makeProfile('tok5');
+    const p2 = { ...makeProfile('tok5'), signals: { hardwareConcurrency: 8 } };
+    await adapter.set('tok5', p1, 3600);
+    await adapter.set('tok5', p2, 3600);
+    const result = await adapter.get('tok5');
+    expect(result?.signals.hardwareConcurrency).toBe(8);
+  });
+
+  it('clears all entries', async () => {
+    await adapter.set('a', makeProfile('a'), 3600);
+    await adapter.set('b', makeProfile('b'), 3600);
+    adapter.clear();
+    expect(await adapter.get('a')).toBeNull();
+    expect(await adapter.get('b')).toBeNull();
+  });
+});

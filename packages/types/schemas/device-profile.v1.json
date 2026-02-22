@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://device-router.dev/schemas/device-profile.v1.json",
+  "title": "DeviceProfile",
+  "description": "Device capability profile collected by the client-side probe",
+  "type": "object",
+  "required": ["schemaVersion", "sessionToken", "createdAt", "expiresAt", "signals"],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1,
+      "description": "Schema version for forward compatibility"
+    },
+    "sessionToken": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique session identifier"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of profile creation"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of profile expiration"
+    },
+    "signals": {
+      "$ref": "#/definitions/RawSignals"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "RawSignals": {
+      "type": "object",
+      "properties": {
+        "hardwareConcurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of logical CPU cores"
+        },
+        "deviceMemory": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Approximate device memory in GB"
+        },
+        "connection": {
+          "$ref": "#/definitions/ConnectionInfo"
+        },
+        "userAgent": {
+          "type": "string",
+          "description": "Navigator user agent string"
+        },
+        "viewport": {
+          "$ref": "#/definitions/Viewport"
+        },
+        "pixelRatio": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Device pixel ratio"
+        },
+        "prefersReducedMotion": {
+          "type": "boolean",
+          "description": "User prefers reduced motion"
+        },
+        "prefersColorScheme": {
+          "type": "string",
+          "enum": ["light", "dark", "no-preference"],
+          "description": "User preferred color scheme"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ConnectionInfo": {
+      "type": "object",
+      "properties": {
+        "effectiveType": {
+          "type": "string",
+          "enum": ["slow-2g", "2g", "3g", "4g"],
+          "description": "Effective connection type"
+        },
+        "downlink": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Downlink speed in Mbps"
+        },
+        "rtt": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Round-trip time in ms"
+        },
+        "saveData": {
+          "type": "boolean",
+          "description": "Data saver mode enabled"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Viewport": {
+      "type": "object",
+      "required": ["width", "height"],
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Viewport width in CSS pixels"
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Viewport height in CSS pixels"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

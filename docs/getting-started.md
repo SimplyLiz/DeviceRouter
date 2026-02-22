@@ -129,7 +129,7 @@ app.use(async (ctx) => {
 <script src="/path/to/device-router-probe.min.js"></script>
 ```
 
-The probe script (~988 bytes gzipped) runs once per session. It collects device signals and POSTs them to the probe endpoint.
+The probe script (~1 KB gzipped) runs once per session. It collects device signals and POSTs them to the probe endpoint.
 
 ### Auto-Injection
 

@@ -123,6 +123,65 @@ describe('runProbe', () => {
     await expect(runProbe()).resolves.toBeUndefined();
   });
 
+  it('includes battery when getBattery resolves', async () => {
+    Object.defineProperty(globalThis, 'navigator', {
+      value: {
+        hardwareConcurrency: 4,
+        userAgent: 'Test/1.0',
+        getBattery: () => Promise.resolve({ level: 0.72, charging: true }),
+      },
+      writable: true,
+      configurable: true,
+    });
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ sessionToken: 'tok' }),
+    });
+    globalThis.fetch = mockFetch;
+
+    await runProbe();
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.battery).toEqual({ level: 0.72, charging: true });
+  });
+
+  it('omits battery when getBattery is unavailable', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ sessionToken: 'tok' }),
+    });
+    globalThis.fetch = mockFetch;
+
+    await runProbe();
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.battery).toBeUndefined();
+  });
+
+  it('omits battery when getBattery rejects', async () => {
+    Object.defineProperty(globalThis, 'navigator', {
+      value: {
+        hardwareConcurrency: 4,
+        userAgent: 'Test/1.0',
+        getBattery: () => Promise.reject(new Error('not supported')),
+      },
+      writable: true,
+      configurable: true,
+    });
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ sessionToken: 'tok' }),
+    });
+    globalThis.fetch = mockFetch;
+
+    await runProbe();
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.battery).toBeUndefined();
+  });
+
   it('does not set cookie on non-ok response', async () => {
     const mockDoc = { cookie: '' };
     Object.defineProperty(globalThis, 'document', {

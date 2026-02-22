@@ -70,4 +70,56 @@ describe('deriveHints', () => {
     const hints = deriveHints({ cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' });
     expect(hints.disable3dEffects).toBe(false);
   });
+
+  it('constrains hints on low battery unplugged even for high-end device', () => {
+    const hints = deriveHints(
+      { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' },
+      { battery: { level: 0.08, charging: false } },
+    );
+    expect(hints.deferHeavyComponents).toBe(true);
+    expect(hints.reduceAnimations).toBe(true);
+    expect(hints.disableAutoplay).toBe(true);
+    // Capability-based hints stay permissive
+    expect(hints.serveMinimalCSS).toBe(false);
+    expect(hints.useImagePlaceholders).toBe(false);
+    expect(hints.preferServerRendering).toBe(false);
+    expect(hints.disable3dEffects).toBe(false);
+  });
+
+  it('does not constrain when low battery but charging', () => {
+    const hints = deriveHints(
+      { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' },
+      { battery: { level: 0.05, charging: true } },
+    );
+    expect(hints.deferHeavyComponents).toBe(false);
+    expect(hints.reduceAnimations).toBe(false);
+    expect(hints.disableAutoplay).toBe(false);
+  });
+
+  it('does not constrain when battery above threshold', () => {
+    const hints = deriveHints(
+      { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' },
+      { battery: { level: 0.5, charging: false } },
+    );
+    expect(hints.deferHeavyComponents).toBe(false);
+    expect(hints.reduceAnimations).toBe(false);
+    expect(hints.disableAutoplay).toBe(false);
+  });
+
+  it('does not change behavior when battery signal is absent', () => {
+    const hints = deriveHints({ cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' }, {});
+    expect(hints.deferHeavyComponents).toBe(false);
+    expect(hints.reduceAnimations).toBe(false);
+    expect(hints.disableAutoplay).toBe(false);
+  });
+
+  it('does not constrain at exactly 0.15 (strict less-than)', () => {
+    const hints = deriveHints(
+      { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' },
+      { battery: { level: 0.15, charging: false } },
+    );
+    expect(hints.deferHeavyComponents).toBe(false);
+    expect(hints.reduceAnimations).toBe(false);
+    expect(hints.disableAutoplay).toBe(false);
+  });
 });

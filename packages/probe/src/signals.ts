@@ -13,6 +13,7 @@ export interface ProbeSignals {
   prefersReducedMotion?: boolean;
   prefersColorScheme?: 'light' | 'dark' | 'no-preference';
   gpuRenderer?: string;
+  battery?: { level: number; charging: boolean };
 }
 
 export function collectHardwareConcurrency(): number | undefined {

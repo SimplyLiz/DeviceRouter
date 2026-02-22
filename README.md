@@ -1,6 +1,6 @@
 # DeviceRouter
 
-[![npm](https://img.shields.io/npm/v/@device-router/types?label=npm&color=cb3837)](https://www.npmjs.com/package/@device-router/types)
+[![npm](https://img.shields.io/npm/v/@device-router/types?label=npm&color=cb3837)](https://www.npmjs.com/search?q=%40device-router)
 [![CI](https://img.shields.io/github/actions/workflow/status/SimplyLiz/DeviceRouter/ci.yml?branch=main&label=CI)](https://github.com/SimplyLiz/DeviceRouter/actions/workflows/ci.yml)
 [![bundle size](https://img.shields.io/badge/probe-~1%20KB%20gzipped-blue)](https://github.com/SimplyLiz/DeviceRouter/tree/main/packages/probe)
 [![license](https://img.shields.io/github/license/SimplyLiz/DeviceRouter)](https://github.com/SimplyLiz/DeviceRouter/blob/main/LICENSE)

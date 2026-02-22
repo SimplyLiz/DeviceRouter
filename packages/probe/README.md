@@ -60,8 +60,8 @@ import { runProbe } from '@device-router/probe';
 
 await runProbe({
   endpoint: '/device-router/probe', // default
-  cookieName: 'dr_session',         // default
-  cookiePath: '/',                   // default
+  cookieName: 'dr_session', // default
+  cookiePath: '/', // default
 });
 ```
 

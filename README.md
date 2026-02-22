@@ -112,15 +112,15 @@ Devices are classified across three dimensions:
 
 Based on tiers and user preferences, DeviceRouter derives actionable booleans:
 
-| Hint                    | When it activates                             |
-| ----------------------- | --------------------------------------------- |
+| Hint                    | When it activates                                      |
+| ----------------------- | ------------------------------------------------------ |
 | `deferHeavyComponents`  | Low-end device, slow connection, or low battery        |
 | `serveMinimalCSS`       | Low-end device                                         |
 | `reduceAnimations`      | Low-end device, prefers reduced motion, or low battery |
 | `useImagePlaceholders`  | Slow connection (2G/3G)                                |
 | `disableAutoplay`       | Low-end device, slow connection, or low battery        |
-| `preferServerRendering` | Low-end device                                |
-| `disable3dEffects`      | No GPU or software renderer                   |
+| `preferServerRendering` | Low-end device                                         |
+| `disable3dEffects`      | No GPU or software renderer                            |
 
 ## Custom Thresholds
 

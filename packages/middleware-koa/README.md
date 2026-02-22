@@ -82,16 +82,16 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 
 ## Options
 
-| Option        | Type                                         | Default           | Description                          |
-| ------------- | -------------------------------------------- | ----------------- | ------------------------------------ |
-| `storage`     | `StorageAdapter`                             | *(required)*      | Storage backend for profiles         |
-| `cookieName`  | `string`                                     | `'dr_session'`    | Session cookie name                  |
-| `cookiePath`  | `string`                                     | `'/'`             | Cookie path                          |
-| `ttl`         | `number`                                     | `86400` (24h)     | Profile TTL in seconds               |
-| `thresholds`  | `TierThresholds`                             | Built-in defaults | Custom tier thresholds               |
-| `injectProbe` | `boolean`                                    | `false`           | Auto-inject probe into HTML          |
-| `probePath`   | `string`                                     | —                 | Custom probe endpoint path           |
-| `probeNonce`  | `string \| ((ctx: Context) => string)`       | —                 | CSP nonce for injected script        |
+| Option        | Type                                   | Default           | Description                   |
+| ------------- | -------------------------------------- | ----------------- | ----------------------------- |
+| `storage`     | `StorageAdapter`                       | _(required)_      | Storage backend for profiles  |
+| `cookieName`  | `string`                               | `'dr_session'`    | Session cookie name           |
+| `cookiePath`  | `string`                               | `'/'`             | Cookie path                   |
+| `ttl`         | `number`                               | `86400` (24h)     | Profile TTL in seconds        |
+| `thresholds`  | `TierThresholds`                       | Built-in defaults | Custom tier thresholds        |
+| `injectProbe` | `boolean`                              | `false`           | Auto-inject probe into HTML   |
+| `probePath`   | `string`                               | —                 | Custom probe endpoint path    |
+| `probeNonce`  | `string \| ((ctx: Context) => string)` | —                 | CSP nonce for injected script |
 
 ## Exports
 

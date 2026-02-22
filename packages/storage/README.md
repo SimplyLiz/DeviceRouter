@@ -52,10 +52,18 @@ import type { StorageAdapter } from '@device-router/storage';
 import type { DeviceProfile } from '@device-router/types';
 
 class MyAdapter implements StorageAdapter {
-  async get(sessionToken: string): Promise<DeviceProfile | null> { /* ... */ }
-  async set(sessionToken: string, profile: DeviceProfile, ttlSeconds: number): Promise<void> { /* ... */ }
-  async delete(sessionToken: string): Promise<void> { /* ... */ }
-  async exists(sessionToken: string): Promise<boolean> { /* ... */ }
+  async get(sessionToken: string): Promise<DeviceProfile | null> {
+    /* ... */
+  }
+  async set(sessionToken: string, profile: DeviceProfile, ttlSeconds: number): Promise<void> {
+    /* ... */
+  }
+  async delete(sessionToken: string): Promise<void> {
+    /* ... */
+  }
+  async exists(sessionToken: string): Promise<boolean> {
+    /* ... */
+  }
 }
 ```
 
@@ -63,12 +71,12 @@ class MyAdapter implements StorageAdapter {
 
 ### `StorageAdapter` interface
 
-| Method   | Signature                                                          | Description                  |
-| -------- | ------------------------------------------------------------------ | ---------------------------- |
-| `get`    | `(sessionToken: string) => Promise<DeviceProfile \| null>`         | Retrieve a profile           |
-| `set`    | `(sessionToken: string, profile: DeviceProfile, ttl: number) => Promise<void>` | Store with TTL (seconds) |
-| `delete` | `(sessionToken: string) => Promise<void>`                          | Remove a profile             |
-| `exists` | `(sessionToken: string) => Promise<boolean>`                       | Check if a profile exists    |
+| Method   | Signature                                                                      | Description               |
+| -------- | ------------------------------------------------------------------------------ | ------------------------- |
+| `get`    | `(sessionToken: string) => Promise<DeviceProfile \| null>`                     | Retrieve a profile        |
+| `set`    | `(sessionToken: string, profile: DeviceProfile, ttl: number) => Promise<void>` | Store with TTL (seconds)  |
+| `delete` | `(sessionToken: string) => Promise<void>`                                      | Remove a profile          |
+| `exists` | `(sessionToken: string) => Promise<boolean>`                                   | Check if a profile exists |
 
 ### `MemoryStorageAdapter`
 
@@ -80,9 +88,9 @@ Implements `StorageAdapter` plus:
 
 Constructor options:
 
-| Option      | Type     | Default         | Description               |
-| ----------- | -------- | --------------- | ------------------------- |
-| `client`    | `object` | *(required)*    | Redis-compatible client   |
+| Option      | Type     | Default         | Description                |
+| ----------- | -------- | --------------- | -------------------------- |
+| `client`    | `object` | _(required)_    | Redis-compatible client    |
 | `keyPrefix` | `string` | `'dr:profile:'` | Key prefix for all entries |
 
 ## License

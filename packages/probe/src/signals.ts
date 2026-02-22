@@ -78,9 +78,9 @@ export function collectGpuRenderer(): string | undefined {
   if (typeof document === 'undefined') return undefined;
   try {
     const c = document.createElement('canvas');
-    const gl = c.getContext('webgl', { failIfMajorPerformanceCaveat: true }) as
-      | WebGLRenderingContext
-      | null;
+    const gl = c.getContext('webgl', {
+      failIfMajorPerformanceCaveat: true,
+    }) as WebGLRenderingContext | null;
     if (gl) return readRenderer(gl);
     // Context refused — major performance caveat (software renderer).
     const fb = c.getContext('webgl') as WebGLRenderingContext | null;

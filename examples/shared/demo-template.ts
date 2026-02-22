@@ -5,7 +5,11 @@ export interface DemoTemplateOptions {
   frameworkName: string;
 }
 
-export function renderDemoPage({ profile, forceParam, frameworkName }: DemoTemplateOptions): string {
+export function renderDemoPage({
+  profile,
+  forceParam,
+  frameworkName,
+}: DemoTemplateOptions): string {
   // Determine effective hints — force overrides detected profile
   const hints =
     forceParam === 'lite'

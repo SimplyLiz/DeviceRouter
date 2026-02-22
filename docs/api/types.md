@@ -73,9 +73,9 @@ Custom thresholds for tier classification. All fields are optional — unset fie
 
 ### GpuThresholds
 
-| Field             | Type     | Default                                               | Description                          |
-| ----------------- | -------- | ----------------------------------------------------- | ------------------------------------ |
-| `softwarePattern` | `RegExp` | `/SwiftShader\|llvmpipe\|Software Rasterizer/i`       | Renderer matches → `'low'` tier      |
+| Field             | Type     | Default                                                   | Description                      |
+| ----------------- | -------- | --------------------------------------------------------- | -------------------------------- |
+| `softwarePattern` | `RegExp` | `/SwiftShader\|llvmpipe\|Software Rasterizer/i`           | Renderer matches → `'low'` tier  |
 | `highEndPattern`  | `RegExp` | `/\bRTX\b\|Radeon RX [5-9]\d{3}\|Radeon Pro\|Apple M\d/i` | Renderer matches → `'high'` tier |
 
 ### Example

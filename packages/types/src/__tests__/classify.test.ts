@@ -146,18 +146,22 @@ describe('classifyGpu', () => {
     // Default: Intel HD not software
     expect(classifyGpu('Intel(R) HD Graphics 630')).toBe('mid');
     // Custom: treat Intel HD as software
-    expect(classifyGpu('Intel(R) HD Graphics 630', {
-      softwarePattern: /Intel.*HD/i,
-    })).toBe('low');
+    expect(
+      classifyGpu('Intel(R) HD Graphics 630', {
+        softwarePattern: /Intel.*HD/i,
+      }),
+    ).toBe('low');
   });
 
   it('uses custom highEndPattern threshold', () => {
     // Default: GTX 1060 is mid
     expect(classifyGpu('NVIDIA GeForce GTX 1060')).toBe('mid');
     // Custom: treat GTX as high-end
-    expect(classifyGpu('NVIDIA GeForce GTX 1060', {
-      highEndPattern: /\bGTX\b/i,
-    })).toBe('high');
+    expect(
+      classifyGpu('NVIDIA GeForce GTX 1060', {
+        highEndPattern: /\bGTX\b/i,
+      }),
+    ).toBe('high');
   });
 });
 

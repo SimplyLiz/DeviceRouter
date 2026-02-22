@@ -213,13 +213,13 @@ describe('signal collectors', () => {
       const loseCtx = { loseContext: vi.fn() };
       return {
         getExtension: vi.fn((name: string) =>
-          name === 'WEBGL_debug_renderer_info' ? debugExt
-          : name === 'WEBGL_lose_context' ? loseCtx
-          : null,
+          name === 'WEBGL_debug_renderer_info'
+            ? debugExt
+            : name === 'WEBGL_lose_context'
+              ? loseCtx
+              : null,
         ),
-        getParameter: vi.fn((param: number) =>
-          param === UNMASKED ? renderer : null,
-        ),
+        getParameter: vi.fn((param: number) => (param === UNMASKED ? renderer : null)),
         _loseCtx: loseCtx,
       };
     }

@@ -1,0 +1,9 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/types" },
+    { "path": "packages/probe" },
+    { "path": "packages/storage" },
+    { "path": "packages/middleware-express" }
+  ]
+}

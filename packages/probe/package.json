@@ -9,7 +9,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./dist/device-router-probe.min.js": "./dist/device-router-probe.min.js"
   },
   "files": [
     "dist"

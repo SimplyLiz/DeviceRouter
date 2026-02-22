@@ -32,7 +32,13 @@
   "peerDependencies": {
     "koa": "^2.0.0"
   },
+  "peerDependenciesMeta": {
+    "@device-router/probe": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@device-router/probe": "workspace:*",
     "@types/koa": "^2.15.0",
     "koa": "^2.16.0"
   }

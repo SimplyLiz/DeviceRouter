@@ -32,7 +32,13 @@
   "peerDependencies": {
     "hono": "^4.0.0"
   },
+  "peerDependenciesMeta": {
+    "@device-router/probe": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@device-router/probe": "workspace:*",
     "hono": "^4.7.5"
   }
 }

@@ -61,6 +61,72 @@ importers:
         specifier: ^4.0.0
         version: 4.21.0
 
+  examples/fastify-basic:
+    dependencies:
+      '@device-router/middleware-fastify':
+        specifier: workspace:*
+        version: link:../../packages/middleware-fastify
+      '@device-router/storage':
+        specifier: workspace:*
+        version: link:../../packages/storage
+      '@device-router/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      '@fastify/cookie':
+        specifier: ^11.0.1
+        version: 11.0.2
+      fastify:
+        specifier: ^5.2.1
+        version: 5.7.4
+    devDependencies:
+      tsx:
+        specifier: ^4.0.0
+        version: 4.21.0
+
+  examples/hono-basic:
+    dependencies:
+      '@device-router/middleware-hono':
+        specifier: workspace:*
+        version: link:../../packages/middleware-hono
+      '@device-router/storage':
+        specifier: workspace:*
+        version: link:../../packages/storage
+      '@device-router/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      '@hono/node-server':
+        specifier: ^1.13.8
+        version: 1.19.9(hono@4.12.1)
+      hono:
+        specifier: ^4.7.5
+        version: 4.12.1
+    devDependencies:
+      tsx:
+        specifier: ^4.0.0
+        version: 4.21.0
+
+  examples/koa-basic:
+    dependencies:
+      '@device-router/middleware-koa':
+        specifier: workspace:*
+        version: link:../../packages/middleware-koa
+      '@device-router/storage':
+        specifier: workspace:*
+        version: link:../../packages/storage
+      '@device-router/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      koa:
+        specifier: ^2.16.0
+        version: 2.16.3
+    devDependencies:
+      '@types/koa':
+        specifier: ^2.15.0
+        version: 2.15.0
+      tsx:
+        specifier: ^4.0.0
+        version: 4.21.0
+
   packages/middleware-express:
     dependencies:
       '@device-router/storage':
@@ -95,6 +161,9 @@ importers:
         specifier: workspace:*
         version: link:../types
     devDependencies:
+      '@device-router/probe':
+        specifier: workspace:*
+        version: link:../probe
       '@fastify/cookie':
         specifier: ^11.0.1
         version: 11.0.2
@@ -114,6 +183,9 @@ importers:
         specifier: workspace:*
         version: link:../types
     devDependencies:
+      '@device-router/probe':
+        specifier: workspace:*
+        version: link:../probe
       hono:
         specifier: ^4.7.5
         version: 4.12.1
@@ -127,6 +199,9 @@ importers:
         specifier: workspace:*
         version: link:../types
     devDependencies:
+      '@device-router/probe':
+        specifier: workspace:*
+        version: link:../probe
       '@types/koa':
         specifier: ^2.15.0
         version: 2.15.0
@@ -546,6 +621,12 @@ packages:
 
   '@fastify/proxy-addr@5.1.0':
     resolution: {integrity: sha512-INS+6gh91cLUjB+PVHfu1UqcB76Sqtpyp7bnL+FYojhjygvOPA9ctiD/JDKsyD9Xgu4hUhCSJBPig/w7duNajw==}
+
+  '@hono/node-server@1.19.9':
+    resolution: {integrity: sha512-vHL6w3ecZsky+8P5MD+eFfaGTyCeOHUIFYMGpQGbrBTSmNNoxv0if69rEZ5giu36weC5saFuznL411gRX7bJDw==}
+    engines: {node: '>=18.14.1'}
+    peerDependencies:
+      hono: ^4
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -2132,6 +2213,10 @@ snapshots:
     dependencies:
       '@fastify/forwarded': 3.0.1
       ipaddr.js: 2.3.0
+
+  '@hono/node-server@1.19.9(hono@4.12.1)':
+    dependencies:
+      hono: 4.12.1
 
   '@humanfs/core@0.19.1': {}
 

@@ -39,7 +39,7 @@ No user-agent sniffing. No guesswork. Real signals from real devices, classified
 ```
 
 1. **Probe** — A tiny script runs once per session, collecting device signals via browser APIs
-2. **Classify** — The middleware classifies the device into CPU, memory, and connection tiers
+2. **Classify** — The middleware classifies the device into CPU, memory, connection, and GPU tiers
 3. **Hint** — Rendering hints like `deferHeavyComponents` and `reduceAnimations` are derived automatically
 4. **Serve** — Your route handlers read `req.deviceProfile` and respond accordingly
 
@@ -93,6 +93,7 @@ app.get('/', (req, res) => {
 | Prefers reduced motion | `matchMedia`               | All modern browsers   |
 | Prefers color scheme   | `matchMedia`               | All modern browsers   |
 | GPU renderer           | WebGL debug info           | Chrome, Firefox, Edge |
+| Battery status         | `navigator.getBattery()`   | Chrome, Edge          |
 
 All signals are optional — the probe gracefully degrades based on what the browser supports.
 
@@ -113,11 +114,11 @@ Based on tiers and user preferences, DeviceRouter derives actionable booleans:
 
 | Hint                    | When it activates                             |
 | ----------------------- | --------------------------------------------- |
-| `deferHeavyComponents`  | Low-end device or slow connection             |
-| `serveMinimalCSS`       | Low-end device                                |
-| `reduceAnimations`      | Low-end device or user prefers reduced motion |
-| `useImagePlaceholders`  | Slow connection (2G/3G)                       |
-| `disableAutoplay`       | Low-end device or slow connection             |
+| `deferHeavyComponents`  | Low-end device, slow connection, or low battery        |
+| `serveMinimalCSS`       | Low-end device                                         |
+| `reduceAnimations`      | Low-end device, prefers reduced motion, or low battery |
+| `useImagePlaceholders`  | Slow connection (2G/3G)                                |
+| `disableAutoplay`       | Low-end device, slow connection, or low battery        |
 | `preferServerRendering` | Low-end device                                |
 | `disable3dEffects`      | No GPU or software renderer                   |
 

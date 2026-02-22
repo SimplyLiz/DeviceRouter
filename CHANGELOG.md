@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.2.0 (2026-02-22)
+
+### Features
+
+- **GPU detection** — Classify GPU tier from WebGL renderer string: software renderers → `low`, RTX/RX 5000+/Apple M-series → `high`, everything else → `mid`
+- **Battery API signal** — Collect battery level and charging status via `navigator.getBattery()` (Chromium-only, silently skipped elsewhere). When unplugged and below 15%, `deferHeavyComponents`, `reduceAnimations`, and `disableAutoplay` are forced on
+- **Signal validation** — New `isValidSignals()` type guard for validating incoming probe payloads
+- **Custom GPU thresholds** — `softwarePattern` and `highEndPattern` are configurable via `GpuThresholds`
+
+### Dependencies
+
+- Bump `esbuild` from 0.25.12 to 0.27.3
+- Bump `koa` and `@types/koa`
+- Bump `actions/checkout` from v4 to v6
+- Bump `actions/setup-node` from v4 to v6
+
+### Infrastructure
+
+- Split CI into separate lint, audit, and test jobs
+- Add Dependabot config for automated dependency updates
+
 ## 0.1.0 (2026-02-22)
 
 Initial release.

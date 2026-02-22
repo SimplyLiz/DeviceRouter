@@ -1,8 +1,8 @@
 # DeviceRouter
 
-[![npm](https://img.shields.io/npm/v/@device-router/types?label=npm&color=cb3837)](https://www.npmjs.com/package/@device-router/types)
+[![npm](https://img.shields.io/npm/v/@device-router/types?label=npm&color=cb3837)](https://www.npmjs.com/search?q=%40device-router)
 [![CI](https://img.shields.io/github/actions/workflow/status/SimplyLiz/DeviceRouter/ci.yml?branch=main&label=CI)](https://github.com/SimplyLiz/DeviceRouter/actions/workflows/ci.yml)
-[![bundle size](https://img.shields.io/badge/probe-988%20B%20gzipped-blue)](https://github.com/SimplyLiz/DeviceRouter/tree/main/packages/probe)
+[![bundle size](https://img.shields.io/badge/probe-~1%20KB%20gzipped-blue)](https://github.com/SimplyLiz/DeviceRouter/tree/main/packages/probe)
 [![license](https://img.shields.io/github/license/SimplyLiz/DeviceRouter)](https://github.com/SimplyLiz/DeviceRouter/blob/main/LICENSE)
 [![node](https://img.shields.io/badge/node-%E2%89%A520-417e38)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6)](https://www.typescriptlang.org/)
@@ -11,7 +11,7 @@
 
 Stop guessing what your users' devices can handle. DeviceRouter detects real device capabilities — CPU cores, memory, network speed, and more — and gives your server the intelligence to adapt responses instantly.
 
-A **988-byte** client probe. One middleware call. Full device awareness on every request.
+A **~1 KB** client probe. One middleware call. Full device awareness on every request.
 
 ## Why DeviceRouter?
 
@@ -27,7 +27,7 @@ No user-agent sniffing. No guesswork. Real signals from real devices, classified
 ```
 ┌──────────┐                  ┌────────────┐     ┌─────────┐
 │ Browser  │  POST /probe     │  Express   │     │ Storage │
-│ (988 B)  │ ──────────────>  │ Middleware │ ──> │         │
+│ (~1 KB)  │ ──────────────>  │ Middleware │ ──> │         │
 │          │  device signals  │            │     │         │
 └──────────┘                  └────────────┘     └─────────┘
                                     │
@@ -39,7 +39,7 @@ No user-agent sniffing. No guesswork. Real signals from real devices, classified
 ```
 
 1. **Probe** — A tiny script runs once per session, collecting device signals via browser APIs
-2. **Classify** — The middleware classifies the device into CPU, memory, and connection tiers
+2. **Classify** — The middleware classifies the device into CPU, memory, connection, and GPU tiers
 3. **Hint** — Rendering hints like `deferHeavyComponents` and `reduceAnimations` are derived automatically
 4. **Serve** — Your route handlers read `req.deviceProfile` and respond accordingly
 
@@ -93,6 +93,7 @@ app.get('/', (req, res) => {
 | Prefers reduced motion | `matchMedia`               | All modern browsers   |
 | Prefers color scheme   | `matchMedia`               | All modern browsers   |
 | GPU renderer           | WebGL debug info           | Chrome, Firefox, Edge |
+| Battery status         | `navigator.getBattery()`   | Chrome, Edge          |
 
 All signals are optional — the probe gracefully degrades based on what the browser supports.
 
@@ -111,15 +112,15 @@ Devices are classified across three dimensions:
 
 Based on tiers and user preferences, DeviceRouter derives actionable booleans:
 
-| Hint                    | When it activates                             |
-| ----------------------- | --------------------------------------------- |
-| `deferHeavyComponents`  | Low-end device or slow connection             |
-| `serveMinimalCSS`       | Low-end device                                |
-| `reduceAnimations`      | Low-end device or user prefers reduced motion |
-| `useImagePlaceholders`  | Slow connection (2G/3G)                       |
-| `disableAutoplay`       | Low-end device or slow connection             |
-| `preferServerRendering` | Low-end device                                |
-| `disable3dEffects`      | No GPU or software renderer                   |
+| Hint                    | When it activates                                      |
+| ----------------------- | ------------------------------------------------------ |
+| `deferHeavyComponents`  | Low-end device, slow connection, or low battery        |
+| `serveMinimalCSS`       | Low-end device                                         |
+| `reduceAnimations`      | Low-end device, prefers reduced motion, or low battery |
+| `useImagePlaceholders`  | Slow connection (2G/3G)                                |
+| `disableAutoplay`       | Low-end device, slow connection, or low battery        |
+| `preferServerRendering` | Low-end device                                         |
+| `disable3dEffects`      | No GPU or software renderer                            |
 
 ## Custom Thresholds
 
@@ -156,7 +157,7 @@ No need to manually add `<script>` tags — the probe is injected before `</head
 
 | Package                                                               | Description                                           | Size              |
 | --------------------------------------------------------------------- | ----------------------------------------------------- | ----------------- |
-| [`@device-router/probe`](docs/api/probe.md)                           | Client-side capability probe                          | **988 B** gzipped |
+| [`@device-router/probe`](docs/api/probe.md)                           | Client-side capability probe                          | **~1 KB** gzipped |
 | [`@device-router/types`](docs/api/types.md)                           | Type definitions, classification, and hint derivation | —                 |
 | [`@device-router/storage`](docs/api/storage.md)                       | Storage adapters (in-memory + Redis)                  | —                 |
 | [`@device-router/middleware-express`](docs/api/middleware-express.md) | Express middleware                                    | —                 |

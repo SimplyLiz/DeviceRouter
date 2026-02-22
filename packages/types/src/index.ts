@@ -16,12 +16,14 @@ export type {
   CpuThresholds,
   MemoryThresholds,
   ConnectionThresholds,
+  GpuThresholds,
   TierThresholds,
 } from './thresholds.js';
 export {
   DEFAULT_CPU_THRESHOLDS,
   DEFAULT_MEMORY_THRESHOLDS,
   DEFAULT_CONNECTION_THRESHOLDS,
+  DEFAULT_GPU_THRESHOLDS,
 } from './thresholds.js';
 
 export {

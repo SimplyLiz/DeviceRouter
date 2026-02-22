@@ -67,15 +67,26 @@ export function collectPrefersColorScheme(): 'light' | 'dark' | 'no-preference' 
   return 'no-preference';
 }
 
+function readRenderer(gl: WebGLRenderingContext): string | undefined {
+  const d = gl.getExtension('WEBGL_debug_renderer_info');
+  const r = d ? (gl.getParameter(d.UNMASKED_RENDERER_WEBGL) as string) : undefined;
+  gl.getExtension('WEBGL_lose_context')?.loseContext();
+  return r;
+}
+
 export function collectGpuRenderer(): string | undefined {
   if (typeof document === 'undefined') return undefined;
   try {
     const c = document.createElement('canvas');
-    const gl = c.getContext('webgl') || c.getContext('webgl2');
-    if (!gl) return undefined;
-    const d = gl.getExtension('WEBGL_debug_renderer_info');
-    if (!d) return undefined;
-    return gl.getParameter(d.UNMASKED_RENDERER_WEBGL) as string;
+    const gl = c.getContext('webgl', { failIfMajorPerformanceCaveat: true }) as
+      | WebGLRenderingContext
+      | null;
+    if (gl) return readRenderer(gl);
+    // Context refused — major performance caveat (software renderer).
+    const fb = c.getContext('webgl') as WebGLRenderingContext | null;
+    if (!fb) return undefined;
+    const r = readRenderer(fb);
+    return r ? `Software Rasterizer (${r})` : 'Software Rasterizer';
   } catch {
     return undefined;
   }

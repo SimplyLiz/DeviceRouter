@@ -141,6 +141,24 @@ describe('classifyGpu', () => {
     expect(classifyGpu('Mali-G78')).toBe('mid');
     expect(classifyGpu('Adreno (TM) 660')).toBe('mid');
   });
+
+  it('uses custom softwarePattern threshold', () => {
+    // Default: Intel HD not software
+    expect(classifyGpu('Intel(R) HD Graphics 630')).toBe('mid');
+    // Custom: treat Intel HD as software
+    expect(classifyGpu('Intel(R) HD Graphics 630', {
+      softwarePattern: /Intel.*HD/i,
+    })).toBe('low');
+  });
+
+  it('uses custom highEndPattern threshold', () => {
+    // Default: GTX 1060 is mid
+    expect(classifyGpu('NVIDIA GeForce GTX 1060')).toBe('mid');
+    // Custom: treat GTX as high-end
+    expect(classifyGpu('NVIDIA GeForce GTX 1060', {
+      highEndPattern: /\bGTX\b/i,
+    })).toBe('high');
+  });
 });
 
 describe('classify', () => {
@@ -186,6 +204,14 @@ describe('classify', () => {
       },
     );
     expect(result).toEqual({ cpu: 'low', memory: 'low', connection: 'fast', gpu: 'none' });
+  });
+
+  it('applies custom GPU thresholds', () => {
+    const result = classify(
+      { hardwareConcurrency: 8, gpuRenderer: 'NVIDIA GeForce GTX 1060' },
+      { gpu: { highEndPattern: /\bGTX\b/i } },
+    );
+    expect(result.gpu).toBe('high');
   });
 
   it('partial thresholds leave other dimensions at defaults', () => {

@@ -11,6 +11,7 @@ import {
   DEFAULT_CPU_THRESHOLDS,
   DEFAULT_MEMORY_THRESHOLDS,
   DEFAULT_CONNECTION_THRESHOLDS,
+  DEFAULT_GPU_THRESHOLDS,
 } from './thresholds.js';
 
 export function classifyCpu(
@@ -56,13 +57,14 @@ export function classifyConnection(
   return '4g';
 }
 
-const SOFTWARE_GPU = /SwiftShader|llvmpipe|Software Rasterizer/i;
-const HIGH_END_GPU = /\bRTX\b|Radeon RX [5-9]\d{3}|Radeon Pro|Apple M\d/i;
-
-export function classifyGpu(renderer?: string): GpuTier {
+export function classifyGpu(
+  renderer?: string,
+  thresholds?: Partial<import('./thresholds.js').GpuThresholds>,
+): GpuTier {
   if (!renderer) return 'none';
-  if (SOFTWARE_GPU.test(renderer)) return 'low';
-  if (HIGH_END_GPU.test(renderer)) return 'high';
+  const { softwarePattern, highEndPattern } = { ...DEFAULT_GPU_THRESHOLDS, ...thresholds };
+  if (softwarePattern.test(renderer)) return 'low';
+  if (highEndPattern.test(renderer)) return 'high';
   return 'mid';
 }
 
@@ -75,6 +77,6 @@ export function classify(signals: RawSignals, thresholds?: TierThresholds): Devi
       signals.connection?.downlink,
       thresholds?.connection,
     ),
-    gpu: classifyGpu(signals.gpuRenderer),
+    gpu: classifyGpu(signals.gpuRenderer, thresholds?.gpu),
   };
 }

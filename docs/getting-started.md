@@ -129,7 +129,7 @@ app.use(async (ctx) => {
 <script src="/path/to/device-router-probe.min.js"></script>
 ```
 
-The probe script (~762 bytes gzipped) runs once per session. It collects device signals and POSTs them to the probe endpoint.
+The probe script (~988 bytes gzipped) runs once per session. It collects device signals and POSTs them to the probe endpoint.
 
 ### Auto-Injection
 
@@ -196,11 +196,12 @@ const storage = new RedisStorageAdapter({
 
 The middleware classifies devices into tiers based on collected signals:
 
-| Tier | CPU       | Memory | Connection |
-| ---- | --------- | ------ | ---------- |
-| Low  | 1-2 cores | ≤2 GB  | 2g         |
-| Mid  | 3-4 cores | 2-4 GB | 3g, 4g     |
-| High | 5+ cores  | >4 GB  | fast       |
+| Tier | CPU       | Memory | Connection | GPU                           |
+| ---- | --------- | ------ | ---------- | ----------------------------- |
+| None | —         | —      | —          | No WebGL                      |
+| Low  | 1-2 cores | ≤2 GB  | 2g         | Software renderer             |
+| Mid  | 3-4 cores | 2-4 GB | 3g, 4g     | Integrated / older discrete   |
+| High | 5+ cores  | >4 GB  | fast       | RTX, RX 5000+, Apple M-series |
 
 ## Rendering Hints
 
@@ -212,3 +213,4 @@ Based on device tiers, the middleware provides boolean rendering hints:
 - `useImagePlaceholders` — Show placeholders instead of full images
 - `disableAutoplay` — Prevent auto-playing media
 - `preferServerRendering` — Favor SSR over client-side rendering
+- `disable3dEffects` — Disable WebGL/3D content (no GPU or software renderer)

@@ -6,6 +6,7 @@ export type {
   CpuTier,
   MemoryTier,
   ConnectionTier,
+  GpuTier,
   DeviceTiers,
   RenderingHints,
   ClassifiedProfile,
@@ -15,14 +16,22 @@ export type {
   CpuThresholds,
   MemoryThresholds,
   ConnectionThresholds,
+  GpuThresholds,
   TierThresholds,
 } from './thresholds.js';
 export {
   DEFAULT_CPU_THRESHOLDS,
   DEFAULT_MEMORY_THRESHOLDS,
   DEFAULT_CONNECTION_THRESHOLDS,
+  DEFAULT_GPU_THRESHOLDS,
 } from './thresholds.js';
 
-export { classify, classifyCpu, classifyMemory, classifyConnection } from './classify.js';
+export {
+  classify,
+  classifyCpu,
+  classifyMemory,
+  classifyConnection,
+  classifyGpu,
+} from './classify.js';
 export { deriveHints } from './hints.js';
 export { isValidSignals } from './validate.js';

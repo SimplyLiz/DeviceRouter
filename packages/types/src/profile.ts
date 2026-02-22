@@ -19,6 +19,7 @@ export interface RawSignals {
   pixelRatio?: number;
   prefersReducedMotion?: boolean;
   prefersColorScheme?: 'light' | 'dark' | 'no-preference';
+  gpuRenderer?: string;
 }
 
 export interface DeviceProfile {
@@ -32,11 +33,13 @@ export interface DeviceProfile {
 export type CpuTier = 'low' | 'mid' | 'high';
 export type MemoryTier = 'low' | 'mid' | 'high';
 export type ConnectionTier = '2g' | '3g' | '4g' | 'fast';
+export type GpuTier = 'none' | 'low' | 'mid' | 'high';
 
 export interface DeviceTiers {
   cpu: CpuTier;
   memory: MemoryTier;
   connection: ConnectionTier;
+  gpu: GpuTier;
 }
 
 export interface RenderingHints {
@@ -46,6 +49,7 @@ export interface RenderingHints {
   useImagePlaceholders: boolean;
   disableAutoplay: boolean;
   preferServerRendering: boolean;
+  disable3dEffects: boolean;
 }
 
 export interface ClassifiedProfile {

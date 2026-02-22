@@ -25,16 +25,17 @@ No user-agent sniffing. No guesswork. Real signals from real devices, classified
 ## How It Works
 
 ```
-┌──────────┐    POST /probe     ┌──────────────┐     ┌─────────┐
-│ Browser  │ ────────────────> │   Express    │ ──> │ Storage │
-│ (988 B)  │   device signals  │  Middleware   │     │         │
-└──────────┘                   └──────────────┘     └─────────┘
-                                       │
-                                       ▼
-                               ┌────────────────┐
-                               │req.deviceProfile│
-                               │  tiers + hints  │
-                               └────────────────┘
+┌──────────┐                  ┌────────────┐     ┌─────────┐
+│ Browser  │  POST /probe     │  Express   │     │ Storage │
+│ (988 B)  │ ──────────────>  │ Middleware │ ──> │         │
+│          │  device signals  │            │     │         │
+└──────────┘                  └────────────┘     └─────────┘
+                                    │
+                                    ▼
+                            ┌───────────────────┐
+                            │ req.deviceProfile │
+                            │  tiers + hints    │
+                            └───────────────────┘
 ```
 
 1. **Probe** — A tiny script runs once per session, collecting device signals via browser APIs

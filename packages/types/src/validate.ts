@@ -17,5 +17,12 @@ export function isValidSignals(body: unknown): body is RawSignals {
     b.prefersColorScheme !== 'no-preference'
   )
     return false;
+  if (b.gpuRenderer !== undefined && typeof b.gpuRenderer !== 'string') return false;
+  if (b.battery !== undefined) {
+    if (typeof b.battery !== 'object' || b.battery === null) return false;
+    const bat = b.battery as Record<string, unknown>;
+    if (typeof bat.level !== 'number') return false;
+    if (typeof bat.charging !== 'boolean') return false;
+  }
   return true;
 }

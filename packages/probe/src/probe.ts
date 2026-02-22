@@ -7,12 +7,12 @@ export interface ProbeOptions {
 }
 
 function getCookie(name: string): string | null {
-  const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-  return match ? decodeURIComponent(match[1]) : null;
+  const match = document.cookie.match(new RegExp('(^|; )' + name + '=([^;]*)'));
+  return match ? decodeURIComponent(match[2]) : null;
 }
 
 function setCookie(name: string, value: string, path: string): void {
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=${path}; SameSite=Lax`;
+  document.cookie = `${name}=${encodeURIComponent(value)};path=${path};SameSite=Lax`;
 }
 
 export async function runProbe(options: ProbeOptions = {}): Promise<void> {
@@ -22,10 +22,17 @@ export async function runProbe(options: ProbeOptions = {}): Promise<void> {
     cookiePath = '/',
   } = options;
 
-  const existingSession = getCookie(cookieName);
-  if (existingSession) return;
+  if (getCookie(cookieName)) return;
 
   const signals = collectSignals();
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const bm = await (navigator as any).getBattery();
+    signals.battery = { level: bm.level, charging: bm.charging };
+  } catch {
+    // API unavailable (Firefox, Safari) — leave undefined
+  }
 
   try {
     const response = await fetch(endpoint, {

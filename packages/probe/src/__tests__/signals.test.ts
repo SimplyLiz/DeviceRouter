@@ -8,6 +8,7 @@ import {
   collectPixelRatio,
   collectPrefersReducedMotion,
   collectPrefersColorScheme,
+  collectGpuRenderer,
   collectSignals,
 } from '../signals.js';
 
@@ -200,6 +201,119 @@ describe('signal collectors', () => {
         configurable: true,
       });
       expect(collectPrefersColorScheme()).toBe('no-preference');
+    });
+  });
+
+  describe('collectGpuRenderer', () => {
+    const originalDocument = globalThis.document;
+    const UNMASKED = 0x9246;
+
+    function makeMockGl(renderer: string | null) {
+      const debugExt = renderer ? { UNMASKED_RENDERER_WEBGL: UNMASKED } : null;
+      const loseCtx = { loseContext: vi.fn() };
+      return {
+        getExtension: vi.fn((name: string) =>
+          name === 'WEBGL_debug_renderer_info'
+            ? debugExt
+            : name === 'WEBGL_lose_context'
+              ? loseCtx
+              : null,
+        ),
+        getParameter: vi.fn((param: number) => (param === UNMASKED ? renderer : null)),
+        _loseCtx: loseCtx,
+      };
+    }
+
+    afterEach(() => {
+      Object.defineProperty(globalThis, 'document', {
+        value: originalDocument,
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    it('returns undefined when document is unavailable', () => {
+      Object.defineProperty(globalThis, 'document', {
+        value: undefined,
+        writable: true,
+        configurable: true,
+      });
+      expect(collectGpuRenderer()).toBeUndefined();
+    });
+
+    it('returns renderer string when WebGL context succeeds with failIfMajorPerformanceCaveat', () => {
+      const mockGl = makeMockGl('NVIDIA GeForce RTX 3080');
+      const mockCanvas = {
+        getContext: vi.fn((_type: string, _opts?: unknown) => mockGl),
+      };
+      Object.defineProperty(globalThis, 'document', {
+        value: { createElement: vi.fn(() => mockCanvas) },
+        writable: true,
+        configurable: true,
+      });
+      expect(collectGpuRenderer()).toBe('NVIDIA GeForce RTX 3080');
+      expect(mockGl._loseCtx.loseContext).toHaveBeenCalled();
+    });
+
+    it('returns Software Rasterizer prefix when failIfMajorPerformanceCaveat fails', () => {
+      const fallbackGl = makeMockGl('llvmpipe (LLVM 12.0.0)');
+      const mockCanvas = {
+        getContext: vi.fn((type: string, opts?: Record<string, unknown>) => {
+          if (opts?.failIfMajorPerformanceCaveat) return null;
+          if (type === 'webgl') return fallbackGl;
+          return null;
+        }),
+      };
+      Object.defineProperty(globalThis, 'document', {
+        value: { createElement: vi.fn(() => mockCanvas) },
+        writable: true,
+        configurable: true,
+      });
+      expect(collectGpuRenderer()).toBe('Software Rasterizer (llvmpipe (LLVM 12.0.0))');
+      expect(fallbackGl._loseCtx.loseContext).toHaveBeenCalled();
+    });
+
+    it('returns Software Rasterizer when caveat fails and no debug extension', () => {
+      const fallbackGl = makeMockGl(null);
+      const mockCanvas = {
+        getContext: vi.fn((type: string, opts?: Record<string, unknown>) => {
+          if (opts?.failIfMajorPerformanceCaveat) return null;
+          if (type === 'webgl') return fallbackGl;
+          return null;
+        }),
+      };
+      Object.defineProperty(globalThis, 'document', {
+        value: { createElement: vi.fn(() => mockCanvas) },
+        writable: true,
+        configurable: true,
+      });
+      expect(collectGpuRenderer()).toBe('Software Rasterizer');
+    });
+
+    it('returns undefined when WebGL is not supported at all', () => {
+      const mockCanvas = {
+        getContext: vi.fn(() => null),
+      };
+      Object.defineProperty(globalThis, 'document', {
+        value: { createElement: vi.fn(() => mockCanvas) },
+        writable: true,
+        configurable: true,
+      });
+      expect(collectGpuRenderer()).toBeUndefined();
+    });
+
+    it('returns undefined when debug extension is not available on a capable GPU', () => {
+      const mockGl = makeMockGl(null);
+      const mockCanvas = {
+        getContext: vi.fn((_type: string, _opts?: unknown) => mockGl),
+      };
+      Object.defineProperty(globalThis, 'document', {
+        value: { createElement: vi.fn(() => mockCanvas) },
+        writable: true,
+        configurable: true,
+      });
+      expect(collectGpuRenderer()).toBeUndefined();
+      expect(mockGl._loseCtx.loseContext).toHaveBeenCalled();
     });
   });
 

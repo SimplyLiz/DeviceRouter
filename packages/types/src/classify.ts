@@ -1,9 +1,17 @@
-import type { RawSignals, CpuTier, MemoryTier, ConnectionTier, DeviceTiers } from './profile.js';
+import type {
+  RawSignals,
+  CpuTier,
+  MemoryTier,
+  ConnectionTier,
+  GpuTier,
+  DeviceTiers,
+} from './profile.js';
 import type { TierThresholds } from './thresholds.js';
 import {
   DEFAULT_CPU_THRESHOLDS,
   DEFAULT_MEMORY_THRESHOLDS,
   DEFAULT_CONNECTION_THRESHOLDS,
+  DEFAULT_GPU_THRESHOLDS,
 } from './thresholds.js';
 
 export function classifyCpu(
@@ -49,6 +57,17 @@ export function classifyConnection(
   return '4g';
 }
 
+export function classifyGpu(
+  renderer?: string,
+  thresholds?: Partial<import('./thresholds.js').GpuThresholds>,
+): GpuTier {
+  if (!renderer) return 'none';
+  const { softwarePattern, highEndPattern } = { ...DEFAULT_GPU_THRESHOLDS, ...thresholds };
+  if (softwarePattern.test(renderer)) return 'low';
+  if (highEndPattern.test(renderer)) return 'high';
+  return 'mid';
+}
+
 export function classify(signals: RawSignals, thresholds?: TierThresholds): DeviceTiers {
   return {
     cpu: classifyCpu(signals.hardwareConcurrency, thresholds?.cpu),
@@ -58,5 +77,6 @@ export function classify(signals: RawSignals, thresholds?: TierThresholds): Devi
       signals.connection?.downlink,
       thresholds?.connection,
     ),
+    gpu: classifyGpu(signals.gpuRenderer, thresholds?.gpu),
   };
 }

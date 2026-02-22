@@ -14,12 +14,14 @@ const tiers = classify({
   deviceMemory: 8,
   connection: { effectiveType: '4g', downlink: 50 },
 });
-// { cpu: 'high', memory: 'high', connection: 'fast' }
+// { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'none' }
 ```
 
 ### `deriveHints(tiers: DeviceTiers, signals?: RawSignals): RenderingHints`
 
 Derives rendering hints from device tiers.
+
+The `battery` signal bypasses tier classification entirely — it's transient state, not a capability. When the device is unplugged and below 15% charge, `deferHeavyComponents`, `reduceAnimations`, and `disableAutoplay` are forced on to conserve power.
 
 ```typescript
 import { classify, deriveHints } from '@device-router/types';
@@ -40,6 +42,10 @@ Classifies memory tier: `<=2` GB → `'low'`, `2-4` → `'mid'`, `>4` → `'high
 ### `classifyConnection(effectiveType?: string, downlink?: number): ConnectionTier`
 
 Classifies connection tier based on Network Information API values.
+
+### `classifyGpu(renderer?: string, thresholds?: Partial<GpuThresholds>): GpuTier`
+
+Classifies GPU tier from WebGL renderer string: no renderer → `'none'`, software renderers (SwiftShader, llvmpipe) → `'low'`, known high-end (RTX, Radeon RX 5000+, Apple M-series) → `'high'`, everything else → `'mid'`. Patterns are customizable via `GpuThresholds`.
 
 ## TierThresholds
 
@@ -67,6 +73,13 @@ Custom thresholds for tier classification. All fields are optional — unset fie
 | `downlink3gUpperBound` | `number` | `2`     | Mbps at or below → `'3g'` tier |
 | `downlink4gUpperBound` | `number` | `5`     | Mbps at or below → `'4g'` tier |
 
+### GpuThresholds
+
+| Field             | Type     | Default                                                   | Description                      |
+| ----------------- | -------- | --------------------------------------------------------- | -------------------------------- |
+| `softwarePattern` | `RegExp` | `/SwiftShader\|llvmpipe\|Software Rasterizer/i`           | Renderer matches → `'low'` tier  |
+| `highEndPattern`  | `RegExp` | `/\bRTX\b\|Radeon RX [5-9]\d{3}\|Radeon Pro\|Apple M\d/i` | Renderer matches → `'high'` tier |
+
 ### Example
 
 ```typescript
@@ -76,9 +89,16 @@ const tiers = classify(signals, {
   cpu: { lowUpperBound: 4, midUpperBound: 8 },
   memory: { midUpperBound: 8 },
   connection: { downlink4gUpperBound: 10 },
+  gpu: { highEndPattern: /\bRTX\b|\bGTX\b/i },
 });
 ```
 
 ## Types
+
+### `GpuTier`
+
+```typescript
+type GpuTier = 'none' | 'low' | 'mid' | 'high';
+```
 
 See [Profile Schema Reference](../profile-schema.md) for full type definitions.

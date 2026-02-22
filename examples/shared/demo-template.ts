@@ -43,6 +43,11 @@ export function renderDemoPage({
 
   const activeMode = forceParam === 'full' ? 'full' : forceParam === 'lite' ? 'lite' : 'auto';
 
+  // Battery badge
+  const batteryBadge = profile?.profile?.signals?.battery
+    ? `${Math.round(profile.profile.signals.battery.level * 100)}%${profile.profile.signals.battery.charging ? ' ⚡' : ''}`
+    : '';
+
   // Connection tier -> badge class
   const connClass = profile
     ? profile.tiers.connection === 'fast' || profile.tiers.connection === '4g'
@@ -239,7 +244,7 @@ ${
       CPU <span class="tier-badge tier-${profile.tiers.cpu}">${profile.tiers.cpu}</span>
       Memory <span class="tier-badge tier-${profile.tiers.memory}">${profile.tiers.memory}</span>
       Connection <span class="tier-badge tier-${connClass}">${profile.tiers.connection}</span>
-      GPU <span class="tier-badge tier-${profile.tiers.gpu === 'none' || profile.tiers.gpu === 'low' ? 'low' : profile.tiers.gpu === 'mid' ? 'mid' : 'high'}">${profile.tiers.gpu}</span>
+      GPU <span class="tier-badge tier-${profile.tiers.gpu === 'none' || profile.tiers.gpu === 'low' ? 'low' : profile.tiers.gpu === 'mid' ? 'mid' : 'high'}">${profile.tiers.gpu}</span>${batteryBadge ? `\n      Battery <span class="tier-badge tier-${profile.profile.signals.battery.level < 0.15 && !profile.profile.signals.battery.charging ? 'low' : profile.profile.signals.battery.level < 0.5 ? 'mid' : 'high'}">${batteryBadge}</span>` : ''}
     </p>
     <ul class="hint-list">${hintEntries}</ul>
     <details style="margin-top:0.5rem"><summary style="font-size:0.875rem;cursor:pointer">Raw Signals</summary>

@@ -1,0 +1,44 @@
+{
+  "name": "@device-router/middleware-hono",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@device-router/storage": "workspace:*",
+    "@device-router/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "hono": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@device-router/probe": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@device-router/probe": "workspace:*",
+    "hono": "^4.7.5"
+  }
+}

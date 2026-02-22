@@ -1,0 +1,21 @@
+{
+  "name": "hono-basic-example",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@device-router/middleware-hono": "workspace:*",
+    "@device-router/storage": "workspace:*",
+    "@device-router/types": "workspace:*",
+    "@hono/node-server": "^1.13.8",
+    "hono": "^4.7.5"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0"
+  }
+}

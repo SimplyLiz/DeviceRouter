@@ -90,3 +90,61 @@ describe('integration: probe → middleware → route', () => {
     expect(testData.hints.deferHeavyComponents).toBe(false);
   });
 });
+
+describe('integration: probe injection (express)', () => {
+  let app: ReturnType<typeof express>;
+  let server: Server;
+  let baseUrl: string;
+  let storage: MemoryStorageAdapter;
+
+  beforeEach(async () => {
+    storage = new MemoryStorageAdapter();
+    app = express();
+    app.use(cookieParser());
+    app.use(express.json());
+
+    const { middleware, injectionMiddleware } = createDeviceRouter({
+      storage,
+      injectProbe: true,
+    });
+
+    if (injectionMiddleware) {
+      app.use(injectionMiddleware);
+    }
+    app.use(middleware);
+
+    app.get('/html', (_req, res) => {
+      res.type('html').send('<html><head><title>Test</title></head><body></body></html>');
+    });
+
+    app.get('/json', (_req, res) => {
+      res.json({ ok: true });
+    });
+
+    await new Promise<void>((resolve) => {
+      server = app.listen(0, () => resolve());
+    });
+    const addr = server.address();
+    if (typeof addr === 'object' && addr) {
+      baseUrl = `http://127.0.0.1:${addr.port}`;
+    }
+  });
+
+  afterEach(async () => {
+    storage.clear();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  });
+
+  it('injects probe script into HTML responses', async () => {
+    const res = await request(`${baseUrl}/html`);
+    const body = await res.text();
+    expect(body).toContain('<script>');
+    expect(body).toContain('</script></head>');
+  });
+
+  it('does not inject into JSON responses', async () => {
+    const res = await request(`${baseUrl}/json`);
+    const data = (await res.json()) as { ok: boolean };
+    expect(data.ok).toBe(true);
+  });
+});

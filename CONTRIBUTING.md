@@ -34,12 +34,18 @@ pnpm test
 
 ```
 packages/
-  types/          - Shared types, tier classification, rendering hints
-  probe/          - Client-side capability probe
-  storage/        - Storage adapters (memory, Redis)
-  middleware-express/ - Express middleware
+  types/              - Shared types, tier classification, rendering hints
+  probe/              - Client-side capability probe
+  storage/            - Storage adapters (memory, Redis)
+  middleware-express/  - Express middleware
+  middleware-fastify/  - Fastify plugin
+  middleware-hono/     - Hono middleware
+  middleware-koa/      - Koa middleware
 examples/
-  express-basic/  - Example Express app
+  express-basic/      - Example Express app
+  fastify-basic/      - Example Fastify app
+  hono-basic/         - Example Hono app
+  koa-basic/          - Example Koa app
 ```
 
 ## Guidelines

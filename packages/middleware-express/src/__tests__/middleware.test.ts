@@ -103,4 +103,32 @@ describe('createMiddleware', () => {
 
     expect(next).toHaveBeenCalledWith(expect.any(Error));
   });
+
+  it('passes custom thresholds to classify', async () => {
+    const profile: DeviceProfile = {
+      schemaVersion: 1,
+      sessionToken: 'tok2',
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+      signals: { hardwareConcurrency: 4, deviceMemory: 4 },
+    };
+    (storage as unknown as { _store: Map<string, DeviceProfile> })._store.set('tok2', profile);
+
+    // Default thresholds: 4 cores = mid, 4 GB = mid
+    const mwDefault = createMiddleware({ storage });
+    const req1 = createMockReq({ dr_session: 'tok2' });
+    await mwDefault(req1, createMockRes(), vi.fn());
+    expect(req1.deviceProfile!.tiers.cpu).toBe('mid');
+    expect(req1.deviceProfile!.tiers.memory).toBe('mid');
+
+    // Custom thresholds: raise lowUpperBound to 6 → 4 cores = low
+    const mwCustom = createMiddleware({
+      storage,
+      thresholds: { cpu: { lowUpperBound: 6 }, memory: { lowUpperBound: 6 } },
+    });
+    const req2 = createMockReq({ dr_session: 'tok2' });
+    await mwCustom(req2, createMockRes(), vi.fn());
+    expect(req2.deviceProfile!.tiers.cpu).toBe('low');
+    expect(req2.deviceProfile!.tiers.memory).toBe('low');
+  });
 });

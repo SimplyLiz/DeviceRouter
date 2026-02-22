@@ -41,6 +41,44 @@ Classifies memory tier: `<=2` GB → `'low'`, `2-4` → `'mid'`, `>4` → `'high
 
 Classifies connection tier based on Network Information API values.
 
+## TierThresholds
+
+Custom thresholds for tier classification. All fields are optional — unset fields use built-in defaults.
+
+### CpuThresholds
+
+| Field           | Type     | Default | Description                      |
+| --------------- | -------- | ------- | -------------------------------- |
+| `lowUpperBound` | `number` | `2`     | Cores at or below → `'low'` tier |
+| `midUpperBound` | `number` | `4`     | Cores at or below → `'mid'` tier |
+
+### MemoryThresholds
+
+| Field           | Type     | Default | Description                   |
+| --------------- | -------- | ------- | ----------------------------- |
+| `lowUpperBound` | `number` | `2`     | GB at or below → `'low'` tier |
+| `midUpperBound` | `number` | `4`     | GB at or below → `'mid'` tier |
+
+### ConnectionThresholds
+
+| Field                  | Type     | Default | Description                    |
+| ---------------------- | -------- | ------- | ------------------------------ |
+| `downlink2gUpperBound` | `number` | `0.5`   | Mbps at or below → `'2g'` tier |
+| `downlink3gUpperBound` | `number` | `2`     | Mbps at or below → `'3g'` tier |
+| `downlink4gUpperBound` | `number` | `5`     | Mbps at or below → `'4g'` tier |
+
+### Example
+
+```typescript
+import { classify } from '@device-router/types';
+
+const tiers = classify(signals, {
+  cpu: { lowUpperBound: 4, midUpperBound: 8 },
+  memory: { midUpperBound: 8 },
+  connection: { downlink4gUpperBound: 10 },
+});
+```
+
 ## Types
 
 See [Profile Schema Reference](../profile-schema.md) for full type definitions.

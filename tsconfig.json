@@ -4,6 +4,9 @@
     { "path": "packages/types" },
     { "path": "packages/probe" },
     { "path": "packages/storage" },
-    { "path": "packages/middleware-express" }
+    { "path": "packages/middleware-express" },
+    { "path": "packages/middleware-fastify" },
+    { "path": "packages/middleware-hono" },
+    { "path": "packages/middleware-koa" }
   ]
 }

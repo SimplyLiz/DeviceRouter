@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import type { StorageAdapter } from '@device-router/storage';
 import type { DeviceProfile, RawSignals } from '@device-router/types';
+import { isValidSignals } from '@device-router/types';
 import { randomUUID } from 'node:crypto';
 
 export interface EndpointOptions {
@@ -8,26 +9,6 @@ export interface EndpointOptions {
   cookieName?: string;
   cookiePath?: string;
   ttl?: number;
-}
-
-function isValidSignals(body: unknown): body is RawSignals {
-  if (typeof body !== 'object' || body === null) return false;
-  const b = body as Record<string, unknown>;
-  if (b.hardwareConcurrency !== undefined && typeof b.hardwareConcurrency !== 'number')
-    return false;
-  if (b.deviceMemory !== undefined && typeof b.deviceMemory !== 'number') return false;
-  if (b.userAgent !== undefined && typeof b.userAgent !== 'string') return false;
-  if (b.pixelRatio !== undefined && typeof b.pixelRatio !== 'number') return false;
-  if (b.prefersReducedMotion !== undefined && typeof b.prefersReducedMotion !== 'boolean')
-    return false;
-  if (
-    b.prefersColorScheme !== undefined &&
-    b.prefersColorScheme !== 'light' &&
-    b.prefersColorScheme !== 'dark' &&
-    b.prefersColorScheme !== 'no-preference'
-  )
-    return false;
-  return true;
 }
 
 export function createProbeEndpoint(options: EndpointOptions) {

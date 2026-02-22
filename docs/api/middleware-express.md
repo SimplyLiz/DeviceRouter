@@ -21,19 +21,24 @@ app.use(middleware);
 
 ### Options
 
-| Option       | Type             | Default        | Description            |
-| ------------ | ---------------- | -------------- | ---------------------- |
-| `storage`    | `StorageAdapter` | required       | Storage backend        |
-| `cookieName` | `string`         | `'dr_session'` | Session cookie name    |
-| `cookiePath` | `string`         | `'/'`          | Cookie path            |
-| `ttl`        | `number`         | `86400`        | Profile TTL in seconds |
+| Option        | Type                                   | Default                  | Description                                    |
+| ------------- | -------------------------------------- | ------------------------ | ---------------------------------------------- |
+| `storage`     | `StorageAdapter`                       | required                 | Storage backend                                |
+| `cookieName`  | `string`                               | `'dr_session'`           | Session cookie name                            |
+| `cookiePath`  | `string`                               | `'/'`                    | Cookie path                                    |
+| `ttl`         | `number`                               | `86400`                  | Profile TTL in seconds                         |
+| `thresholds`  | `TierThresholds`                       | built-in defaults        | Custom tier classification thresholds          |
+| `injectProbe` | `boolean`                              | `false`                  | Auto-inject probe script into HTML responses   |
+| `probePath`   | `string`                               | `'/device-router/probe'` | Custom probe endpoint path for injected script |
+| `probeNonce`  | `string \| ((req: Request) => string)` | —                        | CSP nonce for the injected script tag          |
 
 ### Returns
 
-| Property        | Type               | Description                                                    |
-| --------------- | ------------------ | -------------------------------------------------------------- |
-| `middleware`    | Express middleware | Reads session, classifies device, attaches `req.deviceProfile` |
-| `probeEndpoint` | Express handler    | Handles `POST` from probe, validates and stores signals        |
+| Property              | Type                              | Description                                                    |
+| --------------------- | --------------------------------- | -------------------------------------------------------------- |
+| `middleware`          | Express middleware                | Reads session, classifies device, attaches `req.deviceProfile` |
+| `probeEndpoint`       | Express handler                   | Handles `POST` from probe, validates and stores signals        |
+| `injectionMiddleware` | Express middleware or `undefined` | Only present when `injectProbe: true`                          |
 
 ## req.deviceProfile
 
@@ -49,7 +54,30 @@ interface ClassifiedProfile {
 
 `null` when no session cookie is present or profile has expired.
 
+## Probe Auto-Injection
+
+When `injectProbe: true`, `injectionMiddleware` is returned. Register it before your routes to auto-inject the probe `<script>` into HTML responses.
+
+```typescript
+const { middleware, probeEndpoint, injectionMiddleware } = createDeviceRouter({
+  storage,
+  injectProbe: true,
+  probeNonce: 'my-nonce',
+});
+
+app.post('/device-router/probe', probeEndpoint);
+if (injectionMiddleware) {
+  app.use(injectionMiddleware);
+}
+app.use(middleware);
+```
+
+The script is injected before `</head>`, falling back to `</body>`. JSON and other non-HTML responses pass through unmodified.
+
+**Note:** Injection intercepts `res.send()`. Streaming responses (`res.write()`) are not intercepted — serve the probe script tag manually in streamed HTML.
+
 ## Requirements
 
 - `cookie-parser` middleware must be applied before the DeviceRouter middleware
 - `express.json()` middleware must be applied before the probe endpoint
+- `@device-router/probe` must be installed when using `injectProbe: true`

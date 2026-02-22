@@ -1,0 +1,51 @@
+import type { Context, Handler } from 'hono';
+import { getCookie, setCookie } from 'hono/cookie';
+import type { StorageAdapter } from '@device-router/storage';
+import type { DeviceProfile, RawSignals } from '@device-router/types';
+import { isValidSignals } from '@device-router/types';
+
+export interface EndpointOptions {
+  storage: StorageAdapter;
+  cookieName?: string;
+  cookiePath?: string;
+  ttl?: number;
+}
+
+export function createProbeEndpoint(options: EndpointOptions): Handler {
+  const { storage, cookieName = 'dr_session', cookiePath = '/', ttl = 86400 } = options;
+
+  return async (c: Context) => {
+    try {
+      const signals = await c.req.json();
+
+      if (!isValidSignals(signals)) {
+        return c.json({ ok: false, error: 'Invalid probe payload' }, 400);
+      }
+
+      const existingToken = getCookie(c, cookieName);
+      const sessionToken = existingToken || globalThis.crypto.randomUUID();
+
+      const now = new Date();
+      const profile: DeviceProfile = {
+        schemaVersion: 1,
+        sessionToken,
+        createdAt: now.toISOString(),
+        expiresAt: new Date(now.getTime() + ttl * 1000).toISOString(),
+        signals: signals as RawSignals,
+      };
+
+      await storage.set(sessionToken, profile, ttl);
+
+      setCookie(c, cookieName, sessionToken, {
+        path: cookiePath,
+        httpOnly: true,
+        sameSite: 'Lax',
+        maxAge: ttl,
+      });
+
+      return c.json({ ok: true, sessionToken });
+    } catch {
+      return c.json({ ok: false, error: 'Internal server error' }, 500);
+    }
+  };
+}

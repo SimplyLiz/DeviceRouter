@@ -1,0 +1,21 @@
+{
+  "name": "koa-basic-example",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@device-router/middleware-koa": "workspace:*",
+    "@device-router/storage": "workspace:*",
+    "@device-router/types": "workspace:*",
+    "koa": "^2.16.0"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.15.0",
+    "tsx": "^4.0.0"
+  }
+}

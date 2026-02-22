@@ -1,0 +1,21 @@
+{
+  "name": "fastify-basic-example",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@device-router/middleware-fastify": "workspace:*",
+    "@device-router/storage": "workspace:*",
+    "@device-router/types": "workspace:*",
+    "@fastify/cookie": "^11.0.1",
+    "fastify": "^5.2.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0"
+  }
+}

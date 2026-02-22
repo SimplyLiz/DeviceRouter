@@ -1,0 +1,21 @@
+import type { RawSignals } from './profile.js';
+
+export function isValidSignals(body: unknown): body is RawSignals {
+  if (typeof body !== 'object' || body === null) return false;
+  const b = body as Record<string, unknown>;
+  if (b.hardwareConcurrency !== undefined && typeof b.hardwareConcurrency !== 'number')
+    return false;
+  if (b.deviceMemory !== undefined && typeof b.deviceMemory !== 'number') return false;
+  if (b.userAgent !== undefined && typeof b.userAgent !== 'string') return false;
+  if (b.pixelRatio !== undefined && typeof b.pixelRatio !== 'number') return false;
+  if (b.prefersReducedMotion !== undefined && typeof b.prefersReducedMotion !== 'boolean')
+    return false;
+  if (
+    b.prefersColorScheme !== undefined &&
+    b.prefersColorScheme !== 'light' &&
+    b.prefersColorScheme !== 'dark' &&
+    b.prefersColorScheme !== 'no-preference'
+  )
+    return false;
+  return true;
+}

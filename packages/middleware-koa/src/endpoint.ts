@@ -1,4 +1,4 @@
-import type { Request, Response } from 'express';
+import type { Context } from 'koa';
 import type { StorageAdapter } from '@device-router/storage';
 import type { DeviceProfile, RawSignals } from '@device-router/types';
 import { isValidSignals } from '@device-router/types';
@@ -14,16 +14,17 @@ export interface EndpointOptions {
 export function createProbeEndpoint(options: EndpointOptions) {
   const { storage, cookieName = 'dr_session', cookiePath = '/', ttl = 86400 } = options;
 
-  return async (req: Request, res: Response): Promise<void> => {
+  return async (ctx: Context): Promise<void> => {
     try {
-      const signals = req.body as unknown;
+      const signals = (ctx.request as unknown as { body: unknown }).body;
 
       if (!isValidSignals(signals)) {
-        res.status(400).json({ ok: false, error: 'Invalid probe payload' });
+        ctx.status = 400;
+        ctx.body = { ok: false, error: 'Invalid probe payload' };
         return;
       }
 
-      const existingToken = req.cookies?.[cookieName] as string | undefined;
+      const existingToken = ctx.cookies.get(cookieName);
       const sessionToken = existingToken || randomUUID();
 
       const now = new Date();
@@ -37,16 +38,17 @@ export function createProbeEndpoint(options: EndpointOptions) {
 
       await storage.set(sessionToken, profile, ttl);
 
-      res.cookie(cookieName, sessionToken, {
+      ctx.cookies.set(cookieName, sessionToken, {
         path: cookiePath,
         httpOnly: true,
         sameSite: 'lax',
         maxAge: ttl * 1000,
       });
 
-      res.json({ ok: true, sessionToken });
+      ctx.body = { ok: true, sessionToken };
     } catch {
-      res.status(500).json({ ok: false, error: 'Internal server error' });
+      ctx.status = 500;
+      ctx.body = { ok: false, error: 'Internal server error' };
     }
   };
 }

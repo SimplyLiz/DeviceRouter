@@ -1,8 +1,8 @@
-import type { Request, Response } from 'express';
+import type { Context, Handler } from 'hono';
+import { getCookie, setCookie } from 'hono/cookie';
 import type { StorageAdapter } from '@device-router/storage';
 import type { DeviceProfile, RawSignals } from '@device-router/types';
 import { isValidSignals } from '@device-router/types';
-import { randomUUID } from 'node:crypto';
 
 export interface EndpointOptions {
   storage: StorageAdapter;
@@ -11,20 +11,19 @@ export interface EndpointOptions {
   ttl?: number;
 }
 
-export function createProbeEndpoint(options: EndpointOptions) {
+export function createProbeEndpoint(options: EndpointOptions): Handler {
   const { storage, cookieName = 'dr_session', cookiePath = '/', ttl = 86400 } = options;
 
-  return async (req: Request, res: Response): Promise<void> => {
+  return async (c: Context) => {
     try {
-      const signals = req.body as unknown;
+      const signals = await c.req.json();
 
       if (!isValidSignals(signals)) {
-        res.status(400).json({ ok: false, error: 'Invalid probe payload' });
-        return;
+        return c.json({ ok: false, error: 'Invalid probe payload' }, 400);
       }
 
-      const existingToken = req.cookies?.[cookieName] as string | undefined;
-      const sessionToken = existingToken || randomUUID();
+      const existingToken = getCookie(c, cookieName);
+      const sessionToken = existingToken || globalThis.crypto.randomUUID();
 
       const now = new Date();
       const profile: DeviceProfile = {
@@ -37,16 +36,16 @@ export function createProbeEndpoint(options: EndpointOptions) {
 
       await storage.set(sessionToken, profile, ttl);
 
-      res.cookie(cookieName, sessionToken, {
+      setCookie(c, cookieName, sessionToken, {
         path: cookiePath,
         httpOnly: true,
-        sameSite: 'lax',
-        maxAge: ttl * 1000,
+        sameSite: 'Lax',
+        maxAge: ttl,
       });
 
-      res.json({ ok: true, sessionToken });
+      return c.json({ ok: true, sessionToken });
     } catch {
-      res.status(500).json({ ok: false, error: 'Internal server error' });
+      return c.json({ ok: false, error: 'Internal server error' }, 500);
     }
   };
 }

@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { StorageAdapter } from '@device-router/storage';
 import { classify, deriveHints } from '@device-router/types';
-import type { ClassifiedProfile } from '@device-router/types';
+import type { ClassifiedProfile, TierThresholds } from '@device-router/types';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -15,10 +15,11 @@ declare global {
 export interface MiddlewareOptions {
   storage: StorageAdapter;
   cookieName?: string;
+  thresholds?: TierThresholds;
 }
 
 export function createMiddleware(options: MiddlewareOptions) {
-  const { storage, cookieName = 'dr_session' } = options;
+  const { storage, cookieName = 'dr_session', thresholds } = options;
 
   return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -38,7 +39,7 @@ export function createMiddleware(options: MiddlewareOptions) {
         return;
       }
 
-      const tiers = classify(profile.signals);
+      const tiers = classify(profile.signals, thresholds);
       const hints = deriveHints(tiers, profile.signals);
 
       req.deviceProfile = { profile, tiers, hints };

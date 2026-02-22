@@ -13,22 +13,22 @@ pnpm install
 # Build all packages
 pnpm build
 
-# Run tests
-pnpm test
+# Run tests with coverage
+pnpm test:coverage
 ```
 
 ## Development Workflow
 
-1. Create a feature branch from `main`
+1. Create a feature branch from `develop`
 2. Make your changes
 3. Ensure all checks pass:
    ```bash
    pnpm build
-   pnpm test
+   pnpm test:coverage
    pnpm lint
    pnpm format:check
    ```
-4. Open a pull request
+4. Open a pull request against `develop`
 
 ## Project Structure
 

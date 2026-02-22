@@ -12,7 +12,8 @@ Implementation approach.
 
 ## Checklist
 
-- [ ] Tests pass (`pnpm test`)
+- [ ] Tests pass (`pnpm test:coverage`)
 - [ ] Linting passes (`pnpm lint`)
+- [ ] Formatting passes (`pnpm format:check`)
 - [ ] Build succeeds (`pnpm build`)
 - [ ] Documentation updated (if applicable)

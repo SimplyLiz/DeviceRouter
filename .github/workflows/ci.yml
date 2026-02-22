@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
   build-and-test:
@@ -25,9 +25,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm audit --prod --audit-level=high
+
       - run: pnpm build
 
-      - run: pnpm test
+      - run: pnpm test:coverage
 
       - run: pnpm lint
 

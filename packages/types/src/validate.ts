@@ -17,5 +17,6 @@ export function isValidSignals(body: unknown): body is RawSignals {
     b.prefersColorScheme !== 'no-preference'
   )
     return false;
+  if (b.gpuRenderer !== undefined && typeof b.gpuRenderer !== 'string') return false;
   return true;
 }

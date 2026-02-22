@@ -41,6 +41,10 @@ Classifies memory tier: `<=2` GB → `'low'`, `2-4` → `'mid'`, `>4` → `'high
 
 Classifies connection tier based on Network Information API values.
 
+### `classifyGpu(renderer?: string): GpuTier`
+
+Classifies GPU tier from WebGL renderer string: no renderer → `'none'`, software renderers (SwiftShader, llvmpipe) → `'low'`, known high-end (RTX, Radeon RX 5000+, Apple M-series) → `'high'`, everything else → `'mid'`.
+
 ## TierThresholds
 
 Custom thresholds for tier classification. All fields are optional — unset fields use built-in defaults.
@@ -80,5 +84,11 @@ const tiers = classify(signals, {
 ```
 
 ## Types
+
+### `GpuTier`
+
+```typescript
+type GpuTier = 'none' | 'low' | 'mid' | 'high';
+```
 
 See [Profile Schema Reference](../profile-schema.md) for full type definitions.

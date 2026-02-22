@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { classify, classifyCpu, classifyMemory, classifyConnection } from '../classify.js';
+import {
+  classify,
+  classifyCpu,
+  classifyMemory,
+  classifyConnection,
+  classifyGpu,
+} from '../classify.js';
 
 describe('classifyCpu', () => {
   it('returns low for undefined', () => {
@@ -102,6 +108,41 @@ describe('classifyConnection', () => {
   });
 });
 
+describe('classifyGpu', () => {
+  it('returns none for undefined', () => {
+    expect(classifyGpu(undefined)).toBe('none');
+  });
+
+  it('returns none for empty string', () => {
+    expect(classifyGpu('')).toBe('none');
+  });
+
+  it('returns low for software renderers', () => {
+    expect(classifyGpu('Google SwiftShader')).toBe('low');
+    expect(classifyGpu('llvmpipe (LLVM 12.0.0, 256 bits)')).toBe('low');
+    expect(classifyGpu('Software Rasterizer')).toBe('low');
+  });
+
+  it('returns high for high-end GPUs', () => {
+    expect(classifyGpu('NVIDIA GeForce RTX 3080')).toBe('high');
+    expect(classifyGpu('NVIDIA GeForce RTX 4090')).toBe('high');
+    expect(classifyGpu('AMD Radeon RX 6800 XT')).toBe('high');
+    expect(classifyGpu('AMD Radeon RX 7900 XTX')).toBe('high');
+    expect(classifyGpu('AMD Radeon Pro W6800')).toBe('high');
+    expect(classifyGpu('Apple M1')).toBe('high');
+    expect(classifyGpu('Apple M2 Pro')).toBe('high');
+    expect(classifyGpu('Apple M3 Max')).toBe('high');
+  });
+
+  it('returns mid for other GPUs', () => {
+    expect(classifyGpu('Intel(R) HD Graphics 630')).toBe('mid');
+    expect(classifyGpu('NVIDIA GeForce GTX 1060')).toBe('mid');
+    expect(classifyGpu('AMD Radeon RX 580')).toBe('mid');
+    expect(classifyGpu('Mali-G78')).toBe('mid');
+    expect(classifyGpu('Adreno (TM) 660')).toBe('mid');
+  });
+});
+
 describe('classify', () => {
   it('classifies a low-end device', () => {
     const result = classify({
@@ -109,7 +150,7 @@ describe('classify', () => {
       deviceMemory: 1,
       connection: { effectiveType: '2g' },
     });
-    expect(result).toEqual({ cpu: 'low', memory: 'low', connection: '2g' });
+    expect(result).toEqual({ cpu: 'low', memory: 'low', connection: '2g', gpu: 'none' });
   });
 
   it('classifies a high-end device', () => {
@@ -118,12 +159,21 @@ describe('classify', () => {
       deviceMemory: 8,
       connection: { effectiveType: '4g', downlink: 50 },
     });
-    expect(result).toEqual({ cpu: 'high', memory: 'high', connection: 'fast' });
+    expect(result).toEqual({ cpu: 'high', memory: 'high', connection: 'fast', gpu: 'none' });
   });
 
   it('classifies with missing signals', () => {
     const result = classify({});
-    expect(result).toEqual({ cpu: 'low', memory: 'low', connection: '4g' });
+    expect(result).toEqual({ cpu: 'low', memory: 'low', connection: '4g', gpu: 'none' });
+  });
+
+  it('classifies GPU from gpuRenderer signal', () => {
+    const result = classify({
+      hardwareConcurrency: 8,
+      deviceMemory: 8,
+      gpuRenderer: 'NVIDIA GeForce RTX 3080',
+    });
+    expect(result.gpu).toBe('high');
   });
 
   it('applies custom thresholds across all dimensions', () => {
@@ -135,7 +185,7 @@ describe('classify', () => {
         connection: { downlink4gUpperBound: 3 },
       },
     );
-    expect(result).toEqual({ cpu: 'low', memory: 'low', connection: 'fast' });
+    expect(result).toEqual({ cpu: 'low', memory: 'low', connection: 'fast', gpu: 'none' });
   });
 
   it('partial thresholds leave other dimensions at defaults', () => {

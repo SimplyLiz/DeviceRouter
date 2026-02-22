@@ -12,6 +12,7 @@ export interface ProbeSignals {
   pixelRatio?: number;
   prefersReducedMotion?: boolean;
   prefersColorScheme?: 'light' | 'dark' | 'no-preference';
+  gpuRenderer?: string;
 }
 
 export function collectHardwareConcurrency(): number | undefined {
@@ -66,6 +67,20 @@ export function collectPrefersColorScheme(): 'light' | 'dark' | 'no-preference' 
   return 'no-preference';
 }
 
+export function collectGpuRenderer(): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  try {
+    const c = document.createElement('canvas');
+    const gl = c.getContext('webgl') || c.getContext('webgl2');
+    if (!gl) return undefined;
+    const d = gl.getExtension('WEBGL_debug_renderer_info');
+    if (!d) return undefined;
+    return gl.getParameter(d.UNMASKED_RENDERER_WEBGL) as string;
+  } catch {
+    return undefined;
+  }
+}
+
 export function collectSignals(): ProbeSignals {
   return {
     hardwareConcurrency: collectHardwareConcurrency(),
@@ -76,5 +91,6 @@ export function collectSignals(): ProbeSignals {
     pixelRatio: collectPixelRatio(),
     prefersReducedMotion: collectPrefersReducedMotion(),
     prefersColorScheme: collectPrefersColorScheme(),
+    gpuRenderer: collectGpuRenderer(),
   };
 }

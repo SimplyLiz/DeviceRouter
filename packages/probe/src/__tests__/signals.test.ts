@@ -8,6 +8,7 @@ import {
   collectPixelRatio,
   collectPrefersReducedMotion,
   collectPrefersColorScheme,
+  collectGpuRenderer,
   collectSignals,
 } from '../signals.js';
 
@@ -200,6 +201,75 @@ describe('signal collectors', () => {
         configurable: true,
       });
       expect(collectPrefersColorScheme()).toBe('no-preference');
+    });
+  });
+
+  describe('collectGpuRenderer', () => {
+    const originalDocument = globalThis.document;
+
+    afterEach(() => {
+      Object.defineProperty(globalThis, 'document', {
+        value: originalDocument,
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    it('returns undefined when document is unavailable', () => {
+      Object.defineProperty(globalThis, 'document', {
+        value: undefined,
+        writable: true,
+        configurable: true,
+      });
+      expect(collectGpuRenderer()).toBeUndefined();
+    });
+
+    it('returns renderer string when WebGL debug info is available', () => {
+      const mockExtension = { UNMASKED_RENDERER_WEBGL: 0x9246 };
+      const mockGl = {
+        getExtension: vi.fn((name: string) =>
+          name === 'WEBGL_debug_renderer_info' ? mockExtension : null,
+        ),
+        getParameter: vi.fn((param: number) =>
+          param === 0x9246 ? 'NVIDIA GeForce RTX 3080' : null,
+        ),
+      };
+      const mockCanvas = {
+        getContext: vi.fn((type: string) => (type === 'webgl' ? mockGl : null)),
+      };
+      Object.defineProperty(globalThis, 'document', {
+        value: { createElement: vi.fn(() => mockCanvas) },
+        writable: true,
+        configurable: true,
+      });
+      expect(collectGpuRenderer()).toBe('NVIDIA GeForce RTX 3080');
+    });
+
+    it('returns undefined when WebGL is not supported', () => {
+      const mockCanvas = {
+        getContext: vi.fn(() => null),
+      };
+      Object.defineProperty(globalThis, 'document', {
+        value: { createElement: vi.fn(() => mockCanvas) },
+        writable: true,
+        configurable: true,
+      });
+      expect(collectGpuRenderer()).toBeUndefined();
+    });
+
+    it('returns undefined when debug extension is not available', () => {
+      const mockGl = {
+        getExtension: vi.fn(() => null),
+      };
+      const mockCanvas = {
+        getContext: vi.fn((type: string) => (type === 'webgl' ? mockGl : null)),
+      };
+      Object.defineProperty(globalThis, 'document', {
+        value: { createElement: vi.fn(() => mockCanvas) },
+        writable: true,
+        configurable: true,
+      });
+      expect(collectGpuRenderer()).toBeUndefined();
     });
   });
 

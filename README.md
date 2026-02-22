@@ -1,5 +1,12 @@
 # DeviceRouter
 
+[![npm](https://img.shields.io/npm/v/@device-router/types?label=npm&color=cb3837)](https://www.npmjs.com/package/@device-router/types)
+[![CI](https://img.shields.io/github/actions/workflow/status/SimplyLiz/DeviceRouter/ci.yml?branch=main&label=CI)](https://github.com/SimplyLiz/DeviceRouter/actions/workflows/ci.yml)
+[![bundle size](https://img.shields.io/badge/probe-762%20B%20gzipped-blue)](https://github.com/SimplyLiz/DeviceRouter/tree/main/packages/probe)
+[![license](https://img.shields.io/github/license/SimplyLiz/DeviceRouter)](https://github.com/SimplyLiz/DeviceRouter/blob/main/LICENSE)
+[![node](https://img.shields.io/badge/node-%E2%89%A520-417e38)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6)](https://www.typescriptlang.org/)
+
 **Ship the right experience to every device. Automatically.**
 
 Stop guessing what your users' devices can handle. DeviceRouter detects real device capabilities — CPU cores, memory, network speed, and more — and gives your server the intelligence to adapt responses instantly.
@@ -72,18 +79,19 @@ app.get('/', (req, res) => {
 
 ## What Gets Detected
 
-| Signal                 | Source                     | Browser Support     |
-| ---------------------- | -------------------------- | ------------------- |
-| CPU cores              | `hardwareConcurrency`      | All modern browsers |
-| Device memory          | `deviceMemory`             | Chrome, Edge        |
-| Connection type        | `navigator.connection`     | Chrome, Edge        |
-| Downlink speed         | `navigator.connection`     | Chrome, Edge        |
-| Round-trip time        | `navigator.connection`     | Chrome, Edge        |
-| Data saver mode        | `navigator.connection`     | Chrome, Edge        |
-| Viewport size          | `window.innerWidth/Height` | All browsers        |
-| Pixel ratio            | `devicePixelRatio`         | All browsers        |
-| Prefers reduced motion | `matchMedia`               | All modern browsers |
-| Prefers color scheme   | `matchMedia`               | All modern browsers |
+| Signal                 | Source                     | Browser Support       |
+| ---------------------- | -------------------------- | --------------------- |
+| CPU cores              | `hardwareConcurrency`      | All modern browsers   |
+| Device memory          | `deviceMemory`             | Chrome, Edge          |
+| Connection type        | `navigator.connection`     | Chrome, Edge          |
+| Downlink speed         | `navigator.connection`     | Chrome, Edge          |
+| Round-trip time        | `navigator.connection`     | Chrome, Edge          |
+| Data saver mode        | `navigator.connection`     | Chrome, Edge          |
+| Viewport size          | `window.innerWidth/Height` | All browsers          |
+| Pixel ratio            | `devicePixelRatio`         | All browsers          |
+| Prefers reduced motion | `matchMedia`               | All modern browsers   |
+| Prefers color scheme   | `matchMedia`               | All modern browsers   |
+| GPU renderer           | WebGL debug info           | Chrome, Firefox, Edge |
 
 All signals are optional — the probe gracefully degrades based on what the browser supports.
 
@@ -91,11 +99,12 @@ All signals are optional — the probe gracefully degrades based on what the bro
 
 Devices are classified across three dimensions:
 
-| Dimension      | Low       | Mid          | High/Fast          |
-| -------------- | --------- | ------------ | ------------------ |
-| **CPU**        | 1–2 cores | 3–4 cores    | 5+ cores           |
-| **Memory**     | ≤2 GB     | 2–4 GB       | >4 GB              |
-| **Connection** | 2G        | 3G / slow 4G | Fast 4G+ (≥5 Mbps) |
+| Dimension      | None     | Low               | Mid                         | High/Fast                     |
+| -------------- | -------- | ----------------- | --------------------------- | ----------------------------- |
+| **CPU**        | —        | 1–2 cores         | 3–4 cores                   | 5+ cores                      |
+| **Memory**     | —        | ≤2 GB             | 2–4 GB                      | >4 GB                         |
+| **Connection** | —        | 2G                | 3G / slow 4G                | Fast 4G+ (≥5 Mbps)            |
+| **GPU**        | No WebGL | Software renderer | Integrated / older discrete | RTX, RX 5000+, Apple M-series |
 
 ## Rendering Hints
 
@@ -109,6 +118,7 @@ Based on tiers and user preferences, DeviceRouter derives actionable booleans:
 | `useImagePlaceholders`  | Slow connection (2G/3G)                       |
 | `disableAutoplay`       | Low-end device or slow connection             |
 | `preferServerRendering` | Low-end device                                |
+| `disable3dEffects`      | No GPU or software renderer                   |
 
 ## Custom Thresholds
 
@@ -169,12 +179,29 @@ import { RedisStorageAdapter } from '@device-router/storage';
 new RedisStorageAdapter(redisClient, { prefix: 'dr:profile:' });
 ```
 
-## Framework Quick Start
+## Example Apps
 
-- [Express](docs/getting-started.md#quick-start--express) | [Example](examples/express-basic/)
-- [Fastify](docs/getting-started.md#quick-start--fastify) | [Example](examples/fastify-basic/)
-- [Hono](docs/getting-started.md#quick-start--hono) | [Example](examples/hono-basic/)
-- [Koa](docs/getting-started.md#quick-start--koa) | [Example](examples/koa-basic/)
+Each framework has an example app that renders a product landing page adapting in real time to device capabilities:
+
+- **Full experience** (high-end device) — animated gradient hero, SVG icons, inline charts, pulsing CTA, hover transitions, autoplay visualizer
+- **Lite experience** (low-end device) — flat solid backgrounds, Unicode icons, placeholder boxes, no animations, autoplay disabled
+
+Run any example to see it in action:
+
+```bash
+pnpm install && pnpm build
+cd examples/express-basic
+pnpm dev
+```
+
+Open http://localhost:3000 — the probe runs on first load, refresh to see your detected profile. Use `?force=lite` or `?force=full` to preview each mode without a real device.
+
+| Framework | Guide                                                       | Example                                  |
+| --------- | ----------------------------------------------------------- | ---------------------------------------- |
+| Express   | [Quick Start](docs/getting-started.md#quick-start--express) | [express-basic](examples/express-basic/) |
+| Fastify   | [Quick Start](docs/getting-started.md#quick-start--fastify) | [fastify-basic](examples/fastify-basic/) |
+| Hono      | [Quick Start](docs/getting-started.md#quick-start--hono)    | [hono-basic](examples/hono-basic/)       |
+| Koa       | [Quick Start](docs/getting-started.md#quick-start--koa)     | [koa-basic](examples/koa-basic/)         |
 
 ## Documentation
 

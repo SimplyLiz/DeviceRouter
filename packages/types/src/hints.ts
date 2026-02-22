@@ -11,5 +11,6 @@ export function deriveHints(tiers: DeviceTiers, signals?: RawSignals): Rendering
     useImagePlaceholders: isSlowConnection,
     disableAutoplay: isLowEnd || isSlowConnection,
     preferServerRendering: isLowEnd,
+    disable3dEffects: tiers.gpu === 'none' || tiers.gpu === 'low',
   };
 }

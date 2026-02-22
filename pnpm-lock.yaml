@@ -11,15 +11,12 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.0.1)
-      '@types/cookie-parser':
-        specifier: ^1.4.10
-        version: 1.4.10(@types/express@5.0.6)
+      '@types/node':
+        specifier: ^25.3.0
+        version: 25.3.0
       '@vitest/coverage-v8':
         specifier: ^4.0.18
         version: 4.0.18(vitest@4.0.18(@types/node@25.3.0)(tsx@4.21.0))
-      cookie-parser:
-        specifier: ^1.4.7
-        version: 1.4.7
       eslint:
         specifier: ^10.0.1
         version: 10.0.1

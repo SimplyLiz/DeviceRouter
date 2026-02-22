@@ -24,7 +24,7 @@ app.use(express.json());
 // Probe endpoint — receives device signals from the client
 app.post('/device-router/probe', probeEndpoint);
 
-// Serve the probe script
+// Serve the probe script (monorepo-relative path — in production, serve from node_modules or CDN)
 app.get('/device-router-probe.min.js', (_req, res) => {
   const probePath = resolve(__dirname, '../../../packages/probe/dist/device-router-probe.min.js');
   const script = readFileSync(probePath, 'utf-8');

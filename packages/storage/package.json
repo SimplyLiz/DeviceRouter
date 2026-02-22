@@ -11,10 +11,19 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsc -b",
-    "clean": "rm -rf dist *.tsbuildinfo"
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
     "@device-router/types": "workspace:*"

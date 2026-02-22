@@ -26,9 +26,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/cookie-parser": "^1.4.10",
+    "@types/node": "^25.3.0",
     "@vitest/coverage-v8": "^4.0.18",
-    "cookie-parser": "^1.4.7",
     "eslint": "^10.0.1",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",

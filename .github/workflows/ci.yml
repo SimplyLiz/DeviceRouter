@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20, 22]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+
+      - run: pnpm test
+
+      - run: pnpm lint
+
+      - run: pnpm format:check
+
+      - name: Verify probe size
+        run: |
+          size=$(stat -c%s packages/probe/dist/device-router-probe.min.js.gz 2>/dev/null || stat -f%z packages/probe/dist/device-router-probe.min.js.gz)
+          echo "Probe gzipped size: ${size} bytes"
+          [ "$size" -le 1024 ] || (echo "Probe exceeds 1 KB limit" && exit 1)

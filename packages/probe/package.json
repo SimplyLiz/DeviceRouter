@@ -11,11 +11,20 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsc -b && node scripts/bundle.js",
     "build:probe": "node scripts/bundle.js",
-    "clean": "rm -rf dist *.tsbuildinfo"
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "prepublishOnly": "pnpm run build"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"

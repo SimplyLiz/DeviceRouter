@@ -170,7 +170,7 @@ ${full ? '    <svg style="display:block;width:100%;position:absolute;bottom:-1px
           : '\u26A1'
       }</span>
       <h3>Real-Time Detection</h3>
-      <p>A 901-byte probe collects CPU, memory, GPU, and network signals via browser APIs \u2014 no user-agent sniffing.</p>
+      <p>A ~1 KB probe collects CPU, memory, GPU, network, and battery signals via browser APIs \u2014 no user-agent sniffing.</p>
     </div>
     <div class="card">
       <span class="card-icon">${

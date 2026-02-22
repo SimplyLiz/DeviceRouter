@@ -41,7 +41,7 @@ const storage = new RedisStorageAdapter({
 
 ### Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `client` | Redis-compatible client | required | Must implement `get`, `set`, `del`, `exists` |
-| `keyPrefix` | `string` | `'dr:profile:'` | Key prefix for Redis keys |
+| Option      | Type                    | Default         | Description                                  |
+| ----------- | ----------------------- | --------------- | -------------------------------------------- |
+| `client`    | Redis-compatible client | required        | Must implement `get`, `set`, `del`, `exists` |
+| `keyPrefix` | `string`                | `'dr:profile:'` | Key prefix for Redis keys                    |

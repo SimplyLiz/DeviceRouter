@@ -11,12 +11,7 @@ export interface DeviceRouterOptions {
 }
 
 export function createDeviceRouter(options: DeviceRouterOptions) {
-  const {
-    storage,
-    cookieName = 'dr_session',
-    cookiePath = '/',
-    ttl = 86400,
-  } = options;
+  const { storage, cookieName = 'dr_session', cookiePath = '/', ttl = 86400 } = options;
 
   return {
     middleware: createMiddleware({ storage, cookieName }),

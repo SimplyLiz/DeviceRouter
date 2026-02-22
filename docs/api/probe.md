@@ -17,8 +17,8 @@ import { runProbe } from '@device-router/probe';
 
 await runProbe({
   endpoint: '/device-router/probe', // POST endpoint
-  cookieName: 'dr_session',         // Session cookie name
-  cookiePath: '/',                  // Cookie path
+  cookieName: 'dr_session', // Session cookie name
+  cookiePath: '/', // Cookie path
 });
 ```
 
@@ -34,16 +34,16 @@ Collects all available device signals from browser APIs. Returns an object with 
 
 ## Collected Signals
 
-| Signal | Browser API | Availability |
-|--------|-------------|-------------|
-| `hardwareConcurrency` | `navigator.hardwareConcurrency` | All modern browsers |
-| `deviceMemory` | `navigator.deviceMemory` | Chrome, Edge |
-| `connection` | `navigator.connection` | Chrome, Edge |
-| `userAgent` | `navigator.userAgent` | All browsers |
-| `viewport` | `window.innerWidth/Height` | All browsers |
-| `pixelRatio` | `window.devicePixelRatio` | All browsers |
-| `prefersReducedMotion` | `matchMedia` | All modern browsers |
-| `prefersColorScheme` | `matchMedia` | All modern browsers |
+| Signal                 | Browser API                     | Availability        |
+| ---------------------- | ------------------------------- | ------------------- |
+| `hardwareConcurrency`  | `navigator.hardwareConcurrency` | All modern browsers |
+| `deviceMemory`         | `navigator.deviceMemory`        | Chrome, Edge        |
+| `connection`           | `navigator.connection`          | Chrome, Edge        |
+| `userAgent`            | `navigator.userAgent`           | All browsers        |
+| `viewport`             | `window.innerWidth/Height`      | All browsers        |
+| `pixelRatio`           | `window.devicePixelRatio`       | All browsers        |
+| `prefersReducedMotion` | `matchMedia`                    | All modern browsers |
+| `prefersColorScheme`   | `matchMedia`                    | All modern browsers |
 
 ## Build Output
 

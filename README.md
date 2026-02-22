@@ -21,12 +21,12 @@ The lightweight client-side probe (<1 KB gzipped) collects device signals and su
 
 ## Packages
 
-| Package | Description |
-|---------|-------------|
-| `@device-router/types` | Device profile types, tier classification, rendering hints |
-| `@device-router/probe` | Client-side capability probe (~1 KB gzipped) |
-| `@device-router/storage` | Storage adapters (in-memory, Redis) |
-| `@device-router/middleware-express` | Express middleware and probe endpoint |
+| Package                             | Description                                                |
+| ----------------------------------- | ---------------------------------------------------------- |
+| `@device-router/types`              | Device profile types, tier classification, rendering hints |
+| `@device-router/probe`              | Client-side capability probe (~1 KB gzipped)               |
+| `@device-router/storage`            | Storage adapters (in-memory, Redis)                        |
+| `@device-router/middleware-express` | Express middleware and probe endpoint                      |
 
 ## Quick Start
 

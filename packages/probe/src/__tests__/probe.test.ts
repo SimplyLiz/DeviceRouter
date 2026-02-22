@@ -114,10 +114,7 @@ describe('runProbe', () => {
       cookiePath: '/app',
     });
 
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      '/custom/probe',
-      expect.any(Object),
-    );
+    expect(globalThis.fetch).toHaveBeenCalledWith('/custom/probe', expect.any(Object));
   });
 
   it('silently fails on network error', async () => {

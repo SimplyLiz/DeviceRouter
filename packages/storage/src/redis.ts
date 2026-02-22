@@ -31,7 +31,12 @@ export class RedisStorageAdapter implements StorageAdapter {
   }
 
   async set(sessionToken: string, profile: DeviceProfile, ttlSeconds: number): Promise<void> {
-    await this.client.set(this.key(sessionToken), JSON.stringify(profile), 'EX', String(ttlSeconds));
+    await this.client.set(
+      this.key(sessionToken),
+      JSON.stringify(profile),
+      'EX',
+      String(ttlSeconds),
+    );
   }
 
   async delete(sessionToken: string): Promise<void> {

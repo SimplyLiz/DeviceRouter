@@ -2,15 +2,15 @@
 
 **The server does the thinking. The client does the displaying.**
 
-*Product Requirements Document · v1.1 · Open Source (MIT)*
+_Product Requirements Document · v1.1 · Open Source (MIT)_
 
-| | |
-|---|---|
-| Status | Draft |
-| Version | 1.1 |
-| License | MIT — fully open source |
-| Target | Framework-agnostic (Node, Python, Go, PHP...) |
-| Author | Community — contributions welcome |
+|         |                                               |
+| ------- | --------------------------------------------- |
+| Status  | Draft                                         |
+| Version | 1.1                                           |
+| License | MIT — fully open source                       |
+| Target  | Framework-agnostic (Node, Python, Go, PHP...) |
+| Author  | Community — contributions welcome             |
 
 ---
 
@@ -22,18 +22,18 @@ The root cause is a flawed architectural assumption: that every device should re
 
 The consequences are real and measurable:
 
-- Heavy JS triggers sustained CPU load, which triggers thermal throttling, which slows the chip further — a feedback loop with no exit. Result: +146% frame defects on mid-range mobile devices. *(CatchJS 2024)*
+- Heavy JS triggers sustained CPU load, which triggers thermal throttling, which slows the chip further — a feedback loop with no exit. Result: +146% frame defects on mid-range mobile devices. _(CatchJS 2024)_
 - Per byte delivered, nothing drains a battery like JavaScript. Images and video route through dedicated hardware decoders. JavaScript demands the main CPU continuously: parsing, compiling, executing, garbage-collecting.
-- A 500 KB bundle takes ~200 ms to parse on a MacBook Pro. On a throttled mid-range Android: ~5 seconds. The developer never sees this. The user lives with it. *(V8 Blog)*
+- A 500 KB bundle takes ~200 ms to parse on a MacBook Pro. On a throttled mid-range Android: ~5 seconds. The developer never sees this. The user lives with it. _(V8 Blog)_
 - "Mobile First" in practice means: same application, smaller viewport. Same bundle. Same framework overhead. Shipped to a device with a fraction of the compute and a battery the size of a biscuit.
 
 The scale of the problem becomes concrete when you look at the products everyone uses daily. The following are uncompressed JavaScript payload sizes, measured by Nikita Tonsky in 2024:
 
-| Product | Uncompressed JS Payload |
-|---|---|
-| Slack | 55 MB |
-| LinkedIn | 31 MB |
-| Gmail | 20 MB |
+| Product  | Uncompressed JS Payload |
+| -------- | ----------------------- |
+| Slack    | 55 MB                   |
+| LinkedIn | 31 MB                   |
+| Gmail    | 20 MB                   |
 
 A chat message is 100 bytes. The Slack client weighs 550,000 times more. This is the industry norm, not the exception.
 
@@ -189,43 +189,43 @@ DeviceRouter is infrastructure you run. There is no cloud component, no data sen
 
 ## 7. Technical Requirements
 
-| Requirement | Detail |
-|---|---|
-| Probe size | < 1 KB gzipped. Must parse and execute in < 5 ms on a low-tier Android. |
-| Session storage | Server-side only. Client holds only an opaque session token (no PII in client storage). |
-| Storage backends | Redis (default), PostgreSQL, in-memory (for testing). Interface is pluggable. |
-| Profile TTL | Configurable. Default: 24 hours. Profiles expire and are re-collected on next visit. |
-| Middleware latency | Profile lookup must add < 1 ms to request processing time (Redis p99). |
-| Framework coupling | Zero. Core specification is a documented JSON contract. Adapters are thin wrappers. |
-| Privacy / GDPR | Signals collected are technical characteristics, not personal data under GDPR Art. 4(1). Lawful basis: legitimate interest (Art. 6(1)(f)). No consent banner required for the probe alone. Deployments combining DeviceRouter profiles with authenticated user data must conduct their own DPIA. |
-| Profile schema | Published as a versioned JSON Schema. All adapters must read and write to this schema. Schema version is included in every stored profile. Breaking changes require a major version bump and a documented migration path. |
-| License | MIT. No CLA required for contributions. |
-| Test coverage | All modules require > 80% coverage. Middleware specification includes a conformance test suite. |
-| Documentation | Every public API documented. Getting-started guide must achieve integration in < 15 minutes. |
+| Requirement        | Detail                                                                                                                                                                                                                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Probe size         | < 1 KB gzipped. Must parse and execute in < 5 ms on a low-tier Android.                                                                                                                                                                                                                          |
+| Session storage    | Server-side only. Client holds only an opaque session token (no PII in client storage).                                                                                                                                                                                                          |
+| Storage backends   | Redis (default), PostgreSQL, in-memory (for testing). Interface is pluggable.                                                                                                                                                                                                                    |
+| Profile TTL        | Configurable. Default: 24 hours. Profiles expire and are re-collected on next visit.                                                                                                                                                                                                             |
+| Middleware latency | Profile lookup must add < 1 ms to request processing time (Redis p99).                                                                                                                                                                                                                           |
+| Framework coupling | Zero. Core specification is a documented JSON contract. Adapters are thin wrappers.                                                                                                                                                                                                              |
+| Privacy / GDPR     | Signals collected are technical characteristics, not personal data under GDPR Art. 4(1). Lawful basis: legitimate interest (Art. 6(1)(f)). No consent banner required for the probe alone. Deployments combining DeviceRouter profiles with authenticated user data must conduct their own DPIA. |
+| Profile schema     | Published as a versioned JSON Schema. All adapters must read and write to this schema. Schema version is included in every stored profile. Breaking changes require a major version bump and a documented migration path.                                                                        |
+| License            | MIT. No CLA required for contributions.                                                                                                                                                                                                                                                          |
+| Test coverage      | All modules require > 80% coverage. Middleware specification includes a conformance test suite.                                                                                                                                                                                                  |
+| Documentation      | Every public API documented. Getting-started guide must achieve integration in < 15 minutes.                                                                                                                                                                                                     |
 
 ---
 
 ## 8. Sources
 
-| Claim | Source |
-|---|---|
-| 558 KB median JS, 44% never executed | HTTP Archive 2024 — [httparchive.org/reports/state-of-javascript](https://httparchive.org/reports/state-of-javascript) |
-| 25× slower JS parsing on mobile | V8 Blog — [v8.dev/blog/cost-of-javascript-2019](https://v8.dev/blog/cost-of-javascript-2019) |
-| 431% more main-thread time on React mobile | CatchJS 2024 — [catchjs.com/Blog/PerformanceInTheWild](https://catchjs.com/Blog/PerformanceInTheWild) |
-| Slack 55 MB / LinkedIn 31 MB / Gmail 20 MB | Tonsky 2024 — [tonsky.me/blog/js-bloat/](https://tonsky.me/blog/js-bloat/) |
-| HTMA: 8.8 KB gzipped, ~19 ms round-trip | [htma.run](https://htma.run) — [gitlab.com/min2max/htma](https://gitlab.com/min2max/htma) |
+| Claim                                      | Source                                                                                                                 |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| 558 KB median JS, 44% never executed       | HTTP Archive 2024 — [httparchive.org/reports/state-of-javascript](https://httparchive.org/reports/state-of-javascript) |
+| 25× slower JS parsing on mobile            | V8 Blog — [v8.dev/blog/cost-of-javascript-2019](https://v8.dev/blog/cost-of-javascript-2019)                           |
+| 431% more main-thread time on React mobile | CatchJS 2024 — [catchjs.com/Blog/PerformanceInTheWild](https://catchjs.com/Blog/PerformanceInTheWild)                  |
+| Slack 55 MB / LinkedIn 31 MB / Gmail 20 MB | Tonsky 2024 — [tonsky.me/blog/js-bloat/](https://tonsky.me/blog/js-bloat/)                                             |
+| HTMA: 8.8 KB gzipped, ~19 ms round-trip    | [htma.run](https://htma.run) — [gitlab.com/min2max/htma](https://gitlab.com/min2max/htma)                              |
 
 ---
 
 ## 9. Release Milestones
 
-| Milestone | Scope | Target |
-|---|---|---|
-| v0.1 — Probe Alpha | Capability probe + Express middleware + Redis storage. No dashboard. | Month 1–2 |
-| v0.2 — Adapters | FastAPI, Django, Go adapters. Conformance test suite published. | Month 2–3 |
-| v0.3 — Dashboard Alpha | Self-hostable dashboard with device distribution and bundle cost views. | Month 3–4 |
-| v0.4 — CLI Alpha | Static analysis CLI with dead code detection and bundle cost report. | Month 4–5 |
-| v1.0 — Stable | All modules stable. Full documentation. Docker images. Community adapter guide. | Month 6 |
+| Milestone              | Scope                                                                           | Target    |
+| ---------------------- | ------------------------------------------------------------------------------- | --------- |
+| v0.1 — Probe Alpha     | Capability probe + Express middleware + Redis storage. No dashboard.            | Month 1–2 |
+| v0.2 — Adapters        | FastAPI, Django, Go adapters. Conformance test suite published.                 | Month 2–3 |
+| v0.3 — Dashboard Alpha | Self-hostable dashboard with device distribution and bundle cost views.         | Month 3–4 |
+| v0.4 — CLI Alpha       | Static analysis CLI with dead code detection and bundle cost report.            | Month 4–5 |
+| v1.0 — Stable          | All modules stable. Full documentation. Docker images. Community adapter guide. | Month 6   |
 
 ---
 

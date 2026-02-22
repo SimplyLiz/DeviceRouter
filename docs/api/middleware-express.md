@@ -10,9 +10,9 @@ import { MemoryStorageAdapter } from '@device-router/storage';
 
 const { middleware, probeEndpoint } = createDeviceRouter({
   storage: new MemoryStorageAdapter(),
-  cookieName: 'dr_session',    // Default
-  cookiePath: '/',              // Default
-  ttl: 86400,                   // Default: 24 hours
+  cookieName: 'dr_session', // Default
+  cookiePath: '/', // Default
+  ttl: 86400, // Default: 24 hours
 });
 
 app.post('/device-router/probe', probeEndpoint);
@@ -21,19 +21,19 @@ app.use(middleware);
 
 ### Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `storage` | `StorageAdapter` | required | Storage backend |
-| `cookieName` | `string` | `'dr_session'` | Session cookie name |
-| `cookiePath` | `string` | `'/'` | Cookie path |
-| `ttl` | `number` | `86400` | Profile TTL in seconds |
+| Option       | Type             | Default        | Description            |
+| ------------ | ---------------- | -------------- | ---------------------- |
+| `storage`    | `StorageAdapter` | required       | Storage backend        |
+| `cookieName` | `string`         | `'dr_session'` | Session cookie name    |
+| `cookiePath` | `string`         | `'/'`          | Cookie path            |
+| `ttl`        | `number`         | `86400`        | Profile TTL in seconds |
 
 ### Returns
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `middleware` | Express middleware | Reads session, classifies device, attaches `req.deviceProfile` |
-| `probeEndpoint` | Express handler | Handles `POST` from probe, validates and stores signals |
+| Property        | Type               | Description                                                    |
+| --------------- | ------------------ | -------------------------------------------------------------- |
+| `middleware`    | Express middleware | Reads session, classifies device, attaches `req.deviceProfile` |
+| `probeEndpoint` | Express handler    | Handles `POST` from probe, validates and stores signals        |
 
 ## req.deviceProfile
 
@@ -41,9 +41,9 @@ The middleware attaches a `ClassifiedProfile | null` to `req.deviceProfile`:
 
 ```typescript
 interface ClassifiedProfile {
-  profile: DeviceProfile;    // Raw profile with signals
-  tiers: DeviceTiers;        // { cpu, memory, connection }
-  hints: RenderingHints;     // { deferHeavyComponents, ... }
+  profile: DeviceProfile; // Raw profile with signals
+  tiers: DeviceTiers; // { cpu, memory, connection }
+  hints: RenderingHints; // { deferHeavyComponents, ... }
 }
 ```
 

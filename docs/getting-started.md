@@ -63,10 +63,10 @@ app.get('/', (req, res) => {
 
 ```typescript
 const { middleware, probeEndpoint } = createDeviceRouter({
-  storage,                    // Required: StorageAdapter instance
-  cookieName: 'dr_session',   // Default: 'dr_session'
-  cookiePath: '/',            // Default: '/'
-  ttl: 86400,                 // Default: 86400 (24 hours)
+  storage, // Required: StorageAdapter instance
+  cookieName: 'dr_session', // Default: 'dr_session'
+  cookiePath: '/', // Default: '/'
+  ttl: 86400, // Default: 86400 (24 hours)
   probePath: '/device-router/probe', // Default: '/device-router/probe'
 });
 ```
@@ -80,7 +80,7 @@ import { RedisStorageAdapter } from '@device-router/storage';
 const redis = new Redis();
 const storage = new RedisStorageAdapter({
   client: redis,
-  keyPrefix: 'dr:profile:',  // Default prefix
+  keyPrefix: 'dr:profile:', // Default prefix
 });
 ```
 
@@ -88,11 +88,11 @@ const storage = new RedisStorageAdapter({
 
 The middleware classifies devices into tiers based on collected signals:
 
-| Tier | CPU | Memory | Connection |
-|------|-----|--------|------------|
-| Low | 1-2 cores | ≤2 GB | 2g |
-| Mid | 3-4 cores | 2-4 GB | 3g, 4g |
-| High | 5+ cores | >4 GB | fast |
+| Tier | CPU       | Memory | Connection |
+| ---- | --------- | ------ | ---------- |
+| Low  | 1-2 cores | ≤2 GB  | 2g         |
+| Mid  | 3-4 cores | 2-4 GB | 3g, 4g     |
+| High | 5+ cores  | >4 GB  | fast       |
 
 ## Rendering Hints
 

@@ -18,6 +18,7 @@ export function createInjectionMiddleware(options: InjectOptions): MiddlewareHan
 
     const originalStatus = c.res.status;
     const originalHeaders = new Headers(c.res.headers);
+    originalHeaders.delete('content-length');
     const body = await c.res.text();
 
     const nonceValue = typeof nonce === 'function' ? nonce(c) : nonce;

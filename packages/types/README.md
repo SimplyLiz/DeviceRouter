@@ -101,6 +101,7 @@ if (isValidSignals(requestBody)) {
 - `classifyGpu(renderer?, thresholds?)` — GPU tier
 - `deriveHints(tiers, signals?)` — Derive `RenderingHints` from tiers and signals
 - `isValidSignals(body)` — Type guard for `RawSignals`
+- `isBotSignals(signals)` — Detect bot/crawler/headless browser probe submissions
 - `classifyFromHeaders(headers)` — Classify from UA/Client Hints headers
 - `resolveFallback(fallback)` — Resolve a fallback profile preset or custom tiers
 

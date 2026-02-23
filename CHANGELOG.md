@@ -9,6 +9,7 @@
 - **Fallback profiles** — `fallbackProfile` option accepts `'conservative'` (low-end defaults), `'optimistic'` (high-end defaults), or custom `DeviceTiers`
 - **Profile source tracking** — New `source` field on `ClassifiedProfile` indicates origin: `'probe'`, `'headers'`, or `'fallback'`
 - **Preset tier constants** — `CONSERVATIVE_TIERS` and `OPTIMISTIC_TIERS` exported from `@device-router/types`
+- **Bot/crawler filtering** — Probe endpoints reject bot submissions by default (`rejectBots: true`). New `isBotSignals()` detects bots via UA patterns, headless GPU renderers, and empty signal payloads
 
 ## 0.2.0 (2026-02-22)
 

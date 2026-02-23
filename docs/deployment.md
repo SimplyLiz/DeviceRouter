@@ -114,6 +114,7 @@ app.listen(port, () => console.log(`Listening on :${port}`));
 - **Reverse proxy** — run behind nginx or a load balancer that handles TLS termination. DeviceRouter does not serve HTTPS itself.
 - **TTL** — the default session TTL is 24 hours. Lower it if you want profiles to refresh more frequently.
 - **Rate limiting** — DeviceRouter does not rate-limit the probe endpoint. Add rate limiting via your reverse proxy (nginx `limit_req`, Cloudflare rate limiting) or a framework-level rate limiter to prevent abuse.
+- **Error handler (Express)** — Express's default error handler renders stack traces in HTML responses. Malformed JSON sent to the probe endpoint will trigger this before DeviceRouter code runs. Add a [custom error handler](https://expressjs.com/en/guide/error-handling.html) to return clean JSON errors in production.
 - **Profile versioning** — stored profiles are classified with the thresholds that were active at the time of classification. If you change thresholds in a new deploy, existing stored profiles are _not_ re-classified. To rotate stale profiles: lower the TTL so profiles expire faster, or flush your storage (e.g. `FLUSHDB` in Redis) on deploy.
 
 ## Cloudflare Workers (Edge)

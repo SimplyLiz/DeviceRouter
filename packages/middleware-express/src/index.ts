@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import type { StorageAdapter } from '@device-router/storage';
-import type { TierThresholds } from '@device-router/types';
+import type { TierThresholds, FallbackProfile } from '@device-router/types';
 import { createMiddleware } from './middleware.js';
 import { createProbeEndpoint } from './endpoint.js';
 import { createInjectionMiddleware } from './inject.js';
@@ -16,6 +16,8 @@ export interface DeviceRouterOptions {
   rejectBots?: boolean;
   injectProbe?: boolean;
   probeNonce?: string | ((req: import('express').Request) => string);
+  fallbackProfile?: FallbackProfile;
+  classifyFromHeaders?: boolean;
 }
 
 export function createDeviceRouter(options: DeviceRouterOptions) {
@@ -29,6 +31,8 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     rejectBots,
     injectProbe = false,
     probeNonce,
+    fallbackProfile,
+    classifyFromHeaders,
   } = options;
 
   const result: {
@@ -36,7 +40,13 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     probeEndpoint: ReturnType<typeof createProbeEndpoint>;
     injectionMiddleware?: ReturnType<typeof createInjectionMiddleware>;
   } = {
-    middleware: createMiddleware({ storage, cookieName, thresholds }),
+    middleware: createMiddleware({
+      storage,
+      cookieName,
+      thresholds,
+      fallbackProfile,
+      classifyFromHeaders,
+    }),
     probeEndpoint: createProbeEndpoint({ storage, cookieName, cookiePath, ttl, rejectBots }),
   };
 

@@ -101,6 +101,14 @@ if (isValidSignals(requestBody)) {
 - `classifyGpu(renderer?, thresholds?)` — GPU tier
 - `deriveHints(tiers, signals?)` — Derive `RenderingHints` from tiers and signals
 - `isValidSignals(body)` — Type guard for `RawSignals`
+- `classifyFromHeaders(headers)` — Classify from UA/Client Hints headers
+- `resolveFallback(fallback)` — Resolve a fallback profile preset or custom tiers
+
+### Constants
+
+- `CONSERVATIVE_TIERS` — Low-end device tier preset
+- `OPTIMISTIC_TIERS` — High-end device tier preset
+- `ACCEPT_CH_VALUE` — `Accept-CH` header value for requesting Client Hints
 
 ### Types
 
@@ -108,7 +116,9 @@ if (isValidSignals(requestBody)) {
 - `DeviceTiers` — Classified capability tiers (`cpu`, `memory`, `connection`, `gpu`)
 - `RenderingHints` — Boolean rendering decisions
 - `DeviceProfile` — Full profile with schema version, session token, timestamps, and signals
-- `ClassifiedProfile` — Profile + tiers + hints
+- `ClassifiedProfile` — Profile + tiers + hints + source
+- `ProfileSource` — `'probe' | 'headers' | 'fallback'`
+- `FallbackProfile` — `'conservative' | 'optimistic' | DeviceTiers`
 - `TierThresholds` — Custom threshold configuration
 - `CpuTier`, `MemoryTier`, `ConnectionTier`, `GpuTier` — Individual tier types
 

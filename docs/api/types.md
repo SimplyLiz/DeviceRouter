@@ -65,6 +65,57 @@ if (isBotSignals(signals)) {
 }
 ```
 
+### `classifyFromHeaders(headers): DeviceTiers`
+
+Classifies device capabilities from HTTP request headers (User-Agent and Client Hints). Useful for first-request classification before the probe has run.
+
+```typescript
+import { classifyFromHeaders } from '@device-router/types';
+
+const tiers = classifyFromHeaders({
+  'user-agent': req.headers['user-agent'],
+  'sec-ch-ua-mobile': req.headers['sec-ch-ua-mobile'],
+  'device-memory': req.headers['device-memory'],
+  'save-data': req.headers['save-data'],
+});
+// Mobile UA → { cpu: 'low', memory: 'low', connection: '4g', gpu: 'mid' }
+// Tablet UA → { cpu: 'mid', memory: 'mid', connection: '4g', gpu: 'mid' }
+// Desktop UA → { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'mid' }
+```
+
+Client Hints refine the base classification when present:
+
+- `Device-Memory` overrides the memory tier directly
+- `Save-Data: on` forces connection to `'3g'`
+- `Sec-CH-UA-Mobile: ?1` forces mobile classification
+
+### `resolveFallback(fallback: FallbackProfile): ClassifiedProfile`
+
+Resolves a fallback profile specification into a full `ClassifiedProfile` with `source: 'fallback'`.
+
+```typescript
+import { resolveFallback } from '@device-router/types';
+
+const profile = resolveFallback('conservative');
+// { profile: {...}, tiers: { cpu: 'low', ... }, hints: {...}, source: 'fallback' }
+```
+
+Accepts `'conservative'`, `'optimistic'`, or a custom `DeviceTiers` object.
+
+## Constants
+
+### `CONSERVATIVE_TIERS`
+
+Preset `DeviceTiers` for a conservative (low-end) assumption: `{ cpu: 'low', memory: 'low', connection: '3g', gpu: 'low' }`.
+
+### `OPTIMISTIC_TIERS`
+
+Preset `DeviceTiers` for an optimistic (high-end) assumption: `{ cpu: 'high', memory: 'high', connection: 'fast', gpu: 'mid' }`.
+
+### `ACCEPT_CH_VALUE`
+
+The `Accept-CH` header value used to request Client Hints from the browser: `'Sec-CH-UA-Mobile, Sec-CH-UA-Platform, Device-Memory, Save-Data'`.
+
 ## TierThresholds
 
 Custom thresholds for tier classification. All fields are optional — unset fields use built-in defaults.
@@ -112,6 +163,22 @@ const tiers = classify(signals, {
 ```
 
 ## Types
+
+### `ProfileSource`
+
+```typescript
+type ProfileSource = 'probe' | 'headers' | 'fallback';
+```
+
+Indicates where the classified profile originated: `'probe'` from client-side signals, `'headers'` from UA/Client Hints, or `'fallback'` from a configured default.
+
+### `FallbackProfile`
+
+```typescript
+type FallbackProfile = 'conservative' | 'optimistic' | DeviceTiers;
+```
+
+Specifies the fallback strategy for first requests. Use `'conservative'` for low-end defaults, `'optimistic'` for high-end defaults, or provide a custom `DeviceTiers` object.
 
 ### `GpuTier`
 

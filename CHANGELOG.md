@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- **First-request fallback** — Opt-in strategies to provide a classified profile on the very first page load, before the probe has run
+- **Header-based classification** — `classifyFromHeaders: true` classifies devices from User-Agent and Client Hints headers (`Sec-CH-UA-Mobile`, `Device-Memory`, `Save-Data`), sets `Accept-CH` response header to request hints from Chromium browsers
+- **Fallback profiles** — `fallbackProfile` option accepts `'conservative'` (low-end defaults), `'optimistic'` (high-end defaults), or custom `DeviceTiers`
+- **Profile source tracking** — New `source` field on `ClassifiedProfile` indicates origin: `'probe'`, `'headers'`, or `'fallback'`
+- **Preset tier constants** — `CONSERVATIVE_TIERS` and `OPTIMISTIC_TIERS` exported from `@device-router/types`
+
 ## 0.2.0 (2026-02-22)
 
 ### Features

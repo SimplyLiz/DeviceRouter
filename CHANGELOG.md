@@ -6,6 +6,10 @@
 
 - **Observability hooks** — New `onEvent` callback option on all middleware packages. Emits `profile:classify`, `profile:store`, `bot:reject`, and `error` events for plugging in logging, metrics, and monitoring without middleware wrapping. Callbacks are fire-and-forget with built-in error isolation
 
+### Documentation
+
+- **Observability example** — New `examples/observability/` with Docker Compose stack (Express + Redis + Prometheus + Grafana), all 6 Prometheus metrics wired to `onEvent`, and a pre-built Grafana dashboard. Adds `device_router_hint_total` metric for tracking hint activation rates
+
 ## 0.3.0 (2026-02-23)
 
 ### Breaking Changes

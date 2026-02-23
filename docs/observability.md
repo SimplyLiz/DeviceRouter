@@ -186,6 +186,24 @@ onEvent: (event) => {
 };
 ```
 
+### Hint activation tracking
+
+```typescript
+const hintCounts = new Counter({
+  name: 'device_router_hint_total',
+  help: 'Hint activation counts',
+  labelNames: ['hint'],
+});
+
+onEvent: (event) => {
+  if (event.type === 'profile:classify') {
+    for (const [hint, active] of Object.entries(event.hints)) {
+      if (active) hintCounts.inc({ hint });
+    }
+  }
+};
+```
+
 ## TypeScript Types
 
 ```typescript
@@ -193,3 +211,15 @@ import type { DeviceRouterEvent, OnEventCallback } from '@device-router/types';
 ```
 
 See the [types API reference](api/types.md#event-types) for full type definitions.
+
+## Grafana Dashboard
+
+The [`examples/observability/`](../examples/observability/) directory contains a complete Docker Compose stack (Express + Redis + Prometheus + Grafana) with all six metrics wired up and a pre-built Grafana dashboard that provisions automatically on startup.
+
+```bash
+cd examples/observability
+docker compose up
+# App at localhost:3000, Grafana at localhost:3001
+```
+
+The dashboard includes classification rate/latency panels, error and bot tracking, tier distribution pie charts, and hint activation rates. See the [example README](../examples/observability/README.md) for details.

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createProbeEndpoint } from '../endpoint.js';
 import type { StorageAdapter } from '@device-router/storage';
+import type { DeviceRouterEvent } from '@device-router/types';
 
 function createMockStorage(): StorageAdapter {
   return {
@@ -166,5 +167,77 @@ describe('createProbeEndpoint (koa)', () => {
 
     expect((ctx.body as { ok: boolean }).ok).toBe(true);
     expect(storage.set).toHaveBeenCalled();
+  });
+
+  describe('onEvent', () => {
+    it('emits profile:store after successful storage', async () => {
+      const events: DeviceRouterEvent[] = [];
+      const onEvent = vi.fn((e: DeviceRouterEvent) => {
+        events.push(e);
+      });
+
+      const handler = createProbeEndpoint({ storage, onEvent });
+      const ctx = createMockCtx({ hardwareConcurrency: 4 });
+
+      await handler(ctx);
+
+      expect(onEvent).toHaveBeenCalled();
+      const storeEvent = events.find((e) => e.type === 'profile:store');
+      expect(storeEvent).toBeDefined();
+      const event = storeEvent as Extract<DeviceRouterEvent, { type: 'profile:store' }>;
+      expect(typeof event.sessionToken).toBe('string');
+      expect(typeof event.durationMs).toBe('number');
+    });
+
+    it('emits bot:reject when bot detected', async () => {
+      const events: DeviceRouterEvent[] = [];
+      const onEvent = vi.fn((e: DeviceRouterEvent) => {
+        events.push(e);
+      });
+
+      const handler = createProbeEndpoint({ storage, onEvent });
+      const ctx = createMockCtx({});
+
+      await handler(ctx);
+
+      expect(onEvent).toHaveBeenCalledOnce();
+      expect(events[0].type).toBe('bot:reject');
+      const event = events[0] as Extract<DeviceRouterEvent, { type: 'bot:reject' }>;
+      expect(event.signals).toEqual({});
+    });
+
+    it('emits error event on storage failure', async () => {
+      const events: DeviceRouterEvent[] = [];
+      const onEvent = vi.fn((e: DeviceRouterEvent) => {
+        events.push(e);
+      });
+
+      storage.set = vi.fn().mockRejectedValue(new Error('Redis down'));
+      const handler = createProbeEndpoint({ storage, onEvent });
+      const ctx = createMockCtx({ hardwareConcurrency: 4 });
+
+      await handler(ctx);
+
+      expect(ctx.status).toBe(500);
+      const errorEvent = events.find((e) => e.type === 'error');
+      expect(errorEvent).toBeDefined();
+      const event = errorEvent as Extract<DeviceRouterEvent, { type: 'error' }>;
+      expect(event.phase).toBe('endpoint');
+      expect(event.error).toBeInstanceOf(Error);
+      expect((event.error as Error).message).toBe('Redis down');
+    });
+
+    it('callback errors do not break endpoint', async () => {
+      const onEvent = vi.fn(() => {
+        throw new Error('callback boom');
+      });
+
+      const handler = createProbeEndpoint({ storage, onEvent });
+      const ctx = createMockCtx({ hardwareConcurrency: 4 });
+
+      await handler(ctx);
+
+      expect((ctx.body as { ok: boolean }).ok).toBe(true);
+    });
   });
 });

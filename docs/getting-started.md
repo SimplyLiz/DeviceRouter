@@ -208,6 +208,21 @@ if (profile?.source === 'probe') {
 }
 ```
 
+## Observability
+
+Pass an `onEvent` callback to receive events for classification, storage, bot rejection, and errors:
+
+```typescript
+const { middleware, probeEndpoint } = createDeviceRouter({
+  storage,
+  onEvent: (event) => {
+    console.log(`[device-router] ${event.type}`, event);
+  },
+});
+```
+
+See the [Observability guide](observability.md) for structured logging and Prometheus examples.
+
 ## Custom Thresholds
 
 Override the default tier boundaries:

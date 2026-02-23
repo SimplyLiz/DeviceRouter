@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import type { StorageAdapter } from '@device-router/storage';
-import type { TierThresholds, FallbackProfile } from '@device-router/types';
+import type { TierThresholds, FallbackProfile, OnEventCallback } from '@device-router/types';
 import { validateThresholds } from '@device-router/types';
 import type { FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
@@ -19,6 +19,7 @@ export interface DeviceRouterOptions {
   rejectBots?: boolean;
   fallbackProfile?: FallbackProfile;
   classifyFromHeaders?: boolean;
+  onEvent?: OnEventCallback;
   injectProbe?: boolean;
   probePath?: string;
   probeNonce?: string | ((req: FastifyRequest) => string);
@@ -35,6 +36,7 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     rejectBots,
     fallbackProfile,
     classifyFromHeaders,
+    onEvent,
     injectProbe = false,
     probePath,
     probeNonce,
@@ -48,6 +50,7 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     thresholds,
     fallbackProfile,
     classifyFromHeaders,
+    onEvent,
   });
 
   let injectionHook: ReturnType<typeof createInjectionHook> | undefined;
@@ -89,6 +92,7 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
       cookieSecure,
       ttl,
       rejectBots,
+      onEvent,
     }),
     injectionHook,
   };

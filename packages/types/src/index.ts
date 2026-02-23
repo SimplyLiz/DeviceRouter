@@ -35,3 +35,4 @@ export {
 } from './classify.js';
 export { deriveHints } from './hints.js';
 export { isValidSignals } from './validate.js';
+export { isBotSignals } from './bot.js';

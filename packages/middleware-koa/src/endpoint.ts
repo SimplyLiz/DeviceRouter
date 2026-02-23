@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 import type { StorageAdapter } from '@device-router/storage';
 import type { DeviceProfile, RawSignals } from '@device-router/types';
-import { isValidSignals } from '@device-router/types';
+import { isValidSignals, isBotSignals } from '@device-router/types';
 import { randomUUID } from 'node:crypto';
 
 export interface EndpointOptions {
@@ -9,10 +9,17 @@ export interface EndpointOptions {
   cookieName?: string;
   cookiePath?: string;
   ttl?: number;
+  rejectBots?: boolean;
 }
 
 export function createProbeEndpoint(options: EndpointOptions) {
-  const { storage, cookieName = 'dr_session', cookiePath = '/', ttl = 86400 } = options;
+  const {
+    storage,
+    cookieName = 'dr_session',
+    cookiePath = '/',
+    ttl = 86400,
+    rejectBots = true,
+  } = options;
 
   return async (ctx: Context): Promise<void> => {
     try {
@@ -21,6 +28,12 @@ export function createProbeEndpoint(options: EndpointOptions) {
       if (!isValidSignals(signals)) {
         ctx.status = 400;
         ctx.body = { ok: false, error: 'Invalid probe payload' };
+        return;
+      }
+
+      if (rejectBots && isBotSignals(signals)) {
+        ctx.status = 403;
+        ctx.body = { ok: false, error: 'Bot detected' };
         return;
       }
 

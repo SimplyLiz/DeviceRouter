@@ -14,6 +14,7 @@ export interface DeviceRouterOptions {
   cookiePath?: string;
   ttl?: number;
   thresholds?: TierThresholds;
+  rejectBots?: boolean;
   injectProbe?: boolean;
   probePath?: string;
   probeNonce?: string | ((req: FastifyRequest) => string);
@@ -26,6 +27,7 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     cookiePath = '/',
     ttl = 86400,
     thresholds,
+    rejectBots,
     injectProbe = false,
     probePath,
     probeNonce,
@@ -65,7 +67,7 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
   return {
     plugin,
     pluginOptions,
-    probeEndpoint: createProbeEndpoint({ storage, cookieName, cookiePath, ttl }),
+    probeEndpoint: createProbeEndpoint({ storage, cookieName, cookiePath, ttl, rejectBots }),
     injectionHook,
   };
 }

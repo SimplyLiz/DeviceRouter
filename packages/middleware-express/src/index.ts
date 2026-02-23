@@ -13,6 +13,7 @@ export interface DeviceRouterOptions {
   ttl?: number;
   probePath?: string;
   thresholds?: TierThresholds;
+  rejectBots?: boolean;
   injectProbe?: boolean;
   probeNonce?: string | ((req: import('express').Request) => string);
 }
@@ -25,6 +26,7 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     ttl = 86400,
     probePath,
     thresholds,
+    rejectBots,
     injectProbe = false,
     probeNonce,
   } = options;
@@ -35,7 +37,7 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     injectionMiddleware?: ReturnType<typeof createInjectionMiddleware>;
   } = {
     middleware: createMiddleware({ storage, cookieName, thresholds }),
-    probeEndpoint: createProbeEndpoint({ storage, cookieName, cookiePath, ttl }),
+    probeEndpoint: createProbeEndpoint({ storage, cookieName, cookiePath, ttl, rejectBots }),
   };
 
   if (injectProbe) {

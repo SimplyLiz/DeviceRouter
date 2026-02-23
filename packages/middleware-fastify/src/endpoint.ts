@@ -2,7 +2,7 @@ import type { FastifyRequest, FastifyReply } from 'fastify';
 import '@fastify/cookie';
 import type { StorageAdapter } from '@device-router/storage';
 import type { DeviceProfile, RawSignals } from '@device-router/types';
-import { isValidSignals } from '@device-router/types';
+import { isValidSignals, isBotSignals } from '@device-router/types';
 import { randomUUID } from 'node:crypto';
 
 export interface EndpointOptions {
@@ -10,10 +10,17 @@ export interface EndpointOptions {
   cookieName?: string;
   cookiePath?: string;
   ttl?: number;
+  rejectBots?: boolean;
 }
 
 export function createProbeEndpoint(options: EndpointOptions) {
-  const { storage, cookieName = 'dr_session', cookiePath = '/', ttl = 86400 } = options;
+  const {
+    storage,
+    cookieName = 'dr_session',
+    cookiePath = '/',
+    ttl = 86400,
+    rejectBots = true,
+  } = options;
 
   return async (req: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
@@ -21,6 +28,11 @@ export function createProbeEndpoint(options: EndpointOptions) {
 
       if (!isValidSignals(signals)) {
         reply.status(400).send({ ok: false, error: 'Invalid probe payload' });
+        return;
+      }
+
+      if (rejectBots && isBotSignals(signals)) {
+        reply.status(403).send({ ok: false, error: 'Bot detected' });
         return;
       }
 

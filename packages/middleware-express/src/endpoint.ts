@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import type { StorageAdapter } from '@device-router/storage';
 import type { DeviceProfile, RawSignals } from '@device-router/types';
-import { isValidSignals } from '@device-router/types';
+import { isValidSignals, isBotSignals } from '@device-router/types';
 import { randomUUID } from 'node:crypto';
 
 export interface EndpointOptions {
@@ -9,10 +9,17 @@ export interface EndpointOptions {
   cookieName?: string;
   cookiePath?: string;
   ttl?: number;
+  rejectBots?: boolean;
 }
 
 export function createProbeEndpoint(options: EndpointOptions) {
-  const { storage, cookieName = 'dr_session', cookiePath = '/', ttl = 86400 } = options;
+  const {
+    storage,
+    cookieName = 'dr_session',
+    cookiePath = '/',
+    ttl = 86400,
+    rejectBots = true,
+  } = options;
 
   return async (req: Request, res: Response): Promise<void> => {
     try {
@@ -20,6 +27,11 @@ export function createProbeEndpoint(options: EndpointOptions) {
 
       if (!isValidSignals(signals)) {
         res.status(400).json({ ok: false, error: 'Invalid probe payload' });
+        return;
+      }
+
+      if (rejectBots && isBotSignals(signals)) {
+        res.status(403).json({ ok: false, error: 'Bot detected' });
         return;
       }
 

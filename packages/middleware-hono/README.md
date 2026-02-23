@@ -64,6 +64,8 @@ const { middleware, probeEndpoint, injectionMiddleware } = createDeviceRouter({
 app.use('*', injectionMiddleware);
 ```
 
+> **Streaming responses:** Injection reads the entire response body as text. If your handler returns a `ReadableStream`, the response is buffered into memory before injection. For streaming HTML, add the probe `<script>` tag to your HTML shell manually instead.
+
 ## Custom thresholds
 
 ```typescript

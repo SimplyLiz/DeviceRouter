@@ -67,6 +67,8 @@ const { plugin, probeEndpoint, injectionHook } = createDeviceRouter({
 
 When `injectProbe` is enabled, the plugin registers an `onSend` hook that injects the script before `</head>`.
 
+> **Streaming responses:** The `onSend` hook receives the serialized payload as a string. If you stream responses via `reply.raw`, the hook is bypassed and injection is skipped. Add the probe `<script>` tag to your HTML shell manually instead.
+
 ## Custom thresholds
 
 ```typescript

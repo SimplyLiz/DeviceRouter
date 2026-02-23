@@ -149,6 +149,8 @@ const { middleware, probeEndpoint, injectionMiddleware } = createDeviceRouter({
 
 The probe `<script>` is automatically injected into HTML responses.
 
+> **Streaming responses:** Auto-injection requires the full response body as a string. If you stream HTML (e.g. React `renderToPipeableStream`), the injection is silently skipped. Add the probe `<script>` tag to your HTML shell manually instead.
+
 ## First-Request Handling
 
 By default, `deviceProfile` is `null` on the first page load because the probe hasn't run yet. Two opt-in strategies provide a classified profile immediately:

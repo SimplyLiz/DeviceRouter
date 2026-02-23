@@ -68,6 +68,8 @@ app.use(injectionMiddleware); // before routes
 app.use(middleware);
 ```
 
+> **Streaming responses:** Injection only runs when `ctx.body` is a string. If you set `ctx.body` to a `Stream`, injection is silently skipped. Add the probe `<script>` tag to your HTML shell manually instead.
+
 ## Custom thresholds
 
 ```typescript

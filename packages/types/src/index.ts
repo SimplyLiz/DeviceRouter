@@ -41,3 +41,5 @@ export { deriveHints } from './hints.js';
 export { isValidSignals, validateThresholds } from './validate.js';
 export { isBotSignals } from './bot.js';
 export { classifyFromHeaders, resolveFallback, ACCEPT_CH_VALUE } from './headers.js';
+export type { DeviceRouterEvent, OnEventCallback } from './events.js';
+export { emitEvent } from './events.js';

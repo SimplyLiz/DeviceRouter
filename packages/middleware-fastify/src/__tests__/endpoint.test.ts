@@ -196,4 +196,79 @@ describe('createProbeEndpoint', () => {
     });
     expect(storage.set).toHaveBeenCalled();
   });
+
+  describe('onEvent', () => {
+    it('emits profile:store after successful storage', async () => {
+      const onEvent = vi.fn();
+      const handler = createProbeEndpoint({ storage, onEvent });
+      const req = createMockReq({ hardwareConcurrency: 4 });
+      const reply = createMockReply();
+
+      await handler(req, reply);
+
+      expect(onEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'profile:store',
+          sessionToken: expect.any(String),
+          durationMs: expect.any(Number),
+        }),
+      );
+    });
+
+    it('emits bot:reject when bot detected', async () => {
+      const onEvent = vi.fn();
+      const handler = createProbeEndpoint({ storage, onEvent });
+      const req = createMockReq({});
+      const reply = createMockReply();
+
+      await handler(req, reply);
+
+      expect(onEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'bot:reject',
+          sessionToken: expect.any(String),
+          signals: {},
+        }),
+      );
+    });
+
+    it('emits error event on storage failure', async () => {
+      const onEvent = vi.fn();
+      storage.set = vi.fn().mockRejectedValue(new Error('Redis down'));
+      const handler = createProbeEndpoint({ storage, onEvent });
+      const req = createMockReq({ hardwareConcurrency: 4 });
+      const reply = createMockReply();
+
+      await handler(req, reply);
+
+      expect(onEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'error',
+          phase: 'endpoint',
+          error: expect.any(Error),
+        }),
+      );
+      const event = onEvent.mock.calls.find(
+        (c: unknown[]) => (c[0] as { type: string }).type === 'error',
+      )![0] as { error: Error };
+      expect(event.error.message).toBe('Redis down');
+      expect(reply.status).toHaveBeenCalledWith(500);
+    });
+
+    it('callback errors do not break endpoint', async () => {
+      const onEvent = vi.fn(() => {
+        throw new Error('callback boom');
+      });
+      const handler = createProbeEndpoint({ storage, onEvent });
+      const req = createMockReq({ hardwareConcurrency: 4 });
+      const reply = createMockReply();
+
+      await handler(req, reply);
+
+      expect(reply.send).toHaveBeenCalledWith({
+        ok: true,
+        sessionToken: expect.any(String),
+      });
+    });
+  });
 });

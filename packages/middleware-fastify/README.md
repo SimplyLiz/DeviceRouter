@@ -97,6 +97,22 @@ const { plugin, probeEndpoint } = createDeviceRouter({
 | `probeNonce`          | `string \| ((req: FastifyRequest) => string)` | —                 | CSP nonce for injected script                 |
 | `fallbackProfile`     | `FallbackProfile`                             | —                 | Fallback profile for first requests           |
 | `classifyFromHeaders` | `boolean`                                     | `false`           | Classify from UA/Client Hints                 |
+| `onEvent`             | `OnEventCallback`                             | —                 | Observability callback for logging/metrics    |
+
+## Observability
+
+Pass an `onEvent` callback to receive events for classification, storage, bot rejection, and errors:
+
+```typescript
+const { plugin, probeEndpoint } = createDeviceRouter({
+  storage,
+  onEvent: (event) => {
+    console.log(`[device-router] ${event.type}`, event);
+  },
+});
+```
+
+See the [Observability guide](https://github.com/SimplyLiz/DeviceRouter/blob/main/docs/observability.md) for details.
 
 ## Exports
 

@@ -1,7 +1,18 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { StorageAdapter } from '@device-router/storage';
-import { classify, deriveHints, classifyFromHeaders, resolveFallback } from '@device-router/types';
-import type { ClassifiedProfile, TierThresholds, FallbackProfile } from '@device-router/types';
+import {
+  classify,
+  deriveHints,
+  classifyFromHeaders,
+  resolveFallback,
+  emitEvent,
+} from '@device-router/types';
+import type {
+  ClassifiedProfile,
+  TierThresholds,
+  FallbackProfile,
+  OnEventCallback,
+} from '@device-router/types';
 import { ACCEPT_CH_VALUE } from '@device-router/types';
 
 declare global {
@@ -19,6 +30,7 @@ export interface MiddlewareOptions {
   thresholds?: TierThresholds;
   fallbackProfile?: FallbackProfile;
   classifyFromHeaders?: boolean;
+  onEvent?: OnEventCallback;
 }
 
 export function createMiddleware(options: MiddlewareOptions) {
@@ -28,6 +40,7 @@ export function createMiddleware(options: MiddlewareOptions) {
     thresholds,
     fallbackProfile,
     classifyFromHeaders: useHeaders,
+    onEvent,
   } = options;
 
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -39,7 +52,19 @@ export function createMiddleware(options: MiddlewareOptions) {
       const sessionToken = req.cookies?.[cookieName] as string | undefined;
 
       if (!sessionToken) {
-        req.deviceProfile = resolveFirstRequest(req.headers, useHeaders, fallbackProfile);
+        const start = performance.now();
+        const result = resolveFirstRequest(req.headers, useHeaders, fallbackProfile);
+        req.deviceProfile = result;
+        if (result) {
+          emitEvent(onEvent, {
+            type: 'profile:classify',
+            sessionToken: '',
+            tiers: result.tiers,
+            hints: result.hints,
+            source: result.source,
+            durationMs: performance.now() - start,
+          });
+        }
         next();
         return;
       }
@@ -47,17 +72,45 @@ export function createMiddleware(options: MiddlewareOptions) {
       const profile = await storage.get(sessionToken);
 
       if (!profile) {
-        req.deviceProfile = resolveFirstRequest(req.headers, useHeaders, fallbackProfile);
+        const start = performance.now();
+        const result = resolveFirstRequest(req.headers, useHeaders, fallbackProfile);
+        req.deviceProfile = result;
+        if (result) {
+          emitEvent(onEvent, {
+            type: 'profile:classify',
+            sessionToken,
+            tiers: result.tiers,
+            hints: result.hints,
+            source: result.source,
+            durationMs: performance.now() - start,
+          });
+        }
         next();
         return;
       }
 
+      const start = performance.now();
       const tiers = classify(profile.signals, thresholds);
       const hints = deriveHints(tiers, profile.signals);
+      const durationMs = performance.now() - start;
 
       req.deviceProfile = { profile, tiers, hints, source: 'probe' };
+      emitEvent(onEvent, {
+        type: 'profile:classify',
+        sessionToken,
+        tiers,
+        hints,
+        source: 'probe',
+        durationMs,
+      });
       next();
     } catch (err) {
+      emitEvent(onEvent, {
+        type: 'error',
+        error: err,
+        phase: 'middleware',
+        sessionToken: req.cookies?.[cookieName] as string | undefined,
+      });
       next(err);
     }
   };

@@ -235,4 +235,119 @@ describe('createMiddleware', () => {
       expect(reply._headers['Accept-CH']).toBeUndefined();
     });
   });
+
+  describe('onEvent', () => {
+    it('emits profile:classify with source probe when profile found in storage', async () => {
+      const onEvent = vi.fn();
+      const profile: DeviceProfile = {
+        schemaVersion: 1,
+        sessionToken: 'tok1',
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+        signals: { hardwareConcurrency: 8, deviceMemory: 8 },
+      };
+      storage._store.set('tok1', profile);
+
+      const hook = createMiddleware({ storage, onEvent });
+      const req = createMockReq({ dr_session: 'tok1' });
+
+      await hook(req, createMockReply());
+
+      expect(onEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'profile:classify',
+          source: 'probe',
+          sessionToken: 'tok1',
+          durationMs: expect.any(Number),
+        }),
+      );
+    });
+
+    it('emits profile:classify with source headers when classifyFromHeaders enabled', async () => {
+      const onEvent = vi.fn();
+      const hook = createMiddleware({ storage, classifyFromHeaders: true, onEvent });
+      const req = createMockReq(
+        {},
+        { 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) AppleWebKit/605.1.15 Mobile' },
+      );
+
+      await hook(req, createMockReply());
+
+      expect(onEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'profile:classify',
+          source: 'headers',
+        }),
+      );
+    });
+
+    it('emits profile:classify with source fallback when fallbackProfile set', async () => {
+      const onEvent = vi.fn();
+      const hook = createMiddleware({ storage, fallbackProfile: 'conservative', onEvent });
+      const req = createMockReq();
+
+      await hook(req, createMockReply());
+
+      expect(onEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'profile:classify',
+          source: 'fallback',
+        }),
+      );
+    });
+
+    it('does not emit when no profile resolved', async () => {
+      const onEvent = vi.fn();
+      const hook = createMiddleware({ storage, onEvent });
+      const req = createMockReq();
+
+      await hook(req, createMockReply());
+
+      expect(onEvent).not.toHaveBeenCalled();
+    });
+
+    it('emits error event on storage failure', async () => {
+      const onEvent = vi.fn();
+      storage.get = vi.fn().mockRejectedValue(new Error('Redis down'));
+
+      const hook = createMiddleware({ storage, onEvent });
+      const req = createMockReq({ dr_session: 'tok1' });
+
+      await expect(hook(req, createMockReply())).rejects.toThrow('Redis down');
+
+      expect(onEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'error',
+          phase: 'middleware',
+          error: expect.any(Error),
+        }),
+      );
+      const event = onEvent.mock.calls.find(
+        (c: unknown[]) => (c[0] as { type: string }).type === 'error',
+      )![0] as { error: Error };
+      expect(event.error.message).toBe('Redis down');
+    });
+
+    it('callback errors do not break middleware', async () => {
+      const onEvent = vi.fn(() => {
+        throw new Error('callback boom');
+      });
+      const profile: DeviceProfile = {
+        schemaVersion: 1,
+        sessionToken: 'tok1',
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+        signals: { hardwareConcurrency: 8, deviceMemory: 8 },
+      };
+      storage._store.set('tok1', profile);
+
+      const hook = createMiddleware({ storage, onEvent });
+      const req = createMockReq({ dr_session: 'tok1' });
+
+      await hook(req, createMockReply());
+
+      expect(req.deviceProfile).not.toBeNull();
+      expect(req.deviceProfile!.source).toBe('probe');
+    });
+  });
 });

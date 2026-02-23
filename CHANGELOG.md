@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- **Observability hooks** — New `onEvent` callback option on all middleware packages. Emits `profile:classify`, `profile:store`, `bot:reject`, and `error` events for plugging in logging, metrics, and monitoring without middleware wrapping. Callbacks are fire-and-forget with built-in error isolation
+
 ## 0.3.0 (2026-02-23)
 
 ### Breaking Changes

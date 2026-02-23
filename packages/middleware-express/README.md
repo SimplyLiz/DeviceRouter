@@ -89,6 +89,7 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 | `cookieName`          | `string`                               | `'dr_session'`    | Session cookie name                   |
 | `cookiePath`          | `string`                               | `'/'`             | Cookie path                           |
 | `ttl`                 | `number`                               | `86400` (24h)     | Profile TTL in seconds                |
+| `rejectBots`          | `boolean`                              | `true`            | Reject bot/crawler probe submissions  |
 | `probePath`           | `string`                               | —                 | Custom probe endpoint path            |
 | `thresholds`          | `TierThresholds`                       | Built-in defaults | Custom tier classification thresholds |
 | `injectProbe`         | `boolean`                              | `false`           | Auto-inject probe into HTML           |

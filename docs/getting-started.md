@@ -172,6 +172,7 @@ const { middleware, probeEndpoint } = createDeviceRouter({
   cookieName: 'dr_session',   // Default: 'dr_session'
   cookiePath: '/',            // Default: '/'
   ttl: 86400,                 // Default: 86400 (24 hours)
+  rejectBots: true,           // Default: true — reject bot/crawler probes
   thresholds: { ... },        // Optional: custom tier thresholds
   injectProbe: false,         // Default: false
   probePath: '/device-router/probe',  // Default: '/device-router/probe'

@@ -23,16 +23,17 @@ await app.register(plugin, pluginOptions);
 
 ### Options
 
-| Option        | Type                                          | Default                  | Description                                    |
-| ------------- | --------------------------------------------- | ------------------------ | ---------------------------------------------- |
-| `storage`     | `StorageAdapter`                              | required                 | Storage backend                                |
-| `cookieName`  | `string`                                      | `'dr_session'`           | Session cookie name                            |
-| `cookiePath`  | `string`                                      | `'/'`                    | Cookie path                                    |
-| `ttl`         | `number`                                      | `86400`                  | Profile TTL in seconds                         |
-| `thresholds`  | `TierThresholds`                              | built-in defaults        | Custom tier classification thresholds          |
-| `injectProbe` | `boolean`                                     | `false`                  | Auto-inject probe script into HTML responses   |
-| `probePath`   | `string`                                      | `'/device-router/probe'` | Custom probe endpoint path for injected script |
-| `probeNonce`  | `string \| ((req: FastifyRequest) => string)` | —                        | CSP nonce for the injected script tag          |
+| Option        | Type                                          | Default                  | Description                                        |
+| ------------- | --------------------------------------------- | ------------------------ | -------------------------------------------------- |
+| `storage`     | `StorageAdapter`                              | required                 | Storage backend                                    |
+| `cookieName`  | `string`                                      | `'dr_session'`           | Session cookie name                                |
+| `cookiePath`  | `string`                                      | `'/'`                    | Cookie path                                        |
+| `ttl`         | `number`                                      | `86400`                  | Profile TTL in seconds                             |
+| `rejectBots`  | `boolean`                                     | `true`                   | Reject bot/crawler probe submissions (returns 403) |
+| `thresholds`  | `TierThresholds`                              | built-in defaults        | Custom tier classification thresholds              |
+| `injectProbe` | `boolean`                                     | `false`                  | Auto-inject probe script into HTML responses       |
+| `probePath`   | `string`                                      | `'/device-router/probe'` | Custom probe endpoint path for injected script     |
+| `probeNonce`  | `string \| ((req: FastifyRequest) => string)` | —                        | CSP nonce for the injected script tag              |
 
 ### Returns
 

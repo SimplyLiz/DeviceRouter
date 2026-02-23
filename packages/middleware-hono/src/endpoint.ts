@@ -2,17 +2,24 @@ import type { Context, Handler } from 'hono';
 import { getCookie, setCookie } from 'hono/cookie';
 import type { StorageAdapter } from '@device-router/storage';
 import type { DeviceProfile, RawSignals } from '@device-router/types';
-import { isValidSignals } from '@device-router/types';
+import { isValidSignals, isBotSignals } from '@device-router/types';
 
 export interface EndpointOptions {
   storage: StorageAdapter;
   cookieName?: string;
   cookiePath?: string;
   ttl?: number;
+  rejectBots?: boolean;
 }
 
 export function createProbeEndpoint(options: EndpointOptions): Handler {
-  const { storage, cookieName = 'dr_session', cookiePath = '/', ttl = 86400 } = options;
+  const {
+    storage,
+    cookieName = 'dr_session',
+    cookiePath = '/',
+    ttl = 86400,
+    rejectBots = true,
+  } = options;
 
   return async (c: Context) => {
     try {
@@ -20,6 +27,10 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
 
       if (!isValidSignals(signals)) {
         return c.json({ ok: false, error: 'Invalid probe payload' }, 400);
+      }
+
+      if (rejectBots && isBotSignals(signals)) {
+        return c.json({ ok: false, error: 'Bot detected' }, 403);
       }
 
       const existingToken = getCookie(c, cookieName);

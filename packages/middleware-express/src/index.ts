@@ -2,6 +2,7 @@ import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import type { StorageAdapter } from '@device-router/storage';
 import type { TierThresholds, FallbackProfile } from '@device-router/types';
+import { validateThresholds } from '@device-router/types';
 import { createMiddleware } from './middleware.js';
 import { createProbeEndpoint } from './endpoint.js';
 import { createInjectionMiddleware } from './inject.js';
@@ -34,6 +35,8 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     fallbackProfile,
     classifyFromHeaders,
   } = options;
+
+  if (thresholds) validateThresholds(thresholds);
 
   const result: {
     middleware: ReturnType<typeof createMiddleware>;

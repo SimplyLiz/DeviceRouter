@@ -71,6 +71,22 @@ const tiers = classify(signals, {
 });
 ```
 
+### Validate thresholds
+
+Thresholds are validated automatically by `createDeviceRouter()`. For standalone usage with `classify()`, call `validateThresholds()` explicitly:
+
+```typescript
+import { validateThresholds } from '@device-router/types';
+
+validateThresholds({
+  cpu: { lowUpperBound: 4, midUpperBound: 8 },
+}); // OK
+
+validateThresholds({
+  cpu: { lowUpperBound: 10, midUpperBound: 2 },
+}); // throws Error
+```
+
 ### Validate incoming signals
 
 ```typescript
@@ -100,6 +116,7 @@ if (isValidSignals(requestBody)) {
 - `classifyConnection(effectiveType?, downlink?, thresholds?)` — Connection tier
 - `classifyGpu(renderer?, thresholds?)` — GPU tier
 - `deriveHints(tiers, signals?)` — Derive `RenderingHints` from tiers and signals
+- `validateThresholds(thresholds)` — Validate custom thresholds (called automatically by middleware)
 - `isValidSignals(body)` — Type guard for `RawSignals`
 - `isBotSignals(signals)` — Detect bot/crawler/headless browser probe submissions
 - `classifyFromHeaders(headers)` — Classify from UA/Client Hints headers

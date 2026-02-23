@@ -82,19 +82,19 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 
 ## Options
 
-| Option                | Type                                   | Default           | Description                          |
-| --------------------- | -------------------------------------- | ----------------- | ------------------------------------ |
-| `storage`             | `StorageAdapter`                       | _(required)_      | Storage backend for profiles         |
-| `cookieName`          | `string`                               | `'dr_session'`    | Session cookie name                  |
-| `cookiePath`          | `string`                               | `'/'`             | Cookie path                          |
-| `ttl`                 | `number`                               | `86400` (24h)     | Profile TTL in seconds               |
-| `rejectBots`          | `boolean`                              | `true`            | Reject bot/crawler probe submissions |
-| `thresholds`          | `TierThresholds`                       | Built-in defaults | Custom tier thresholds               |
-| `injectProbe`         | `boolean`                              | `false`           | Auto-inject probe into HTML          |
-| `probePath`           | `string`                               | —                 | Custom probe endpoint path           |
-| `probeNonce`          | `string \| ((ctx: Context) => string)` | —                 | CSP nonce for injected script        |
-| `fallbackProfile`     | `FallbackProfile`                      | —                 | Fallback profile for first requests  |
-| `classifyFromHeaders` | `boolean`                              | `false`           | Classify from UA/Client Hints        |
+| Option                | Type                                   | Default           | Description                                   |
+| --------------------- | -------------------------------------- | ----------------- | --------------------------------------------- |
+| `storage`             | `StorageAdapter`                       | _(required)_      | Storage backend for profiles                  |
+| `cookieName`          | `string`                               | `'dr_session'`    | Session cookie name                           |
+| `cookiePath`          | `string`                               | `'/'`             | Cookie path                                   |
+| `ttl`                 | `number`                               | `86400` (24h)     | Profile TTL in seconds                        |
+| `rejectBots`          | `boolean`                              | `true`            | Reject bot/crawler probe submissions          |
+| `thresholds`          | `TierThresholds`                       | Built-in defaults | Custom tier thresholds (validated at startup) |
+| `injectProbe`         | `boolean`                              | `false`           | Auto-inject probe into HTML                   |
+| `probePath`           | `string`                               | —                 | Custom probe endpoint path                    |
+| `probeNonce`          | `string \| ((ctx: Context) => string)` | —                 | CSP nonce for injected script                 |
+| `fallbackProfile`     | `FallbackProfile`                      | —                 | Fallback profile for first requests           |
+| `classifyFromHeaders` | `boolean`                              | `false`           | Classify from UA/Client Hints                 |
 
 ## Exports
 

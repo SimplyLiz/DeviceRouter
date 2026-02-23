@@ -47,6 +47,26 @@ Classifies connection tier based on Network Information API values.
 
 Classifies GPU tier from WebGL renderer string: no renderer → `'none'`, software renderers (SwiftShader, llvmpipe) → `'low'`, known high-end (RTX, Radeon RX 5000+, Apple M-series) → `'high'`, everything else → `'mid'`. Patterns are customizable via `GpuThresholds`.
 
+### `validateThresholds(thresholds: TierThresholds): void`
+
+Validates custom tier thresholds after merging with defaults. Throws a descriptive error if any rules are violated. Called automatically by `createDeviceRouter()` in all middleware packages — you only need to call this directly if using `classify()` standalone.
+
+**Validation rules:**
+
+- **CPU/Memory**: `lowUpperBound` must be less than `midUpperBound`
+- **Connection**: `downlink2gUpperBound` < `downlink3gUpperBound` < `downlink4gUpperBound`
+- **GPU**: `softwarePattern` and `highEndPattern` must be `RegExp` instances
+- All numeric values must be positive (> 0)
+
+Partial thresholds are merged with defaults before checking, so `{ cpu: { midUpperBound: 1 } }` is rejected because the default `lowUpperBound` (2) would exceed it.
+
+```typescript
+import { validateThresholds } from '@device-router/types';
+
+// Throws: "Invalid thresholds: cpu.lowUpperBound (10) must be less than cpu.midUpperBound (2)"
+validateThresholds({ cpu: { lowUpperBound: 10, midUpperBound: 2 } });
+```
+
 ### `isBotSignals(signals: RawSignals): boolean`
 
 Detects bot, crawler, and headless browser probe submissions. Returns `true` if any of:

@@ -221,6 +221,8 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 });
 ```
 
+Thresholds are validated at startup — inverted bounds, non-positive values, or non-RegExp GPU patterns throw immediately with a descriptive error. Partial thresholds are merged with defaults before validation, so ordering is checked against the full resolved config.
+
 ## Configuration
 
 ```typescript

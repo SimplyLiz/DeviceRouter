@@ -83,16 +83,18 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 
 ## Options
 
-| Option        | Type                                   | Default           | Description                           |
-| ------------- | -------------------------------------- | ----------------- | ------------------------------------- |
-| `storage`     | `StorageAdapter`                       | _(required)_      | Storage backend for profiles          |
-| `cookieName`  | `string`                               | `'dr_session'`    | Session cookie name                   |
-| `cookiePath`  | `string`                               | `'/'`             | Cookie path                           |
-| `ttl`         | `number`                               | `86400` (24h)     | Profile TTL in seconds                |
-| `probePath`   | `string`                               | —                 | Custom probe endpoint path            |
-| `thresholds`  | `TierThresholds`                       | Built-in defaults | Custom tier classification thresholds |
-| `injectProbe` | `boolean`                              | `false`           | Auto-inject probe into HTML           |
-| `probeNonce`  | `string \| ((req: Request) => string)` | —                 | CSP nonce for injected script         |
+| Option                | Type                                   | Default           | Description                           |
+| --------------------- | -------------------------------------- | ----------------- | ------------------------------------- |
+| `storage`             | `StorageAdapter`                       | _(required)_      | Storage backend for profiles          |
+| `cookieName`          | `string`                               | `'dr_session'`    | Session cookie name                   |
+| `cookiePath`          | `string`                               | `'/'`             | Cookie path                           |
+| `ttl`                 | `number`                               | `86400` (24h)     | Profile TTL in seconds                |
+| `probePath`           | `string`                               | —                 | Custom probe endpoint path            |
+| `thresholds`          | `TierThresholds`                       | Built-in defaults | Custom tier classification thresholds |
+| `injectProbe`         | `boolean`                              | `false`           | Auto-inject probe into HTML           |
+| `probeNonce`          | `string \| ((req: Request) => string)` | —                 | CSP nonce for injected script         |
+| `fallbackProfile`     | `FallbackProfile`                      | —                 | Fallback profile for first requests   |
+| `classifyFromHeaders` | `boolean`                              | `false`           | Classify from UA/Client Hints         |
 
 ## Exports
 

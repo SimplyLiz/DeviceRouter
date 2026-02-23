@@ -149,6 +149,63 @@ const { middleware, probeEndpoint, injectionMiddleware } = createDeviceRouter({
 
 The probe `<script>` is automatically injected into HTML responses.
 
+## First-Request Handling
+
+By default, `deviceProfile` is `null` on the first page load because the probe hasn't run yet. Two opt-in strategies provide a classified profile immediately:
+
+### Header-based classification
+
+Classify devices from the User-Agent string and Client Hints headers on the first request:
+
+```typescript
+const { middleware, probeEndpoint } = createDeviceRouter({
+  storage,
+  classifyFromHeaders: true,
+});
+```
+
+This sets `deviceProfile.source` to `'headers'` on first requests. The middleware also sends an `Accept-CH` response header to request Client Hints from Chromium browsers on subsequent requests. Once the probe runs, `source` becomes `'probe'`.
+
+### Fallback profile
+
+Provide structured defaults instead of `null`:
+
+```typescript
+const { middleware, probeEndpoint } = createDeviceRouter({
+  storage,
+  fallbackProfile: 'conservative', // or 'optimistic' or custom DeviceTiers
+});
+```
+
+The `'conservative'` preset assumes a low-end device (low CPU/memory, 3G connection). The `'optimistic'` preset assumes a high-end device.
+
+### Combining both
+
+When both are set, `classifyFromHeaders` takes priority:
+
+```typescript
+const { middleware, probeEndpoint } = createDeviceRouter({
+  storage,
+  classifyFromHeaders: true,
+  fallbackProfile: 'conservative', // used if header classification is disabled
+});
+```
+
+### Checking the profile source
+
+Use the `source` field to know where the profile came from:
+
+```typescript
+const profile = req.deviceProfile;
+if (profile?.source === 'probe') {
+  // Full accuracy — real device signals
+} else if (profile?.source === 'headers') {
+  // Best-effort from UA/Client Hints
+} else if (profile?.source === 'fallback') {
+  // Configured defaults
+}
+```
+
 ## Custom Thresholds
 
 Override the default tier boundaries:
@@ -177,6 +234,8 @@ const { middleware, probeEndpoint } = createDeviceRouter({
   injectProbe: false,         // Default: false
   probePath: '/device-router/probe',  // Default: '/device-router/probe'
   probeNonce: 'my-nonce',     // Optional: CSP nonce
+  classifyFromHeaders: false, // Default: false — classify from UA/Client Hints
+  fallbackProfile: undefined, // Optional: 'conservative', 'optimistic', or custom DeviceTiers
 });
 ```
 

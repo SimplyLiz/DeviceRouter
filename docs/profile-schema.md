@@ -54,6 +54,25 @@ All fields are optional — the probe collects what it can based on browser API 
 | `connection` | `'2g' \| '3g' \| '4g' \| 'fast'`     | Connection tier                    |
 | `gpu`        | `'none' \| 'low' \| 'mid' \| 'high'` | GPU tier based on renderer string  |
 
+## ClassifiedProfile (derived)
+
+The full classified result attached to requests by the middleware.
+
+| Field     | Type             | Description                                     |
+| --------- | ---------------- | ----------------------------------------------- |
+| `profile` | `DeviceProfile`  | Raw profile with signals                        |
+| `tiers`   | `DeviceTiers`    | Classified capability tiers                     |
+| `hints`   | `RenderingHints` | Boolean rendering decisions                     |
+| `source`  | `ProfileSource`  | Origin: `'probe'`, `'headers'`, or `'fallback'` |
+
+### ProfileSource
+
+| Value        | Description                                                |
+| ------------ | ---------------------------------------------------------- |
+| `'probe'`    | Profile from client-side probe signals (stored in session) |
+| `'headers'`  | Classified from UA and Client Hints on first request       |
+| `'fallback'` | Resolved from configured fallback defaults                 |
+
 ## RenderingHints (derived)
 
 | Field                   | Type      | When `true`                                            |

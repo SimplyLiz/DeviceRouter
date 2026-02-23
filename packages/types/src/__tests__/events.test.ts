@@ -45,4 +45,13 @@ describe('emitEvent', () => {
     // Give the microtask queue a tick to ensure no unhandled rejection
     await new Promise((r) => setTimeout(r, 10));
   });
+
+  it('swallows async callback that throws', async () => {
+    const cb = vi.fn(async () => {
+      throw new Error('boom');
+    });
+    expect(() => emitEvent(cb, sampleEvent)).not.toThrow();
+    expect(cb).toHaveBeenCalled();
+    await new Promise((r) => setTimeout(r, 10));
+  });
 });

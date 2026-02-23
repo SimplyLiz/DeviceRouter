@@ -2,6 +2,7 @@ import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import type { StorageAdapter } from '@device-router/storage';
 import type { TierThresholds, FallbackProfile } from '@device-router/types';
+import { validateThresholds } from '@device-router/types';
 import type { Context } from 'hono';
 import { createMiddleware } from './middleware.js';
 import { createProbeEndpoint } from './endpoint.js';
@@ -35,6 +36,8 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     probePath,
     probeNonce,
   } = options;
+
+  if (thresholds) validateThresholds(thresholds);
 
   const result: {
     middleware: ReturnType<typeof createMiddleware>;

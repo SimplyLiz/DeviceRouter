@@ -2,6 +2,7 @@ import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import type { StorageAdapter } from '@device-router/storage';
 import type { TierThresholds, FallbackProfile } from '@device-router/types';
+import { validateThresholds } from '@device-router/types';
 import type { FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import { createMiddleware } from './middleware.js';
@@ -36,6 +37,8 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     probePath,
     probeNonce,
   } = options;
+
+  if (thresholds) validateThresholds(thresholds);
 
   const hook = createMiddleware({
     storage,

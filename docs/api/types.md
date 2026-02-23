@@ -47,6 +47,24 @@ Classifies connection tier based on Network Information API values.
 
 Classifies GPU tier from WebGL renderer string: no renderer → `'none'`, software renderers (SwiftShader, llvmpipe) → `'low'`, known high-end (RTX, Radeon RX 5000+, Apple M-series) → `'high'`, everything else → `'mid'`. Patterns are customizable via `GpuThresholds`.
 
+### `isBotSignals(signals: RawSignals): boolean`
+
+Detects bot, crawler, and headless browser probe submissions. Returns `true` if any of:
+
+- `signals.userAgent` matches known bot/crawler patterns (Googlebot, Bingbot, HeadlessChrome, Puppeteer, curl, etc.)
+- `signals.gpuRenderer` matches headless GPU renderers (SwiftShader, llvmpipe, Software Rasterizer)
+- All substantive signals (`viewport`, `hardwareConcurrency`, `deviceMemory`, `userAgent`) are `undefined`
+
+Used internally by probe endpoints when `rejectBots: true` (the default). Can also be called directly:
+
+```typescript
+import { isBotSignals } from '@device-router/types';
+
+if (isBotSignals(signals)) {
+  // reject or flag this submission
+}
+```
+
 ## TierThresholds
 
 Custom thresholds for tier classification. All fields are optional — unset fields use built-in defaults.

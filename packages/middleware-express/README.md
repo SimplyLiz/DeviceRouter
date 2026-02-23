@@ -5,7 +5,7 @@ Express middleware for [DeviceRouter](https://github.com/SimplyLiz/DeviceRouter)
 ## Installation
 
 ```bash
-pnpm add @device-router/middleware-express @device-router/storage
+pnpm add @device-router/middleware-express @device-router/storage cookie-parser
 ```
 
 For automatic probe injection:
@@ -18,6 +18,7 @@ pnpm add @device-router/probe
 
 ```typescript
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { createDeviceRouter } from '@device-router/middleware-express';
 import { MemoryStorageAdapter } from '@device-router/storage';
 
@@ -27,6 +28,7 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 });
 
 app.use(express.json());
+app.use(cookieParser());
 app.post('/device-router/probe', probeEndpoint);
 app.use(middleware);
 
@@ -103,6 +105,10 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 - `createMiddleware(options)` — Standalone middleware
 - `createProbeEndpoint(options)` — Standalone probe endpoint handler
 - `createInjectionMiddleware(options)` — Standalone probe injection middleware
+
+## Prerequisites
+
+- [`cookie-parser`](https://www.npmjs.com/package/cookie-parser) — required for session cookie handling (`req.cookies`)
 
 ## Compatibility
 

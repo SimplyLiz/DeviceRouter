@@ -29,8 +29,8 @@ app.use(middleware);
 
 ### Options
 
-| Option        | Type                                   | Default                  | Description                                    |
-| ------------- | -------------------------------------- | ------------------------ | ---------------------------------------------- |
+| Option        | Type                                   | Default                  | Description                                        |
+| ------------- | -------------------------------------- | ------------------------ | -------------------------------------------------- |
 | `storage`     | `StorageAdapter`                       | required                 | Storage backend                                    |
 | `cookieName`  | `string`                               | `'dr_session'`           | Session cookie name                                |
 | `cookiePath`  | `string`                               | `'/'`                    | Cookie path                                        |

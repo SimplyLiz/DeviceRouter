@@ -17,6 +17,7 @@ pnpm clean               # Remove all dist/ and build artifacts
 ```
 
 To run a single test file:
+
 ```bash
 pnpm vitest run packages/types/src/__tests__/classify.test.ts
 ```
@@ -38,6 +39,7 @@ DeviceRouter is a pnpm monorepo that detects real device capabilities server-sid
 ### Middleware packages follow an identical pattern
 
 Each middleware package exports a factory `createDeviceRouter(options)` that produces three pieces:
+
 1. **middleware** — reads session cookie → retrieves profile from storage → classifies + derives hints → attaches to request
 2. **endpoint** — `POST /device-router/probe` handler: validates payload, stores profile, sets cookie
 3. **inject** — intercepts HTML responses and injects the minified probe script before `</head>` (supports CSP nonce)

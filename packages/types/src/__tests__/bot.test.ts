@@ -95,9 +95,7 @@ describe('isBotSignals', () => {
 
   describe('headless GPU detection', () => {
     it('detects SwiftShader', () => {
-      expect(
-        isBotSignals({ ...realSignals, gpuRenderer: 'Google SwiftShader' }),
-      ).toBe(true);
+      expect(isBotSignals({ ...realSignals, gpuRenderer: 'Google SwiftShader' })).toBe(true);
     });
 
     it('detects llvmpipe', () => {
@@ -107,15 +105,13 @@ describe('isBotSignals', () => {
     });
 
     it('detects Software Rasterizer', () => {
-      expect(
-        isBotSignals({ ...realSignals, gpuRenderer: 'Software Rasterizer' }),
-      ).toBe(true);
+      expect(isBotSignals({ ...realSignals, gpuRenderer: 'Software Rasterizer' })).toBe(true);
     });
 
     it('allows real GPU renderers', () => {
-      expect(
-        isBotSignals({ ...realSignals, gpuRenderer: 'ANGLE (NVIDIA GeForce RTX 3080)' }),
-      ).toBe(false);
+      expect(isBotSignals({ ...realSignals, gpuRenderer: 'ANGLE (NVIDIA GeForce RTX 3080)' })).toBe(
+        false,
+      );
     });
   });
 

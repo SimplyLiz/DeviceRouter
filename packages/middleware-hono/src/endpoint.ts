@@ -8,6 +8,7 @@ export interface EndpointOptions {
   storage: StorageAdapter;
   cookieName?: string;
   cookiePath?: string;
+  cookieSecure?: boolean;
   ttl?: number;
   rejectBots?: boolean;
 }
@@ -17,6 +18,7 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
     storage,
     cookieName = 'dr_session',
     cookiePath = '/',
+    cookieSecure = false,
     ttl = 86400,
     rejectBots = true,
   } = options;
@@ -50,6 +52,7 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
       setCookie(c, cookieName, sessionToken, {
         path: cookiePath,
         httpOnly: true,
+        secure: cookieSecure,
         sameSite: 'Lax',
         maxAge: ttl,
       });

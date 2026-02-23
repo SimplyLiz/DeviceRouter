@@ -11,6 +11,7 @@ export interface DeviceRouterOptions {
   storage: StorageAdapter;
   cookieName?: string;
   cookiePath?: string;
+  cookieSecure?: boolean;
   ttl?: number;
   probePath?: string;
   thresholds?: TierThresholds;
@@ -26,6 +27,7 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     storage,
     cookieName = 'dr_session',
     cookiePath = '/',
+    cookieSecure,
     ttl = 86400,
     probePath,
     thresholds,
@@ -50,7 +52,14 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
       fallbackProfile,
       classifyFromHeaders,
     }),
-    probeEndpoint: createProbeEndpoint({ storage, cookieName, cookiePath, ttl, rejectBots }),
+    probeEndpoint: createProbeEndpoint({
+      storage,
+      cookieName,
+      cookiePath,
+      cookieSecure,
+      ttl,
+      rejectBots,
+    }),
   };
 
   if (injectProbe) {

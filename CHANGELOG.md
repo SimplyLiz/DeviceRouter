@@ -4,6 +4,7 @@
 
 ### Features
 
+- **Secure cookie option** — New `cookieSecure` option on all middleware packages sets the `Secure` flag on the session cookie. Set `cookieSecure: true` for HTTPS deployments
 - **Threshold validation** — `createDeviceRouter()` now validates custom thresholds at startup: rejects inverted bounds (e.g. `lowUpperBound >= midUpperBound`), non-positive values, and non-RegExp GPU patterns. Fails fast with descriptive errors instead of silently producing wrong classifications
 - **First-request fallback** — Opt-in strategies to provide a classified profile on the very first page load, before the probe has run
 - **Header-based classification** — `classifyFromHeaders: true` classifies devices from User-Agent and Client Hints headers (`Sec-CH-UA-Mobile`, `Device-Memory`, `Save-Data`), sets `Accept-CH` response header to request hints from Chromium browsers

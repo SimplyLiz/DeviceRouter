@@ -6,9 +6,14 @@
 
 - **userAgent and viewport stripped from stored profiles** — `userAgent` and `viewport` are no longer persisted in device profiles. They are still collected by the probe and used for bot/crawler filtering at the endpoint, but stripped before storage. Stored `RawSignals` no longer contain `userAgent` or `viewport` fields
 
+### Bug Fixes
+
+- **Redis error handling** — `RedisStorageAdapter` now catches connection failures and corrupted JSON on all methods. `get()`/`exists()` return safe defaults (`null`/`false`), `set()`/`delete()` silently degrade instead of throwing unhandled errors
+
 ### Documentation
 
 - **Deployment guide** — New `docs/deployment.md` covering Docker (Node.js + Redis), Cloudflare Workers (Hono + KV), and serverless platforms (Lambda, Vercel). Includes Dockerfiles, docker-compose, custom StorageAdapter examples for edge runtimes, and production checklists
+- **Streaming injection limitation** — Documented that probe auto-injection requires a string response body; streaming responses are silently skipped (or buffered on Hono). Added framework-specific notes to all package READMEs and getting-started guide
 
 ### Features
 

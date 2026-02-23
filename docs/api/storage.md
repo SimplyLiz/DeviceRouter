@@ -45,3 +45,14 @@ const storage = new RedisStorageAdapter({
 | ----------- | ----------------------- | --------------- | -------------------------------------------- |
 | `client`    | Redis-compatible client | required        | Must implement `get`, `set`, `del`, `exists` |
 | `keyPrefix` | `string`                | `'dr:profile:'` | Key prefix for Redis keys                    |
+
+### Error handling
+
+All methods catch errors gracefully instead of throwing. If Redis is unavailable or returns corrupted data:
+
+- `get()` returns `null` (treated as no stored profile)
+- `exists()` returns `false`
+- `set()` silently fails (the probe will re-run next session)
+- `delete()` silently fails (the key will expire via TTL)
+
+This ensures middleware continues to work when Redis is temporarily down — requests proceed without a device profile rather than crashing.

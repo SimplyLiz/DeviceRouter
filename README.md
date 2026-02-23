@@ -136,6 +136,8 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 });
 ```
 
+Thresholds are validated at startup — inverted bounds (e.g. `lowUpperBound >= midUpperBound`), non-positive values, and non-RegExp GPU patterns throw immediately.
+
 ## Probe Auto-Injection
 
 Automatically inject the probe script into HTML responses:

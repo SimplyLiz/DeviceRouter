@@ -5,6 +5,14 @@
   "type": "module",
   "license": "MIT",
   "description": "Detect device capabilities server-side and enable tailored responses",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SimplyLiz/DeviceRouter.git"
+  },
+  "homepage": "https://github.com/SimplyLiz/DeviceRouter#readme",
+  "bugs": {
+    "url": "https://github.com/SimplyLiz/DeviceRouter/issues"
+  },
   "scripts": {
     "build": "pnpm -r run build",
     "test": "vitest run",

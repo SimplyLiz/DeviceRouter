@@ -10,6 +10,8 @@ export type {
   DeviceTiers,
   RenderingHints,
   ClassifiedProfile,
+  ProfileSource,
+  FallbackProfile,
 } from './profile.js';
 
 export type {
@@ -32,6 +34,10 @@ export {
   classifyMemory,
   classifyConnection,
   classifyGpu,
+  CONSERVATIVE_TIERS,
+  OPTIMISTIC_TIERS,
 } from './classify.js';
 export { deriveHints } from './hints.js';
-export { isValidSignals } from './validate.js';
+export { isValidSignals, validateThresholds } from './validate.js';
+export { isBotSignals } from './bot.js';
+export { classifyFromHeaders, resolveFallback, ACCEPT_CH_VALUE } from './headers.js';

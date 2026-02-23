@@ -16,13 +16,13 @@ The device profile follows a versioned JSON Schema (`schemas/device-profile.v1.j
 
 All fields are optional — the probe collects what it can based on browser API availability.
 
+> **Note:** The probe also collects `userAgent` and `viewport` for bot/crawler filtering, but they are stripped before the profile is stored.
+
 | Field                  | Type                                   | Description                        |
 | ---------------------- | -------------------------------------- | ---------------------------------- |
 | `hardwareConcurrency`  | `number`                               | Logical CPU cores                  |
 | `deviceMemory`         | `number`                               | Approximate device memory in GB    |
 | `connection`           | `ConnectionInfo`                       | Network connection info            |
-| `userAgent`            | `string`                               | Navigator user agent string        |
-| `viewport`             | `Viewport`                             | Viewport dimensions                |
 | `pixelRatio`           | `number`                               | Device pixel ratio                 |
 | `prefersReducedMotion` | `boolean`                              | Prefers reduced motion media query |
 | `prefersColorScheme`   | `'light' \| 'dark' \| 'no-preference'` | Color scheme preference            |
@@ -38,13 +38,6 @@ All fields are optional — the probe collects what it can based on browser API 
 | `rtt`           | `number`                            | Round-trip time in ms     |
 | `saveData`      | `boolean`                           | Data saver mode enabled   |
 
-## Viewport
-
-| Field    | Type     | Description          |
-| -------- | -------- | -------------------- |
-| `width`  | `number` | Width in CSS pixels  |
-| `height` | `number` | Height in CSS pixels |
-
 ## DeviceTiers (derived)
 
 | Field        | Values                               | Description                        |
@@ -53,6 +46,25 @@ All fields are optional — the probe collects what it can based on browser API 
 | `memory`     | `'low' \| 'mid' \| 'high'`           | Memory tier based on device memory |
 | `connection` | `'2g' \| '3g' \| '4g' \| 'fast'`     | Connection tier                    |
 | `gpu`        | `'none' \| 'low' \| 'mid' \| 'high'` | GPU tier based on renderer string  |
+
+## ClassifiedProfile (derived)
+
+The full classified result attached to requests by the middleware.
+
+| Field     | Type             | Description                                     |
+| --------- | ---------------- | ----------------------------------------------- |
+| `profile` | `DeviceProfile`  | Raw profile with signals                        |
+| `tiers`   | `DeviceTiers`    | Classified capability tiers                     |
+| `hints`   | `RenderingHints` | Boolean rendering decisions                     |
+| `source`  | `ProfileSource`  | Origin: `'probe'`, `'headers'`, or `'fallback'` |
+
+### ProfileSource
+
+| Value        | Description                                                |
+| ------------ | ---------------------------------------------------------- |
+| `'probe'`    | Profile from client-side probe signals (stored in session) |
+| `'headers'`  | Classified from UA and Client Hints on first request       |
+| `'fallback'` | Resolved from configured fallback defaults                 |
 
 ## RenderingHints (derived)
 

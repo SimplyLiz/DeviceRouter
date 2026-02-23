@@ -1,7 +1,8 @@
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import type { StorageAdapter } from '@device-router/storage';
-import type { TierThresholds } from '@device-router/types';
+import type { TierThresholds, FallbackProfile } from '@device-router/types';
+import { validateThresholds } from '@device-router/types';
 import type { FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import { createMiddleware } from './middleware.js';
@@ -12,8 +13,12 @@ export interface DeviceRouterOptions {
   storage: StorageAdapter;
   cookieName?: string;
   cookiePath?: string;
+  cookieSecure?: boolean;
   ttl?: number;
   thresholds?: TierThresholds;
+  rejectBots?: boolean;
+  fallbackProfile?: FallbackProfile;
+  classifyFromHeaders?: boolean;
   injectProbe?: boolean;
   probePath?: string;
   probeNonce?: string | ((req: FastifyRequest) => string);
@@ -24,14 +29,26 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     storage,
     cookieName = 'dr_session',
     cookiePath = '/',
+    cookieSecure,
     ttl = 86400,
     thresholds,
+    rejectBots,
+    fallbackProfile,
+    classifyFromHeaders,
     injectProbe = false,
     probePath,
     probeNonce,
   } = options;
 
-  const hook = createMiddleware({ storage, cookieName, thresholds });
+  if (thresholds) validateThresholds(thresholds);
+
+  const hook = createMiddleware({
+    storage,
+    cookieName,
+    thresholds,
+    fallbackProfile,
+    classifyFromHeaders,
+  });
 
   let injectionHook: ReturnType<typeof createInjectionHook> | undefined;
 
@@ -65,7 +82,14 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
   return {
     plugin,
     pluginOptions,
-    probeEndpoint: createProbeEndpoint({ storage, cookieName, cookiePath, ttl }),
+    probeEndpoint: createProbeEndpoint({
+      storage,
+      cookieName,
+      cookiePath,
+      cookieSecure,
+      ttl,
+      rejectBots,
+    }),
     injectionHook,
   };
 }

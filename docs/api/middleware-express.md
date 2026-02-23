@@ -21,16 +21,20 @@ app.use(middleware);
 
 ### Options
 
-| Option        | Type                                   | Default                  | Description                                    |
-| ------------- | -------------------------------------- | ------------------------ | ---------------------------------------------- |
-| `storage`     | `StorageAdapter`                       | required                 | Storage backend                                |
-| `cookieName`  | `string`                               | `'dr_session'`           | Session cookie name                            |
-| `cookiePath`  | `string`                               | `'/'`                    | Cookie path                                    |
-| `ttl`         | `number`                               | `86400`                  | Profile TTL in seconds                         |
-| `thresholds`  | `TierThresholds`                       | built-in defaults        | Custom tier classification thresholds          |
-| `injectProbe` | `boolean`                              | `false`                  | Auto-inject probe script into HTML responses   |
-| `probePath`   | `string`                               | `'/device-router/probe'` | Custom probe endpoint path for injected script |
-| `probeNonce`  | `string \| ((req: Request) => string)` | —                        | CSP nonce for the injected script tag          |
+| Option                | Type                                   | Default                  | Description                                                  |
+| --------------------- | -------------------------------------- | ------------------------ | ------------------------------------------------------------ |
+| `storage`             | `StorageAdapter`                       | required                 | Storage backend                                              |
+| `cookieName`          | `string`                               | `'dr_session'`           | Session cookie name                                          |
+| `cookiePath`          | `string`                               | `'/'`                    | Cookie path                                                  |
+| `cookieSecure`        | `boolean`                              | `false`                  | Set `Secure` flag on the session cookie                      |
+| `ttl`                 | `number`                               | `86400`                  | Profile TTL in seconds                                       |
+| `rejectBots`          | `boolean`                              | `true`                   | Reject bot/crawler probe submissions (returns 403)           |
+| `thresholds`          | `TierThresholds`                       | built-in defaults        | Custom tier classification thresholds (validated at startup) |
+| `injectProbe`         | `boolean`                              | `false`                  | Auto-inject probe script into HTML responses                 |
+| `probePath`           | `string`                               | `'/device-router/probe'` | Custom probe endpoint path for injected script               |
+| `probeNonce`          | `string \| ((req: Request) => string)` | —                        | CSP nonce for the injected script tag                        |
+| `fallbackProfile`     | `FallbackProfile`                      | —                        | Fallback profile for first requests without probe data       |
+| `classifyFromHeaders` | `boolean`                              | `false`                  | Classify from UA/Client Hints on first request               |
 
 ### Returns
 
@@ -47,12 +51,13 @@ The middleware attaches a `ClassifiedProfile | null` to `req.deviceProfile`:
 ```typescript
 interface ClassifiedProfile {
   profile: DeviceProfile; // Raw profile with signals
-  tiers: DeviceTiers; // { cpu, memory, connection }
+  tiers: DeviceTiers; // { cpu, memory, connection, gpu }
   hints: RenderingHints; // { deferHeavyComponents, ... }
+  source: ProfileSource; // 'probe' | 'headers' | 'fallback'
 }
 ```
 
-`null` when no session cookie is present or profile has expired.
+`null` when no session cookie is present or profile has expired (unless `classifyFromHeaders` or `fallbackProfile` is configured).
 
 ## Probe Auto-Injection
 

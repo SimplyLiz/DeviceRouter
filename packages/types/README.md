@@ -71,6 +71,22 @@ const tiers = classify(signals, {
 });
 ```
 
+### Validate thresholds
+
+Thresholds are validated automatically by `createDeviceRouter()`. For standalone usage with `classify()`, call `validateThresholds()` explicitly:
+
+```typescript
+import { validateThresholds } from '@device-router/types';
+
+validateThresholds({
+  cpu: { lowUpperBound: 4, midUpperBound: 8 },
+}); // OK
+
+validateThresholds({
+  cpu: { lowUpperBound: 10, midUpperBound: 2 },
+}); // throws Error
+```
+
 ### Validate incoming signals
 
 ```typescript
@@ -100,7 +116,17 @@ if (isValidSignals(requestBody)) {
 - `classifyConnection(effectiveType?, downlink?, thresholds?)` — Connection tier
 - `classifyGpu(renderer?, thresholds?)` — GPU tier
 - `deriveHints(tiers, signals?)` — Derive `RenderingHints` from tiers and signals
+- `validateThresholds(thresholds)` — Validate custom thresholds (called automatically by middleware)
 - `isValidSignals(body)` — Type guard for `RawSignals`
+- `isBotSignals(signals)` — Detect bot/crawler/headless browser probe submissions
+- `classifyFromHeaders(headers)` — Classify from UA/Client Hints headers
+- `resolveFallback(fallback)` — Resolve a fallback profile preset or custom tiers
+
+### Constants
+
+- `CONSERVATIVE_TIERS` — Low-end device tier preset
+- `OPTIMISTIC_TIERS` — High-end device tier preset
+- `ACCEPT_CH_VALUE` — `Accept-CH` header value for requesting Client Hints
 
 ### Types
 
@@ -108,7 +134,9 @@ if (isValidSignals(requestBody)) {
 - `DeviceTiers` — Classified capability tiers (`cpu`, `memory`, `connection`, `gpu`)
 - `RenderingHints` — Boolean rendering decisions
 - `DeviceProfile` — Full profile with schema version, session token, timestamps, and signals
-- `ClassifiedProfile` — Profile + tiers + hints
+- `ClassifiedProfile` — Profile + tiers + hints + source
+- `ProfileSource` — `'probe' | 'headers' | 'fallback'`
+- `FallbackProfile` — `'conservative' | 'optimistic' | DeviceTiers`
 - `TierThresholds` — Custom threshold configuration
 - `CpuTier`, `MemoryTier`, `ConnectionTier`, `GpuTier` — Individual tier types
 

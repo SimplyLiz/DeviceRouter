@@ -51,8 +51,35 @@ describe('createProbeEndpoint (koa)', () => {
       expect.any(String),
       expect.objectContaining({
         httpOnly: true,
+        secure: false,
         sameSite: 'lax',
       }),
+    );
+  });
+
+  it('does not set secure cookie by default', async () => {
+    const handler = createProbeEndpoint({ storage });
+    const ctx = createMockCtx({ hardwareConcurrency: 4 });
+
+    await handler(ctx);
+
+    expect(ctx.cookies.set).toHaveBeenCalledWith(
+      'dr_session',
+      expect.any(String),
+      expect.objectContaining({ secure: false }),
+    );
+  });
+
+  it('enables secure cookie when cookieSecure is true', async () => {
+    const handler = createProbeEndpoint({ storage, cookieSecure: true });
+    const ctx = createMockCtx({ hardwareConcurrency: 4 });
+
+    await handler(ctx);
+
+    expect(ctx.cookies.set).toHaveBeenCalledWith(
+      'dr_session',
+      expect.any(String),
+      expect.objectContaining({ secure: true }),
     );
   });
 
@@ -95,12 +122,49 @@ describe('createProbeEndpoint (koa)', () => {
     expect((ctx.body as { ok: boolean; error: string }).error).toBe('Internal server error');
   });
 
-  it('accepts empty signals object', async () => {
-    const handler = createProbeEndpoint({ storage });
+  it('accepts empty signals object when rejectBots is false', async () => {
+    const handler = createProbeEndpoint({ storage, rejectBots: false });
     const ctx = createMockCtx({});
 
     await handler(ctx);
 
     expect((ctx.body as { ok: boolean }).ok).toBe(true);
+  });
+
+  it('rejects empty signals as bot by default', async () => {
+    const handler = createProbeEndpoint({ storage });
+    const ctx = createMockCtx({});
+
+    await handler(ctx);
+
+    expect(ctx.status).toBe(403);
+    expect((ctx.body as { error: string }).error).toBe('Bot detected');
+    expect(storage.set).not.toHaveBeenCalled();
+  });
+
+  it('rejects bot user-agent', async () => {
+    const handler = createProbeEndpoint({ storage });
+    const ctx = createMockCtx({
+      hardwareConcurrency: 4,
+      userAgent: 'Mozilla/5.0 (compatible; Googlebot/2.1)',
+      viewport: { width: 1024, height: 768 },
+    });
+
+    await handler(ctx);
+
+    expect(ctx.status).toBe(403);
+    expect(storage.set).not.toHaveBeenCalled();
+  });
+
+  it('allows bot signals when rejectBots is false', async () => {
+    const handler = createProbeEndpoint({ storage, rejectBots: false });
+    const ctx = createMockCtx({
+      userAgent: 'Mozilla/5.0 (compatible; Googlebot/2.1)',
+    });
+
+    await handler(ctx);
+
+    expect((ctx.body as { ok: boolean }).ok).toBe(true);
+    expect(storage.set).toHaveBeenCalled();
   });
 });

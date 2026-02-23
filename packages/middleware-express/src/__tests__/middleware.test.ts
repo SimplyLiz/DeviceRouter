@@ -18,15 +18,22 @@ function createMockStorage(): StorageAdapter {
   } as StorageAdapter & { _store: Map<string, DeviceProfile> };
 }
 
-function createMockReq(cookies: Record<string, string> = {}) {
+function createMockReq(cookies: Record<string, string> = {}, headers: Record<string, string> = {}) {
   return {
     cookies,
+    headers,
     deviceProfile: undefined,
   } as unknown as import('express').Request;
 }
 
 function createMockRes() {
-  return {} as unknown as import('express').Response;
+  const res = {
+    _headers: {} as Record<string, string>,
+    setHeader: vi.fn((name: string, value: string) => {
+      res._headers[name] = value;
+    }),
+  };
+  return res as unknown as import('express').Response & { _headers: Record<string, string> };
 }
 
 describe('createMiddleware', () => {
@@ -79,6 +86,7 @@ describe('createMiddleware', () => {
     expect(req.deviceProfile!.tiers.cpu).toBe('high');
     expect(req.deviceProfile!.tiers.memory).toBe('high');
     expect(req.deviceProfile!.hints.deferHeavyComponents).toBe(false);
+    expect(req.deviceProfile!.source).toBe('probe');
     expect(next).toHaveBeenCalledWith();
   });
 
@@ -130,5 +138,157 @@ describe('createMiddleware', () => {
     await mwCustom(req2, createMockRes(), vi.fn());
     expect(req2.deviceProfile!.tiers.cpu).toBe('low');
     expect(req2.deviceProfile!.tiers.memory).toBe('low');
+  });
+
+  describe('fallbackProfile', () => {
+    it('returns conservative fallback when configured', async () => {
+      const mw = createMiddleware({ storage, fallbackProfile: 'conservative' });
+      const req = createMockReq();
+      const next = vi.fn();
+
+      await mw(req, createMockRes(), next);
+
+      expect(req.deviceProfile).not.toBeNull();
+      expect(req.deviceProfile!.source).toBe('fallback');
+      expect(req.deviceProfile!.tiers.cpu).toBe('low');
+      expect(req.deviceProfile!.tiers.memory).toBe('low');
+      expect(req.deviceProfile!.tiers.connection).toBe('3g');
+      expect(req.deviceProfile!.hints.deferHeavyComponents).toBe(true);
+    });
+
+    it('returns optimistic fallback when configured', async () => {
+      const mw = createMiddleware({ storage, fallbackProfile: 'optimistic' });
+      const req = createMockReq();
+      const next = vi.fn();
+
+      await mw(req, createMockRes(), next);
+
+      expect(req.deviceProfile).not.toBeNull();
+      expect(req.deviceProfile!.source).toBe('fallback');
+      expect(req.deviceProfile!.tiers.cpu).toBe('high');
+      expect(req.deviceProfile!.tiers.memory).toBe('high');
+      expect(req.deviceProfile!.tiers.connection).toBe('fast');
+    });
+
+    it('returns custom DeviceTiers fallback', async () => {
+      const mw = createMiddleware({
+        storage,
+        fallbackProfile: { cpu: 'mid', memory: 'mid', connection: '4g', gpu: 'low' },
+      });
+      const req = createMockReq();
+      const next = vi.fn();
+
+      await mw(req, createMockRes(), next);
+
+      expect(req.deviceProfile!.source).toBe('fallback');
+      expect(req.deviceProfile!.tiers).toEqual({
+        cpu: 'mid',
+        memory: 'mid',
+        connection: '4g',
+        gpu: 'low',
+      });
+    });
+
+    it('falls back when cookie exists but profile not in storage', async () => {
+      const mw = createMiddleware({ storage, fallbackProfile: 'conservative' });
+      const req = createMockReq({ dr_session: 'expired-token' });
+      const next = vi.fn();
+
+      await mw(req, createMockRes(), next);
+
+      expect(req.deviceProfile!.source).toBe('fallback');
+      expect(req.deviceProfile!.tiers.cpu).toBe('low');
+    });
+  });
+
+  describe('classifyFromHeaders', () => {
+    it('classifies mobile UA from headers', async () => {
+      const mw = createMiddleware({ storage, classifyFromHeaders: true });
+      const req = createMockReq(
+        {},
+        { 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) AppleWebKit/605.1.15 Mobile' },
+      );
+      const next = vi.fn();
+
+      await mw(req, createMockRes(), next);
+
+      expect(req.deviceProfile).not.toBeNull();
+      expect(req.deviceProfile!.source).toBe('headers');
+      expect(req.deviceProfile!.tiers.cpu).toBe('low');
+      expect(req.deviceProfile!.tiers.memory).toBe('low');
+    });
+
+    it('uses Client Hints when present', async () => {
+      const mw = createMiddleware({ storage, classifyFromHeaders: true });
+      const req = createMockReq(
+        {},
+        {
+          'user-agent': 'Mozilla/5.0 Chrome/120.0.0.0',
+          'device-memory': '2',
+          'save-data': 'on',
+        },
+      );
+      const next = vi.fn();
+
+      await mw(req, createMockRes(), next);
+
+      expect(req.deviceProfile!.source).toBe('headers');
+      expect(req.deviceProfile!.tiers.memory).toBe('low');
+      expect(req.deviceProfile!.tiers.connection).toBe('3g');
+    });
+
+    it('takes priority over fallbackProfile', async () => {
+      const mw = createMiddleware({
+        storage,
+        classifyFromHeaders: true,
+        fallbackProfile: 'conservative',
+      });
+      const req = createMockReq(
+        {},
+        { 'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X) Chrome/120.0.0.0' },
+      );
+      const next = vi.fn();
+
+      await mw(req, createMockRes(), next);
+
+      expect(req.deviceProfile!.source).toBe('headers');
+      expect(req.deviceProfile!.tiers.cpu).toBe('high');
+    });
+
+    it('sets Accept-CH header when enabled', async () => {
+      const mw = createMiddleware({ storage, classifyFromHeaders: true });
+      const req = createMockReq();
+      const res = createMockRes();
+      const next = vi.fn();
+
+      await mw(req, res, next);
+
+      expect(res._headers['Accept-CH']).toContain('Sec-CH-UA-Mobile');
+      expect(res._headers['Accept-CH']).toContain('Device-Memory');
+    });
+
+    it('does not set Accept-CH header by default', async () => {
+      const mw = createMiddleware({ storage });
+      const req = createMockReq();
+      const res = createMockRes();
+      const next = vi.fn();
+
+      await mw(req, res, next);
+
+      expect(res._headers['Accept-CH']).toBeUndefined();
+    });
+
+    it('classifies from headers when cookie exists but storage misses', async () => {
+      const mw = createMiddleware({ storage, classifyFromHeaders: true });
+      const req = createMockReq(
+        { dr_session: 'expired' },
+        { 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) Mobile' },
+      );
+      const next = vi.fn();
+
+      await mw(req, createMockRes(), next);
+
+      expect(req.deviceProfile!.source).toBe('headers');
+    });
   });
 });

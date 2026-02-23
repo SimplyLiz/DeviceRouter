@@ -46,6 +46,35 @@ describe('createProbeEndpoint (hono)', () => {
     const setCookie = res.headers.get('set-cookie');
     expect(setCookie).toBeTruthy();
     expect(setCookie).toContain('dr_session=');
+    expect(setCookie).not.toContain('Secure');
+  });
+
+  it('does not set secure cookie by default', async () => {
+    const app = new Hono();
+    app.post('/probe', createProbeEndpoint({ storage }));
+
+    const res = await app.request('/probe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hardwareConcurrency: 4 }),
+    });
+
+    const setCookie = res.headers.get('set-cookie');
+    expect(setCookie).not.toContain('Secure');
+  });
+
+  it('enables secure cookie when cookieSecure is true', async () => {
+    const app = new Hono();
+    app.post('/probe', createProbeEndpoint({ storage, cookieSecure: true }));
+
+    const res = await app.request('/probe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hardwareConcurrency: 4 }),
+    });
+
+    const setCookie = res.headers.get('set-cookie');
+    expect(setCookie).toContain('Secure');
   });
 
   it('returns 400 for invalid payload', async () => {
@@ -63,9 +92,9 @@ describe('createProbeEndpoint (hono)', () => {
     expect(data.ok).toBe(false);
   });
 
-  it('accepts empty signals object', async () => {
+  it('accepts empty signals object when rejectBots is false', async () => {
     const app = new Hono();
-    app.post('/probe', createProbeEndpoint({ storage }));
+    app.post('/probe', createProbeEndpoint({ storage, rejectBots: false }));
 
     const res = await app.request('/probe', {
       method: 'POST',
@@ -76,5 +105,57 @@ describe('createProbeEndpoint (hono)', () => {
     expect(res.status).toBe(200);
     const data = (await res.json()) as { ok: boolean };
     expect(data.ok).toBe(true);
+  });
+
+  it('rejects empty signals as bot by default', async () => {
+    const app = new Hono();
+    app.post('/probe', createProbeEndpoint({ storage }));
+
+    const res = await app.request('/probe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+
+    expect(res.status).toBe(403);
+    const data = (await res.json()) as { ok: boolean; error: string };
+    expect(data.error).toBe('Bot detected');
+    expect(storage.set).not.toHaveBeenCalled();
+  });
+
+  it('rejects bot user-agent', async () => {
+    const app = new Hono();
+    app.post('/probe', createProbeEndpoint({ storage }));
+
+    const res = await app.request('/probe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        hardwareConcurrency: 4,
+        userAgent: 'Mozilla/5.0 (compatible; Googlebot/2.1)',
+        viewport: { width: 1024, height: 768 },
+      }),
+    });
+
+    expect(res.status).toBe(403);
+    expect(storage.set).not.toHaveBeenCalled();
+  });
+
+  it('allows bot signals when rejectBots is false', async () => {
+    const app = new Hono();
+    app.post('/probe', createProbeEndpoint({ storage, rejectBots: false }));
+
+    const res = await app.request('/probe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userAgent: 'Mozilla/5.0 (compatible; Googlebot/2.1)',
+      }),
+    });
+
+    expect(res.status).toBe(200);
+    const data = (await res.json()) as { ok: boolean };
+    expect(data.ok).toBe(true);
+    expect(storage.set).toHaveBeenCalled();
   });
 });

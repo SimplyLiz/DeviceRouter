@@ -47,6 +47,95 @@ Classifies connection tier based on Network Information API values.
 
 Classifies GPU tier from WebGL renderer string: no renderer → `'none'`, software renderers (SwiftShader, llvmpipe) → `'low'`, known high-end (RTX, Radeon RX 5000+, Apple M-series) → `'high'`, everything else → `'mid'`. Patterns are customizable via `GpuThresholds`.
 
+### `validateThresholds(thresholds: TierThresholds): void`
+
+Validates custom tier thresholds after merging with defaults. Throws a descriptive error if any rules are violated. Called automatically by `createDeviceRouter()` in all middleware packages — you only need to call this directly if using `classify()` standalone.
+
+**Validation rules:**
+
+- **CPU/Memory**: `lowUpperBound` must be less than `midUpperBound`
+- **Connection**: `downlink2gUpperBound` < `downlink3gUpperBound` < `downlink4gUpperBound`
+- **GPU**: `softwarePattern` and `highEndPattern` must be `RegExp` instances
+- All numeric values must be positive (> 0)
+
+Partial thresholds are merged with defaults before checking, so `{ cpu: { midUpperBound: 1 } }` is rejected because the default `lowUpperBound` (2) would exceed it.
+
+```typescript
+import { validateThresholds } from '@device-router/types';
+
+// Throws: "Invalid thresholds: cpu.lowUpperBound (10) must be less than cpu.midUpperBound (2)"
+validateThresholds({ cpu: { lowUpperBound: 10, midUpperBound: 2 } });
+```
+
+### `isBotSignals(signals: RawSignals): boolean`
+
+Detects bot, crawler, and headless browser probe submissions. Returns `true` if any of:
+
+- `signals.userAgent` matches known bot/crawler patterns (Googlebot, Bingbot, HeadlessChrome, Puppeteer, curl, etc.)
+- `signals.gpuRenderer` matches headless GPU renderers (SwiftShader, llvmpipe, Software Rasterizer)
+- All substantive signals (`viewport`, `hardwareConcurrency`, `deviceMemory`, `userAgent`) are `undefined`
+
+Used internally by probe endpoints when `rejectBots: true` (the default). Can also be called directly:
+
+```typescript
+import { isBotSignals } from '@device-router/types';
+
+if (isBotSignals(signals)) {
+  // reject or flag this submission
+}
+```
+
+### `classifyFromHeaders(headers): DeviceTiers`
+
+Classifies device capabilities from HTTP request headers (User-Agent and Client Hints). Useful for first-request classification before the probe has run.
+
+```typescript
+import { classifyFromHeaders } from '@device-router/types';
+
+const tiers = classifyFromHeaders({
+  'user-agent': req.headers['user-agent'],
+  'sec-ch-ua-mobile': req.headers['sec-ch-ua-mobile'],
+  'device-memory': req.headers['device-memory'],
+  'save-data': req.headers['save-data'],
+});
+// Mobile UA → { cpu: 'low', memory: 'low', connection: '4g', gpu: 'mid' }
+// Tablet UA → { cpu: 'mid', memory: 'mid', connection: '4g', gpu: 'mid' }
+// Desktop UA → { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'mid' }
+```
+
+Client Hints refine the base classification when present:
+
+- `Device-Memory` overrides the memory tier directly
+- `Save-Data: on` forces connection to `'3g'`
+- `Sec-CH-UA-Mobile: ?1` forces mobile classification
+
+### `resolveFallback(fallback: FallbackProfile): ClassifiedProfile`
+
+Resolves a fallback profile specification into a full `ClassifiedProfile` with `source: 'fallback'`.
+
+```typescript
+import { resolveFallback } from '@device-router/types';
+
+const profile = resolveFallback('conservative');
+// { profile: {...}, tiers: { cpu: 'low', ... }, hints: {...}, source: 'fallback' }
+```
+
+Accepts `'conservative'`, `'optimistic'`, or a custom `DeviceTiers` object.
+
+## Constants
+
+### `CONSERVATIVE_TIERS`
+
+Preset `DeviceTiers` for a conservative (low-end) assumption: `{ cpu: 'low', memory: 'low', connection: '3g', gpu: 'low' }`.
+
+### `OPTIMISTIC_TIERS`
+
+Preset `DeviceTiers` for an optimistic (high-end) assumption: `{ cpu: 'high', memory: 'high', connection: 'fast', gpu: 'mid' }`.
+
+### `ACCEPT_CH_VALUE`
+
+The `Accept-CH` header value used to request Client Hints from the browser: `'Sec-CH-UA-Mobile, Sec-CH-UA-Platform, Device-Memory, Save-Data'`.
+
 ## TierThresholds
 
 Custom thresholds for tier classification. All fields are optional — unset fields use built-in defaults.
@@ -94,6 +183,22 @@ const tiers = classify(signals, {
 ```
 
 ## Types
+
+### `ProfileSource`
+
+```typescript
+type ProfileSource = 'probe' | 'headers' | 'fallback';
+```
+
+Indicates where the classified profile originated: `'probe'` from client-side signals, `'headers'` from UA/Client Hints, or `'fallback'` from a configured default.
+
+### `FallbackProfile`
+
+```typescript
+type FallbackProfile = 'conservative' | 'optimistic' | DeviceTiers;
+```
+
+Specifies the fallback strategy for first requests. Use `'conservative'` for low-end defaults, `'optimistic'` for high-end defaults, or provide a custom `DeviceTiers` object.
 
 ### `GpuTier`
 

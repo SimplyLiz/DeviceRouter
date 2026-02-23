@@ -1,18 +1,27 @@
 import type { Request, Response } from 'express';
 import type { StorageAdapter } from '@device-router/storage';
 import type { DeviceProfile, RawSignals } from '@device-router/types';
-import { isValidSignals } from '@device-router/types';
+import { isValidSignals, isBotSignals } from '@device-router/types';
 import { randomUUID } from 'node:crypto';
 
 export interface EndpointOptions {
   storage: StorageAdapter;
   cookieName?: string;
   cookiePath?: string;
+  cookieSecure?: boolean;
   ttl?: number;
+  rejectBots?: boolean;
 }
 
 export function createProbeEndpoint(options: EndpointOptions) {
-  const { storage, cookieName = 'dr_session', cookiePath = '/', ttl = 86400 } = options;
+  const {
+    storage,
+    cookieName = 'dr_session',
+    cookiePath = '/',
+    cookieSecure = false,
+    ttl = 86400,
+    rejectBots = true,
+  } = options;
 
   return async (req: Request, res: Response): Promise<void> => {
     try {
@@ -23,8 +32,19 @@ export function createProbeEndpoint(options: EndpointOptions) {
         return;
       }
 
+      if (rejectBots && isBotSignals(signals)) {
+        res.status(403).json({ ok: false, error: 'Bot detected' });
+        return;
+      }
+
       const existingToken = req.cookies?.[cookieName] as string | undefined;
       const sessionToken = existingToken || randomUUID();
+
+      const {
+        userAgent: _userAgent,
+        viewport: _viewport,
+        ...storedSignals
+      } = signals as RawSignals;
 
       const now = new Date();
       const profile: DeviceProfile = {
@@ -32,7 +52,7 @@ export function createProbeEndpoint(options: EndpointOptions) {
         sessionToken,
         createdAt: now.toISOString(),
         expiresAt: new Date(now.getTime() + ttl * 1000).toISOString(),
-        signals: signals as RawSignals,
+        signals: storedSignals,
       };
 
       await storage.set(sessionToken, profile, ttl);
@@ -40,6 +60,7 @@ export function createProbeEndpoint(options: EndpointOptions) {
       res.cookie(cookieName, sessionToken, {
         path: cookiePath,
         httpOnly: true,
+        secure: cookieSecure,
         sameSite: 'lax',
         maxAge: ttl * 1000,
       });

@@ -5,7 +5,7 @@ Express middleware for [DeviceRouter](https://github.com/SimplyLiz/DeviceRouter)
 ## Installation
 
 ```bash
-pnpm add @device-router/middleware-express @device-router/storage
+pnpm add @device-router/middleware-express @device-router/storage cookie-parser
 ```
 
 For automatic probe injection:
@@ -18,6 +18,7 @@ pnpm add @device-router/probe
 
 ```typescript
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { createDeviceRouter } from '@device-router/middleware-express';
 import { MemoryStorageAdapter } from '@device-router/storage';
 
@@ -27,6 +28,7 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 });
 
 app.use(express.json());
+app.use(cookieParser());
 app.post('/device-router/probe', probeEndpoint);
 app.use(middleware);
 
@@ -67,6 +69,8 @@ app.post('/device-router/probe', probeEndpoint);
 app.use(middleware);
 ```
 
+> **Streaming responses:** Injection intercepts `res.send()` and requires the body to be a string. If you stream HTML via `res.write()`, the injection is silently skipped. Add the probe `<script>` tag to your HTML shell manually instead.
+
 ## Custom thresholds
 
 Override default tier classification boundaries:
@@ -83,16 +87,20 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 
 ## Options
 
-| Option        | Type                                   | Default           | Description                           |
-| ------------- | -------------------------------------- | ----------------- | ------------------------------------- |
-| `storage`     | `StorageAdapter`                       | _(required)_      | Storage backend for profiles          |
-| `cookieName`  | `string`                               | `'dr_session'`    | Session cookie name                   |
-| `cookiePath`  | `string`                               | `'/'`             | Cookie path                           |
-| `ttl`         | `number`                               | `86400` (24h)     | Profile TTL in seconds                |
-| `probePath`   | `string`                               | —                 | Custom probe endpoint path            |
-| `thresholds`  | `TierThresholds`                       | Built-in defaults | Custom tier classification thresholds |
-| `injectProbe` | `boolean`                              | `false`           | Auto-inject probe into HTML           |
-| `probeNonce`  | `string \| ((req: Request) => string)` | —                 | CSP nonce for injected script         |
+| Option                | Type                                   | Default           | Description                                   |
+| --------------------- | -------------------------------------- | ----------------- | --------------------------------------------- |
+| `storage`             | `StorageAdapter`                       | _(required)_      | Storage backend for profiles                  |
+| `cookieName`          | `string`                               | `'dr_session'`    | Session cookie name                           |
+| `cookiePath`          | `string`                               | `'/'`             | Cookie path                                   |
+| `cookieSecure`        | `boolean`                              | `false`           | Set `Secure` flag on the session cookie       |
+| `ttl`                 | `number`                               | `86400` (24h)     | Profile TTL in seconds                        |
+| `rejectBots`          | `boolean`                              | `true`            | Reject bot/crawler probe submissions          |
+| `probePath`           | `string`                               | —                 | Custom probe endpoint path                    |
+| `thresholds`          | `TierThresholds`                       | Built-in defaults | Custom tier thresholds (validated at startup) |
+| `injectProbe`         | `boolean`                              | `false`           | Auto-inject probe into HTML                   |
+| `probeNonce`          | `string \| ((req: Request) => string)` | —                 | CSP nonce for injected script                 |
+| `fallbackProfile`     | `FallbackProfile`                      | —                 | Fallback profile for first requests           |
+| `classifyFromHeaders` | `boolean`                              | `false`           | Classify from UA/Client Hints                 |
 
 ## Exports
 
@@ -100,6 +108,10 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 - `createMiddleware(options)` — Standalone middleware
 - `createProbeEndpoint(options)` — Standalone probe endpoint handler
 - `createInjectionMiddleware(options)` — Standalone probe injection middleware
+
+## Prerequisites
+
+- [`cookie-parser`](https://www.npmjs.com/package/cookie-parser) — required for session cookie handling (`req.cookies`)
 
 ## Compatibility
 

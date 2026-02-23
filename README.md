@@ -97,6 +97,8 @@ app.get('/', (req, res) => {
 
 All signals are optional — the probe gracefully degrades based on what the browser supports.
 
+> **Note:** The probe also collects `navigator.userAgent` and viewport dimensions for [bot/crawler filtering](docs/getting-started.md). They are used during probe submission and stripped before the profile is stored.
+
 ## Tier Classification
 
 Devices are classified across three dimensions:
@@ -136,6 +138,8 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 });
 ```
 
+Thresholds are validated at startup — inverted bounds (e.g. `lowUpperBound >= midUpperBound`), non-positive values, and non-RegExp GPU patterns throw immediately.
+
 ## Probe Auto-Injection
 
 Automatically inject the probe script into HTML responses:
@@ -152,6 +156,24 @@ const { middleware, probeEndpoint, injectionMiddleware } = createDeviceRouter({
 ```
 
 No need to manually add `<script>` tags — the probe is injected before `</head>` in every HTML response.
+
+## First-Request Handling
+
+By default, `deviceProfile` is `null` on the first page load before the probe runs. Two opt-in strategies provide immediate classification:
+
+```typescript
+const { middleware, probeEndpoint } = createDeviceRouter({
+  storage,
+  // Option 1: Classify from User-Agent + Client Hints headers
+  classifyFromHeaders: true,
+  // Option 2: Fall back to preset defaults
+  fallbackProfile: 'conservative', // or 'optimistic' or custom DeviceTiers
+});
+```
+
+When `classifyFromHeaders` is enabled, mobile/tablet/desktop detection happens from the UA string, and Chromium Client Hints (`Device-Memory`, `Save-Data`) refine the result. Check `profile.source` to know the origin: `'probe'`, `'headers'`, or `'fallback'`.
+
+See [Getting Started — First-Request Handling](docs/getting-started.md#first-request-handling) for details.
 
 ## Packages
 
@@ -208,6 +230,7 @@ Open http://localhost:3000 — the probe runs on first load, refresh to see your
 ## Documentation
 
 - [Getting Started](docs/getting-started.md)
+- [Deployment Guide](docs/deployment.md) — Docker, Cloudflare Workers, serverless
 - [Profile Schema Reference](docs/profile-schema.md)
 - API Reference: [types](docs/api/types.md) | [probe](docs/api/probe.md) | [storage](docs/api/storage.md) | [express](docs/api/middleware-express.md) | [fastify](docs/api/middleware-fastify.md) | [hono](docs/api/middleware-hono.md) | [koa](docs/api/middleware-koa.md)
 

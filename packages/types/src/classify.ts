@@ -80,3 +80,17 @@ export function classify(signals: RawSignals, thresholds?: TierThresholds): Devi
     gpu: classifyGpu(signals.gpuRenderer, thresholds?.gpu),
   };
 }
+
+export const CONSERVATIVE_TIERS: DeviceTiers = {
+  cpu: 'low',
+  memory: 'low',
+  connection: '3g',
+  gpu: 'low',
+};
+
+export const OPTIMISTIC_TIERS: DeviceTiers = {
+  cpu: 'high',
+  memory: 'high',
+  connection: 'fast',
+  gpu: 'mid',
+};

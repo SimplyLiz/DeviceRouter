@@ -55,8 +55,37 @@ describe('createProbeEndpoint', () => {
       expect.any(String),
       expect.objectContaining({
         httpOnly: true,
+        secure: false,
         sameSite: 'lax',
       }),
+    );
+  });
+
+  it('does not set secure cookie by default', async () => {
+    const handler = createProbeEndpoint({ storage });
+    const req = createMockReq({ hardwareConcurrency: 4 });
+    const reply = createMockReply();
+
+    await handler(req, reply);
+
+    expect(reply.setCookie).toHaveBeenCalledWith(
+      'dr_session',
+      expect.any(String),
+      expect.objectContaining({ secure: false }),
+    );
+  });
+
+  it('enables secure cookie when cookieSecure is true', async () => {
+    const handler = createProbeEndpoint({ storage, cookieSecure: true });
+    const req = createMockReq({ hardwareConcurrency: 4 });
+    const reply = createMockReply();
+
+    await handler(req, reply);
+
+    expect(reply.setCookie).toHaveBeenCalledWith(
+      'dr_session',
+      expect.any(String),
+      expect.objectContaining({ secure: true }),
     );
   });
 
@@ -112,8 +141,8 @@ describe('createProbeEndpoint', () => {
     });
   });
 
-  it('accepts empty signals object', async () => {
-    const handler = createProbeEndpoint({ storage });
+  it('accepts empty signals object when rejectBots is false', async () => {
+    const handler = createProbeEndpoint({ storage, rejectBots: false });
     const req = createMockReq({});
     const reply = createMockReply();
 
@@ -123,5 +152,48 @@ describe('createProbeEndpoint', () => {
       ok: true,
       sessionToken: expect.any(String),
     });
+  });
+
+  it('rejects empty signals as bot by default', async () => {
+    const handler = createProbeEndpoint({ storage });
+    const req = createMockReq({});
+    const reply = createMockReply();
+
+    await handler(req, reply);
+
+    expect(reply.status).toHaveBeenCalledWith(403);
+    expect(reply.send).toHaveBeenCalledWith({ ok: false, error: 'Bot detected' });
+    expect(storage.set).not.toHaveBeenCalled();
+  });
+
+  it('rejects bot user-agent', async () => {
+    const handler = createProbeEndpoint({ storage });
+    const req = createMockReq({
+      hardwareConcurrency: 4,
+      userAgent: 'Mozilla/5.0 (compatible; Googlebot/2.1)',
+      viewport: { width: 1024, height: 768 },
+    });
+    const reply = createMockReply();
+
+    await handler(req, reply);
+
+    expect(reply.status).toHaveBeenCalledWith(403);
+    expect(storage.set).not.toHaveBeenCalled();
+  });
+
+  it('allows bot signals when rejectBots is false', async () => {
+    const handler = createProbeEndpoint({ storage, rejectBots: false });
+    const req = createMockReq({
+      userAgent: 'Mozilla/5.0 (compatible; Googlebot/2.1)',
+    });
+    const reply = createMockReply();
+
+    await handler(req, reply);
+
+    expect(reply.send).toHaveBeenCalledWith({
+      ok: true,
+      sessionToken: expect.any(String),
+    });
+    expect(storage.set).toHaveBeenCalled();
   });
 });

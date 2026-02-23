@@ -2,7 +2,24 @@
   "name": "@device-router/middleware-hono",
   "version": "0.3.0",
   "type": "module",
+  "description": "Hono middleware for DeviceRouter — device classification and rendering hints, edge-compatible",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SimplyLiz/DeviceRouter.git",
+    "directory": "packages/middleware-hono"
+  },
+  "homepage": "https://github.com/SimplyLiz/DeviceRouter/tree/main/packages/middleware-hono#readme",
+  "bugs": {
+    "url": "https://github.com/SimplyLiz/DeviceRouter/issues"
+  },
+  "keywords": [
+    "device-router",
+    "hono",
+    "middleware",
+    "edge",
+    "device-detection"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

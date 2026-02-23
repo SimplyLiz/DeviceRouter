@@ -2,7 +2,24 @@
   "name": "@device-router/probe",
   "version": "0.3.0",
   "type": "module",
+  "description": "Lightweight (~1 KB gzipped) client-side probe for collecting device capability signals",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SimplyLiz/DeviceRouter.git",
+    "directory": "packages/probe"
+  },
+  "homepage": "https://github.com/SimplyLiz/DeviceRouter/tree/main/packages/probe#readme",
+  "bugs": {
+    "url": "https://github.com/SimplyLiz/DeviceRouter/issues"
+  },
+  "keywords": [
+    "device-detection",
+    "browser-signals",
+    "client-probe",
+    "lightweight",
+    "device-capabilities"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

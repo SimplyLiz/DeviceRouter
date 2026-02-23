@@ -2,7 +2,24 @@
   "name": "@device-router/middleware-express",
   "version": "0.3.0",
   "type": "module",
+  "description": "Express middleware for DeviceRouter — device classification and rendering hints per request",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SimplyLiz/DeviceRouter.git",
+    "directory": "packages/middleware-express"
+  },
+  "homepage": "https://github.com/SimplyLiz/DeviceRouter/tree/main/packages/middleware-express#readme",
+  "bugs": {
+    "url": "https://github.com/SimplyLiz/DeviceRouter/issues"
+  },
+  "keywords": [
+    "device-router",
+    "express",
+    "middleware",
+    "device-detection",
+    "server-side-rendering"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

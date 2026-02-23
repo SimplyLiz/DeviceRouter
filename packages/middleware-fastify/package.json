@@ -2,7 +2,24 @@
   "name": "@device-router/middleware-fastify",
   "version": "0.3.0",
   "type": "module",
+  "description": "Fastify plugin for DeviceRouter — device classification and rendering hints per request",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SimplyLiz/DeviceRouter.git",
+    "directory": "packages/middleware-fastify"
+  },
+  "homepage": "https://github.com/SimplyLiz/DeviceRouter/tree/main/packages/middleware-fastify#readme",
+  "bugs": {
+    "url": "https://github.com/SimplyLiz/DeviceRouter/issues"
+  },
+  "keywords": [
+    "device-router",
+    "fastify",
+    "fastify-plugin",
+    "device-detection",
+    "server-side-rendering"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

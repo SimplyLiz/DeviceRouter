@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.3.0 (2026-02-23)
+
 ### Breaking Changes
 
 - **userAgent and viewport stripped from stored profiles** — `userAgent` and `viewport` are no longer persisted in device profiles. They are still collected by the probe and used for bot/crawler filtering at the endpoint, but stripped before storage. Stored `RawSignals` no longer contain `userAgent` or `viewport` fields

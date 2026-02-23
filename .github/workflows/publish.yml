@@ -42,7 +42,7 @@ jobs:
             exit 1
           fi
 
-      - run: pnpm -r publish --no-git-checks --access public
+      - run: pnpm -r publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

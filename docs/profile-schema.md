@@ -16,14 +16,13 @@ The device profile follows a versioned JSON Schema (`schemas/device-profile.v1.j
 
 All fields are optional — the probe collects what it can based on browser API availability.
 
-> **Note:** The probe also collects `userAgent` for bot/crawler filtering, but it is stripped before the profile is stored.
+> **Note:** The probe also collects `userAgent` and `viewport` for bot/crawler filtering, but they are stripped before the profile is stored.
 
 | Field                  | Type                                   | Description                        |
 | ---------------------- | -------------------------------------- | ---------------------------------- |
 | `hardwareConcurrency`  | `number`                               | Logical CPU cores                  |
 | `deviceMemory`         | `number`                               | Approximate device memory in GB    |
 | `connection`           | `ConnectionInfo`                       | Network connection info            |
-| `viewport`             | `Viewport`                             | Viewport dimensions                |
 | `pixelRatio`           | `number`                               | Device pixel ratio                 |
 | `prefersReducedMotion` | `boolean`                              | Prefers reduced motion media query |
 | `prefersColorScheme`   | `'light' \| 'dark' \| 'no-preference'` | Color scheme preference            |
@@ -38,13 +37,6 @@ All fields are optional — the probe collects what it can based on browser API 
 | `downlink`      | `number`                            | Downlink speed in Mbps    |
 | `rtt`           | `number`                            | Round-trip time in ms     |
 | `saveData`      | `boolean`                           | Data saver mode enabled   |
-
-## Viewport
-
-| Field    | Type     | Description          |
-| -------- | -------- | -------------------- |
-| `width`  | `number` | Width in CSS pixels  |
-| `height` | `number` | Height in CSS pixels |
 
 ## DeviceTiers (derived)
 

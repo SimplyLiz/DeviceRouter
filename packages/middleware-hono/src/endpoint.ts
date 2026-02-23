@@ -38,7 +38,11 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
       const existingToken = getCookie(c, cookieName);
       const sessionToken = existingToken || globalThis.crypto.randomUUID();
 
-      const { userAgent: _userAgent, ...storedSignals } = signals as RawSignals;
+      const {
+        userAgent: _userAgent,
+        viewport: _viewport,
+        ...storedSignals
+      } = signals as RawSignals;
 
       const now = new Date();
       const profile: DeviceProfile = {

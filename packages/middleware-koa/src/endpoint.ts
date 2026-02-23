@@ -42,7 +42,11 @@ export function createProbeEndpoint(options: EndpointOptions) {
       const existingToken = ctx.cookies.get(cookieName);
       const sessionToken = existingToken || randomUUID();
 
-      const { userAgent: _userAgent, ...storedSignals } = signals as RawSignals;
+      const {
+        userAgent: _userAgent,
+        viewport: _viewport,
+        ...storedSignals
+      } = signals as RawSignals;
 
       const now = new Date();
       const profile: DeviceProfile = {

@@ -97,7 +97,7 @@ app.get('/', (req, res) => {
 
 All signals are optional — the probe gracefully degrades based on what the browser supports.
 
-> **Note:** The probe also collects `navigator.userAgent` for [bot/crawler filtering](docs/getting-started.md). It is used during probe submission and stripped before the profile is stored.
+> **Note:** The probe also collects `navigator.userAgent` and viewport dimensions for [bot/crawler filtering](docs/getting-started.md). They are used during probe submission and stripped before the profile is stored.
 
 ## Tier Classification
 

@@ -48,9 +48,6 @@
         "connection": {
           "$ref": "#/definitions/ConnectionInfo"
         },
-        "viewport": {
-          "$ref": "#/definitions/Viewport"
-        },
         "pixelRatio": {
           "type": "number",
           "minimum": 0,
@@ -89,23 +86,6 @@
         "saveData": {
           "type": "boolean",
           "description": "Data saver mode enabled"
-        }
-      },
-      "additionalProperties": false
-    },
-    "Viewport": {
-      "type": "object",
-      "required": ["width", "height"],
-      "properties": {
-        "width": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Viewport width in CSS pixels"
-        },
-        "height": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Viewport height in CSS pixels"
         }
       },
       "additionalProperties": false

@@ -153,6 +153,24 @@ const { middleware, probeEndpoint, injectionMiddleware } = createDeviceRouter({
 
 No need to manually add `<script>` tags — the probe is injected before `</head>` in every HTML response.
 
+## First-Request Handling
+
+By default, `deviceProfile` is `null` on the first page load before the probe runs. Two opt-in strategies provide immediate classification:
+
+```typescript
+const { middleware, probeEndpoint } = createDeviceRouter({
+  storage,
+  // Option 1: Classify from User-Agent + Client Hints headers
+  classifyFromHeaders: true,
+  // Option 2: Fall back to preset defaults
+  fallbackProfile: 'conservative', // or 'optimistic' or custom DeviceTiers
+});
+```
+
+When `classifyFromHeaders` is enabled, mobile/tablet/desktop detection happens from the UA string, and Chromium Client Hints (`Device-Memory`, `Save-Data`) refine the result. Check `profile.source` to know the origin: `'probe'`, `'headers'`, or `'fallback'`.
+
+See [Getting Started — First-Request Handling](docs/getting-started.md#first-request-handling) for details.
+
 ## Packages
 
 | Package                                                               | Description                                           | Size              |

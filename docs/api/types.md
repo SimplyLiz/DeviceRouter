@@ -115,6 +115,7 @@ Preset `DeviceTiers` for an optimistic (high-end) assumption: `{ cpu: 'high', me
 ### `ACCEPT_CH_VALUE`
 
 The `Accept-CH` header value used to request Client Hints from the browser: `'Sec-CH-UA-Mobile, Sec-CH-UA-Platform, Device-Memory, Save-Data'`.
+
 ## TierThresholds
 
 Custom thresholds for tier classification. All fields are optional — unset fields use built-in defaults.

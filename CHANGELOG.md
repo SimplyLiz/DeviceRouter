@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Documentation
+
+- **Deployment guide** — New `docs/deployment.md` covering Docker (Node.js + Redis), Cloudflare Workers (Hono + KV), and serverless platforms (Lambda, Vercel). Includes Dockerfiles, docker-compose, custom StorageAdapter examples for edge runtimes, and production checklists
+
 ### Features
 
 - **Secure cookie option** — New `cookieSecure` option on all middleware packages sets the `Secure` flag on the session cookie. Set `cookieSecure: true` for HTTPS deployments

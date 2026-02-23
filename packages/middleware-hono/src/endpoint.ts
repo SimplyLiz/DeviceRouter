@@ -26,15 +26,21 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
   } = options;
 
   return async (c: Context) => {
+    let sessionToken: string | undefined;
     try {
-      const signals = await c.req.json();
+      let signals: unknown;
+      try {
+        signals = await c.req.json();
+      } catch {
+        return c.json({ ok: false, error: 'Invalid probe payload' }, 400);
+      }
 
       if (!isValidSignals(signals)) {
         return c.json({ ok: false, error: 'Invalid probe payload' }, 400);
       }
 
       const existingToken = getCookie(c, cookieName);
-      const sessionToken = existingToken || globalThis.crypto.randomUUID();
+      sessionToken = existingToken || globalThis.crypto.randomUUID();
 
       if (rejectBots && isBotSignals(signals)) {
         emitEvent(onEvent, { type: 'bot:reject', sessionToken, signals });
@@ -76,7 +82,7 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
         type: 'error',
         error: err,
         phase: 'endpoint',
-        sessionToken: getCookie(c, cookieName),
+        sessionToken,
       });
       return c.json({ ok: false, error: 'Internal server error' }, 500);
     }

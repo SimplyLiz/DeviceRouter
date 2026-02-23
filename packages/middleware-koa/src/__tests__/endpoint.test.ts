@@ -202,6 +202,8 @@ describe('createProbeEndpoint (koa)', () => {
 
       expect(onEvent).toHaveBeenCalledOnce();
       expect(events[0].type).toBe('bot:reject');
+      const event = events[0] as Extract<DeviceRouterEvent, { type: 'bot:reject' }>;
+      expect(event.signals).toEqual({});
     });
 
     it('emits error event on storage failure', async () => {
@@ -221,6 +223,8 @@ describe('createProbeEndpoint (koa)', () => {
       expect(errorEvent).toBeDefined();
       const event = errorEvent as Extract<DeviceRouterEvent, { type: 'error' }>;
       expect(event.phase).toBe('endpoint');
+      expect(event.error).toBeInstanceOf(Error);
+      expect((event.error as Error).message).toBe('Redis down');
     });
 
     it('callback errors do not break endpoint', async () => {

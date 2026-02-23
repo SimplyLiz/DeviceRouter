@@ -319,8 +319,13 @@ describe('createMiddleware', () => {
         expect.objectContaining({
           type: 'error',
           phase: 'middleware',
+          error: expect.any(Error),
         }),
       );
+      const event = onEvent.mock.calls.find(
+        (c: unknown[]) => (c[0] as { type: string }).type === 'error',
+      )![0] as { error: Error };
+      expect(event.error.message).toBe('Redis down');
     });
 
     it('callback errors do not break middleware', async () => {

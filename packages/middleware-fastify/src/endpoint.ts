@@ -27,6 +27,7 @@ export function createProbeEndpoint(options: EndpointOptions) {
   } = options;
 
   return async (req: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    let sessionToken: string | undefined;
     try {
       const signals = req.body as unknown;
 
@@ -36,7 +37,7 @@ export function createProbeEndpoint(options: EndpointOptions) {
       }
 
       const existingToken = req.cookies?.[cookieName];
-      const sessionToken = existingToken || randomUUID();
+      sessionToken = existingToken || randomUUID();
 
       if (rejectBots && isBotSignals(signals)) {
         emitEvent(onEvent, { type: 'bot:reject', sessionToken, signals });
@@ -79,7 +80,7 @@ export function createProbeEndpoint(options: EndpointOptions) {
         type: 'error',
         error: err,
         phase: 'endpoint',
-        sessionToken: req.cookies?.[cookieName],
+        sessionToken,
       });
       reply.status(500).send({ ok: false, error: 'Internal server error' });
     }

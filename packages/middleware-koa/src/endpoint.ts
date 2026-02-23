@@ -26,6 +26,7 @@ export function createProbeEndpoint(options: EndpointOptions) {
   } = options;
 
   return async (ctx: Context): Promise<void> => {
+    let sessionToken: string | undefined;
     try {
       const signals = (ctx.request as unknown as { body: unknown }).body;
 
@@ -36,7 +37,7 @@ export function createProbeEndpoint(options: EndpointOptions) {
       }
 
       const existingToken = ctx.cookies.get(cookieName);
-      const sessionToken = existingToken || randomUUID();
+      sessionToken = existingToken || randomUUID();
 
       if (rejectBots && isBotSignals(signals)) {
         emitEvent(onEvent, { type: 'bot:reject', sessionToken, signals });
@@ -80,7 +81,7 @@ export function createProbeEndpoint(options: EndpointOptions) {
         type: 'error',
         error: err,
         phase: 'endpoint',
-        sessionToken: ctx.cookies.get(cookieName),
+        sessionToken,
       });
       ctx.status = 500;
       ctx.body = { ok: false, error: 'Internal server error' };

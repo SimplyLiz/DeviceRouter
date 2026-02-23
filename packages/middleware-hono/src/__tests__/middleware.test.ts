@@ -308,6 +308,9 @@ describe('createMiddleware (hono)', () => {
       const event = onEvent.mock.calls[0][0] as DeviceRouterEvent;
       expect(event.type).toBe('error');
       expect(event).toHaveProperty('phase', 'middleware');
+      const errorEvent = event as Extract<DeviceRouterEvent, { type: 'error' }>;
+      expect(errorEvent.error).toBeInstanceOf(Error);
+      expect((errorEvent.error as Error).message).toBe('storage down');
     });
 
     it('callback errors do not break middleware', async () => {

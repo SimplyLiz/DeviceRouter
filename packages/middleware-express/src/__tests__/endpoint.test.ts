@@ -273,6 +273,7 @@ describe('createProbeEndpoint', () => {
       expect(botEvents).toHaveLength(1);
       const event = botEvents[0] as Extract<DeviceRouterEvent, { type: 'bot:reject' }>;
       expect(typeof event.sessionToken).toBe('string');
+      expect(event.signals).toEqual({});
     });
 
     it('emits error event on storage failure', async () => {
@@ -292,6 +293,8 @@ describe('createProbeEndpoint', () => {
       expect(errorEvents).toHaveLength(1);
       const event = errorEvents[0] as Extract<DeviceRouterEvent, { type: 'error' }>;
       expect(event.phase).toBe('endpoint');
+      expect(event.error).toBeInstanceOf(Error);
+      expect((event.error as Error).message).toBe('Redis down');
       expect(res.status).toHaveBeenCalledWith(500);
     });
 

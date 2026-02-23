@@ -227,6 +227,7 @@ describe('createProbeEndpoint', () => {
         expect.objectContaining({
           type: 'bot:reject',
           sessionToken: expect.any(String),
+          signals: {},
         }),
       );
     });
@@ -244,8 +245,13 @@ describe('createProbeEndpoint', () => {
         expect.objectContaining({
           type: 'error',
           phase: 'endpoint',
+          error: expect.any(Error),
         }),
       );
+      const event = onEvent.mock.calls.find(
+        (c: unknown[]) => (c[0] as { type: string }).type === 'error',
+      )![0] as { error: Error };
+      expect(event.error.message).toBe('Redis down');
       expect(reply.status).toHaveBeenCalledWith(500);
     });
 

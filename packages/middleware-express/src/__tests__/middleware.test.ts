@@ -390,6 +390,8 @@ describe('createMiddleware', () => {
       expect(events[0].type).toBe('error');
       const event = events[0] as Extract<DeviceRouterEvent, { type: 'error' }>;
       expect(event.phase).toBe('middleware');
+      expect(event.error).toBeInstanceOf(Error);
+      expect((event.error as Error).message).toBe('Storage down');
       expect(next).toHaveBeenCalledWith(expect.any(Error));
     });
 

@@ -93,6 +93,22 @@ describe('createProbeEndpoint (hono)', () => {
     expect(data.ok).toBe(false);
   });
 
+  it('returns 400 for malformed JSON', async () => {
+    const app = new Hono();
+    app.post('/probe', createProbeEndpoint({ storage }));
+
+    const res = await app.request('/probe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{not valid json',
+    });
+
+    expect(res.status).toBe(400);
+    const data = (await res.json()) as { ok: boolean; error: string };
+    expect(data.ok).toBe(false);
+    expect(data.error).toBe('Invalid probe payload');
+  });
+
   it('accepts empty signals object when rejectBots is false', async () => {
     const app = new Hono();
     app.post('/probe', createProbeEndpoint({ storage, rejectBots: false }));
@@ -195,6 +211,8 @@ describe('createProbeEndpoint (hono)', () => {
       expect(onEvent).toHaveBeenCalledOnce();
       const event = onEvent.mock.calls[0][0] as DeviceRouterEvent;
       expect(event.type).toBe('bot:reject');
+      const botEvent = event as Extract<DeviceRouterEvent, { type: 'bot:reject' }>;
+      expect(botEvent.signals).toEqual({});
     });
 
     it('emits error event on storage failure', async () => {
@@ -215,6 +233,9 @@ describe('createProbeEndpoint (hono)', () => {
       const event = onEvent.mock.calls[0][0] as DeviceRouterEvent;
       expect(event.type).toBe('error');
       expect(event).toHaveProperty('phase', 'endpoint');
+      const errorEvent = event as Extract<DeviceRouterEvent, { type: 'error' }>;
+      expect(errorEvent.error).toBeInstanceOf(Error);
+      expect((errorEvent.error as Error).message).toBe('storage down');
     });
 
     it('callback errors do not break endpoint', async () => {

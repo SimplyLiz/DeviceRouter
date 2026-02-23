@@ -56,4 +56,5 @@ Each middleware package exports a factory `createDeviceRouter(options)` that pro
 - **Tests:** Vitest, files in `src/__tests__/*.test.ts`, 80% coverage threshold (branches/functions/lines/statements)
 - **Probe size budget:** must be ≤ 1 KB gzipped (checked in CI via `packages/probe/scripts/bundle.js`)
 - **Node version:** ≥20 (.nvmrc: v20)
+- **Always run `pnpm format` before committing** — CI enforces `format:check` and will fail on unformatted code
 - **No author/co-author attribution** in commits, code, or docs

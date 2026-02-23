@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import type { StorageAdapter } from '@device-router/storage';
-import type { TierThresholds, FallbackProfile } from '@device-router/types';
+import type { TierThresholds, FallbackProfile, OnEventCallback } from '@device-router/types';
 import { validateThresholds } from '@device-router/types';
 import { createMiddleware } from './middleware.js';
 import { createProbeEndpoint } from './endpoint.js';
@@ -20,6 +20,7 @@ export interface DeviceRouterOptions {
   probeNonce?: string | ((req: import('express').Request) => string);
   fallbackProfile?: FallbackProfile;
   classifyFromHeaders?: boolean;
+  onEvent?: OnEventCallback;
 }
 
 export function createDeviceRouter(options: DeviceRouterOptions) {
@@ -36,6 +37,7 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     probeNonce,
     fallbackProfile,
     classifyFromHeaders,
+    onEvent,
   } = options;
 
   if (thresholds) validateThresholds(thresholds);
@@ -51,6 +53,7 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
       thresholds,
       fallbackProfile,
       classifyFromHeaders,
+      onEvent,
     }),
     probeEndpoint: createProbeEndpoint({
       storage,
@@ -59,6 +62,7 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
       cookieSecure,
       ttl,
       rejectBots,
+      onEvent,
     }),
   };
 

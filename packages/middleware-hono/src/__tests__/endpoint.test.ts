@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Hono } from 'hono';
 import { createProbeEndpoint } from '../endpoint.js';
 import type { StorageAdapter } from '@device-router/storage';
+import type { DeviceRouterEvent } from '@device-router/types';
 
 function createMockStorage(): StorageAdapter {
   return {
@@ -157,5 +158,81 @@ describe('createProbeEndpoint (hono)', () => {
     const data = (await res.json()) as { ok: boolean };
     expect(data.ok).toBe(true);
     expect(storage.set).toHaveBeenCalled();
+  });
+
+  describe('onEvent', () => {
+    it('emits profile:store after successful storage', async () => {
+      const onEvent = vi.fn();
+      const app = new Hono();
+      app.post('/probe', createProbeEndpoint({ storage, onEvent }));
+
+      const res = await app.request('/probe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hardwareConcurrency: 4, deviceMemory: 8 }),
+      });
+
+      expect(res.status).toBe(200);
+      expect(onEvent).toHaveBeenCalledOnce();
+      const event = onEvent.mock.calls[0][0] as DeviceRouterEvent;
+      expect(event.type).toBe('profile:store');
+      expect(typeof (event as { sessionToken: string }).sessionToken).toBe('string');
+      expect(typeof (event as { durationMs: number }).durationMs).toBe('number');
+    });
+
+    it('emits bot:reject when bot detected', async () => {
+      const onEvent = vi.fn();
+      const app = new Hono();
+      app.post('/probe', createProbeEndpoint({ storage, onEvent }));
+
+      const res = await app.request('/probe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+
+      expect(res.status).toBe(403);
+      expect(onEvent).toHaveBeenCalledOnce();
+      const event = onEvent.mock.calls[0][0] as DeviceRouterEvent;
+      expect(event.type).toBe('bot:reject');
+    });
+
+    it('emits error event on storage failure', async () => {
+      const onEvent = vi.fn();
+      storage.set = vi.fn().mockRejectedValue(new Error('storage down'));
+
+      const app = new Hono();
+      app.post('/probe', createProbeEndpoint({ storage, onEvent }));
+
+      const res = await app.request('/probe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hardwareConcurrency: 4, deviceMemory: 8 }),
+      });
+
+      expect(res.status).toBe(500);
+      expect(onEvent).toHaveBeenCalledOnce();
+      const event = onEvent.mock.calls[0][0] as DeviceRouterEvent;
+      expect(event.type).toBe('error');
+      expect(event).toHaveProperty('phase', 'endpoint');
+    });
+
+    it('callback errors do not break endpoint', async () => {
+      const onEvent = vi.fn().mockImplementation(() => {
+        throw new Error('callback boom');
+      });
+      const app = new Hono();
+      app.post('/probe', createProbeEndpoint({ storage, onEvent }));
+
+      const res = await app.request('/probe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hardwareConcurrency: 4, deviceMemory: 8 }),
+      });
+
+      expect(res.status).toBe(200);
+      const data = (await res.json()) as { ok: boolean };
+      expect(data.ok).toBe(true);
+    });
   });
 });

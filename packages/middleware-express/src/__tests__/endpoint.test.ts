@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createProbeEndpoint } from '../endpoint.js';
 import type { StorageAdapter } from '@device-router/storage';
+import type { DeviceRouterEvent } from '@device-router/types';
 
 function createMockStorage(): StorageAdapter {
   return {
@@ -231,5 +232,84 @@ describe('createProbeEndpoint', () => {
       sessionToken: expect.any(String),
     });
     expect(storage.set).toHaveBeenCalled();
+  });
+
+  describe('onEvent', () => {
+    it('emits profile:store after successful storage', async () => {
+      const events: DeviceRouterEvent[] = [];
+      const onEvent = vi.fn((e: DeviceRouterEvent) => {
+        events.push(e);
+      });
+
+      const handler = createProbeEndpoint({ storage, onEvent });
+      const signals = { hardwareConcurrency: 4, deviceMemory: 8 };
+      const req = createMockReq(signals);
+      const res = createMockRes();
+
+      await handler(req, res);
+
+      const storeEvents = events.filter((e) => e.type === 'profile:store');
+      expect(storeEvents).toHaveLength(1);
+      const event = storeEvents[0] as Extract<DeviceRouterEvent, { type: 'profile:store' }>;
+      expect(typeof event.sessionToken).toBe('string');
+      expect(event.signals).toEqual(signals);
+      expect(typeof event.durationMs).toBe('number');
+    });
+
+    it('emits bot:reject when bot detected', async () => {
+      const events: DeviceRouterEvent[] = [];
+      const onEvent = vi.fn((e: DeviceRouterEvent) => {
+        events.push(e);
+      });
+
+      const handler = createProbeEndpoint({ storage, onEvent });
+      const req = createMockReq({});
+      const res = createMockRes();
+
+      await handler(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      const botEvents = events.filter((e) => e.type === 'bot:reject');
+      expect(botEvents).toHaveLength(1);
+      const event = botEvents[0] as Extract<DeviceRouterEvent, { type: 'bot:reject' }>;
+      expect(typeof event.sessionToken).toBe('string');
+    });
+
+    it('emits error event on storage failure', async () => {
+      const events: DeviceRouterEvent[] = [];
+      const onEvent = vi.fn((e: DeviceRouterEvent) => {
+        events.push(e);
+      });
+
+      storage.set = vi.fn().mockRejectedValue(new Error('Redis down'));
+      const handler = createProbeEndpoint({ storage, onEvent });
+      const req = createMockReq({ hardwareConcurrency: 4 });
+      const res = createMockRes();
+
+      await handler(req, res);
+
+      const errorEvents = events.filter((e) => e.type === 'error');
+      expect(errorEvents).toHaveLength(1);
+      const event = errorEvents[0] as Extract<DeviceRouterEvent, { type: 'error' }>;
+      expect(event.phase).toBe('endpoint');
+      expect(res.status).toHaveBeenCalledWith(500);
+    });
+
+    it('callback errors do not break endpoint', async () => {
+      const onEvent = vi.fn(() => {
+        throw new Error('callback boom');
+      });
+
+      const handler = createProbeEndpoint({ storage, onEvent });
+      const req = createMockReq({ hardwareConcurrency: 4, deviceMemory: 8 });
+      const res = createMockRes();
+
+      await handler(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        ok: true,
+        sessionToken: expect.any(String),
+      });
+    });
   });
 });

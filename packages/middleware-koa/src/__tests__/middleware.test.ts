@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createMiddleware } from '../middleware.js';
 import type { StorageAdapter } from '@device-router/storage';
-import type { DeviceProfile } from '@device-router/types';
+import type { DeviceProfile, DeviceRouterEvent } from '@device-router/types';
 
 function createMockStorage(): StorageAdapter & { _store: Map<string, DeviceProfile> } {
   const store = new Map<string, DeviceProfile>();
@@ -250,6 +250,132 @@ describe('createMiddleware (koa)', () => {
       await mw(ctx, next);
 
       expect(ctx._responseHeaders['Accept-CH']).toBeUndefined();
+    });
+  });
+
+  describe('onEvent', () => {
+    it('emits profile:classify with source probe when profile found in storage', async () => {
+      const events: DeviceRouterEvent[] = [];
+      const onEvent = vi.fn((e: DeviceRouterEvent) => {
+        events.push(e);
+      });
+
+      const profile: DeviceProfile = {
+        schemaVersion: 1,
+        sessionToken: 'tok1',
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+        signals: { hardwareConcurrency: 8, deviceMemory: 8 },
+      };
+      storage._store.set('tok1', profile);
+
+      const mw = createMiddleware({ storage, onEvent });
+      const ctx = createMockCtx({ dr_session: 'tok1' });
+      const next = vi.fn();
+
+      await mw(ctx, next);
+
+      expect(onEvent).toHaveBeenCalledOnce();
+      expect(events[0].type).toBe('profile:classify');
+      const event = events[0] as Extract<DeviceRouterEvent, { type: 'profile:classify' }>;
+      expect(event.source).toBe('probe');
+      expect(event.sessionToken).toBe('tok1');
+      expect(typeof event.durationMs).toBe('number');
+    });
+
+    it('emits profile:classify with source headers when classifyFromHeaders enabled', async () => {
+      const events: DeviceRouterEvent[] = [];
+      const onEvent = vi.fn((e: DeviceRouterEvent) => {
+        events.push(e);
+      });
+
+      const mw = createMiddleware({ storage, classifyFromHeaders: true, onEvent });
+      const ctx = createMockCtx(
+        {},
+        { 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) AppleWebKit/605.1.15 Mobile' },
+      );
+      const next = vi.fn();
+
+      await mw(ctx, next);
+
+      expect(onEvent).toHaveBeenCalledOnce();
+      expect(events[0].type).toBe('profile:classify');
+      const event = events[0] as Extract<DeviceRouterEvent, { type: 'profile:classify' }>;
+      expect(event.source).toBe('headers');
+    });
+
+    it('emits profile:classify with source fallback when fallbackProfile set', async () => {
+      const events: DeviceRouterEvent[] = [];
+      const onEvent = vi.fn((e: DeviceRouterEvent) => {
+        events.push(e);
+      });
+
+      const mw = createMiddleware({ storage, fallbackProfile: 'conservative', onEvent });
+      const ctx = createMockCtx();
+      const next = vi.fn();
+
+      await mw(ctx, next);
+
+      expect(onEvent).toHaveBeenCalledOnce();
+      expect(events[0].type).toBe('profile:classify');
+      const event = events[0] as Extract<DeviceRouterEvent, { type: 'profile:classify' }>;
+      expect(event.source).toBe('fallback');
+    });
+
+    it('does not emit when no profile resolved', async () => {
+      const onEvent = vi.fn();
+
+      const mw = createMiddleware({ storage, onEvent });
+      const ctx = createMockCtx();
+      const next = vi.fn();
+
+      await mw(ctx, next);
+
+      expect(onEvent).not.toHaveBeenCalled();
+    });
+
+    it('emits error event on storage failure', async () => {
+      const events: DeviceRouterEvent[] = [];
+      const onEvent = vi.fn((e: DeviceRouterEvent) => {
+        events.push(e);
+      });
+
+      storage.get = vi.fn().mockRejectedValue(new Error('Storage down'));
+      const mw = createMiddleware({ storage, onEvent });
+      const ctx = createMockCtx({ dr_session: 'tok-err' });
+      const next = vi.fn();
+
+      await expect(mw(ctx, next)).rejects.toThrow('Storage down');
+
+      expect(onEvent).toHaveBeenCalledOnce();
+      expect(events[0].type).toBe('error');
+      const event = events[0] as Extract<DeviceRouterEvent, { type: 'error' }>;
+      expect(event.phase).toBe('middleware');
+    });
+
+    it('callback errors do not break middleware', async () => {
+      const onEvent = vi.fn(() => {
+        throw new Error('callback boom');
+      });
+
+      const profile: DeviceProfile = {
+        schemaVersion: 1,
+        sessionToken: 'tok-safe',
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+        signals: { hardwareConcurrency: 8, deviceMemory: 8 },
+      };
+      storage._store.set('tok-safe', profile);
+
+      const mw = createMiddleware({ storage, onEvent });
+      const ctx = createMockCtx({ dr_session: 'tok-safe' });
+      const next = vi.fn();
+
+      await mw(ctx, next);
+
+      expect(ctx.state.deviceProfile).not.toBeNull();
+      expect(ctx.state.deviceProfile!.source).toBe('probe');
+      expect(next).toHaveBeenCalled();
     });
   });
 });

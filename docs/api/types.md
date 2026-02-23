@@ -207,3 +207,44 @@ type GpuTier = 'none' | 'low' | 'mid' | 'high';
 ```
 
 See [Profile Schema Reference](../profile-schema.md) for full type definitions.
+
+## Event Types
+
+### `DeviceRouterEvent`
+
+Discriminated union of observability events emitted by the middleware. Use the `type` field to narrow:
+
+```typescript
+type DeviceRouterEvent =
+  | {
+      type: 'profile:classify';
+      sessionToken: string;
+      tiers: DeviceTiers;
+      hints: RenderingHints;
+      source: ProfileSource;
+      durationMs: number;
+    }
+  | { type: 'profile:store'; sessionToken: string; signals: RawSignals; durationMs: number }
+  | { type: 'bot:reject'; sessionToken: string; signals: RawSignals }
+  | { type: 'error'; error: unknown; phase: 'middleware' | 'endpoint'; sessionToken?: string };
+```
+
+### `OnEventCallback`
+
+```typescript
+type OnEventCallback = (event: DeviceRouterEvent) => void | Promise<void>;
+```
+
+Callback function passed via the `onEvent` option. May be sync or async — errors are swallowed to avoid disrupting request handling.
+
+### `emitEvent(onEvent, event)`
+
+Helper that invokes the callback with error isolation. Catches sync throws and swallows async rejections. Used internally by all middleware packages — you only need this if building custom integrations.
+
+```typescript
+import { emitEvent } from '@device-router/types';
+
+emitEvent(onEvent, { type: 'profile:classify', ... });
+```
+
+See the [Observability guide](../observability.md) for usage examples.

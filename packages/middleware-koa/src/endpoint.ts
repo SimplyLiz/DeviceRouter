@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 import type { StorageAdapter } from '@device-router/storage';
-import type { DeviceProfile, RawSignals } from '@device-router/types';
-import { isValidSignals, isBotSignals } from '@device-router/types';
+import type { DeviceProfile, RawSignals, OnEventCallback } from '@device-router/types';
+import { isValidSignals, isBotSignals, emitEvent } from '@device-router/types';
 import { randomUUID } from 'node:crypto';
 
 export interface EndpointOptions {
@@ -11,6 +11,7 @@ export interface EndpointOptions {
   cookieSecure?: boolean;
   ttl?: number;
   rejectBots?: boolean;
+  onEvent?: OnEventCallback;
 }
 
 export function createProbeEndpoint(options: EndpointOptions) {
@@ -21,6 +22,7 @@ export function createProbeEndpoint(options: EndpointOptions) {
     cookieSecure = false,
     ttl = 86400,
     rejectBots = true,
+    onEvent,
   } = options;
 
   return async (ctx: Context): Promise<void> => {
@@ -33,14 +35,15 @@ export function createProbeEndpoint(options: EndpointOptions) {
         return;
       }
 
+      const existingToken = ctx.cookies.get(cookieName);
+      const sessionToken = existingToken || randomUUID();
+
       if (rejectBots && isBotSignals(signals)) {
+        emitEvent(onEvent, { type: 'bot:reject', sessionToken, signals });
         ctx.status = 403;
         ctx.body = { ok: false, error: 'Bot detected' };
         return;
       }
-
-      const existingToken = ctx.cookies.get(cookieName);
-      const sessionToken = existingToken || randomUUID();
 
       const {
         userAgent: _userAgent,
@@ -57,7 +60,11 @@ export function createProbeEndpoint(options: EndpointOptions) {
         signals: storedSignals,
       };
 
+      const start = performance.now();
       await storage.set(sessionToken, profile, ttl);
+      const durationMs = performance.now() - start;
+
+      emitEvent(onEvent, { type: 'profile:store', sessionToken, signals, durationMs });
 
       ctx.cookies.set(cookieName, sessionToken, {
         path: cookiePath,
@@ -68,7 +75,13 @@ export function createProbeEndpoint(options: EndpointOptions) {
       });
 
       ctx.body = { ok: true, sessionToken };
-    } catch {
+    } catch (err) {
+      emitEvent(onEvent, {
+        type: 'error',
+        error: err,
+        phase: 'endpoint',
+        sessionToken: ctx.cookies.get(cookieName),
+      });
       ctx.status = 500;
       ctx.body = { ok: false, error: 'Internal server error' };
     }

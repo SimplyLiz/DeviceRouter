@@ -64,6 +64,8 @@ const { middleware, probeEndpoint, injectionMiddleware } = createDeviceRouter({
 app.use('*', injectionMiddleware);
 ```
 
+> **Streaming responses:** Injection reads the entire response body as text. If your handler returns a `ReadableStream`, the response is buffered into memory before injection. For streaming HTML, add the probe `<script>` tag to your HTML shell manually instead.
+
 ## Custom thresholds
 
 ```typescript
@@ -83,6 +85,7 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 | `storage`             | `StorageAdapter`                     | _(required)_      | Storage backend for profiles                  |
 | `cookieName`          | `string`                             | `'dr_session'`    | Session cookie name                           |
 | `cookiePath`          | `string`                             | `'/'`             | Cookie path                                   |
+| `cookieSecure`        | `boolean`                            | `false`           | Set `Secure` flag on the session cookie       |
 | `ttl`                 | `number`                             | `86400` (24h)     | Profile TTL in seconds                        |
 | `rejectBots`          | `boolean`                            | `true`            | Reject bot/crawler probe submissions          |
 | `thresholds`          | `TierThresholds`                     | Built-in defaults | Custom tier thresholds (validated at startup) |

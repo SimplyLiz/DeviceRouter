@@ -68,6 +68,8 @@ app.use(injectionMiddleware); // before routes
 app.use(middleware);
 ```
 
+> **Streaming responses:** Injection only runs when `ctx.body` is a string. If you set `ctx.body` to a `Stream`, injection is silently skipped. Add the probe `<script>` tag to your HTML shell manually instead.
+
 ## Custom thresholds
 
 ```typescript
@@ -87,6 +89,7 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 | `storage`             | `StorageAdapter`                       | _(required)_      | Storage backend for profiles                  |
 | `cookieName`          | `string`                               | `'dr_session'`    | Session cookie name                           |
 | `cookiePath`          | `string`                               | `'/'`             | Cookie path                                   |
+| `cookieSecure`        | `boolean`                              | `false`           | Set `Secure` flag on the session cookie       |
 | `ttl`                 | `number`                               | `86400` (24h)     | Profile TTL in seconds                        |
 | `rejectBots`          | `boolean`                              | `true`            | Reject bot/crawler probe submissions          |
 | `thresholds`          | `TierThresholds`                       | Built-in defaults | Custom tier thresholds (validated at startup) |

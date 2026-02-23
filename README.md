@@ -97,6 +97,8 @@ app.get('/', (req, res) => {
 
 All signals are optional — the probe gracefully degrades based on what the browser supports.
 
+> **Note:** The probe also collects `navigator.userAgent` and viewport dimensions for [bot/crawler filtering](docs/getting-started.md). They are used during probe submission and stripped before the profile is stored.
+
 ## Tier Classification
 
 Devices are classified across three dimensions:
@@ -228,6 +230,7 @@ Open http://localhost:3000 — the probe runs on first load, refresh to see your
 ## Documentation
 
 - [Getting Started](docs/getting-started.md)
+- [Deployment Guide](docs/deployment.md) — Docker, Cloudflare Workers, serverless
 - [Profile Schema Reference](docs/profile-schema.md)
 - API Reference: [types](docs/api/types.md) | [probe](docs/api/probe.md) | [storage](docs/api/storage.md) | [express](docs/api/middleware-express.md) | [fastify](docs/api/middleware-fastify.md) | [hono](docs/api/middleware-hono.md) | [koa](docs/api/middleware-koa.md)
 

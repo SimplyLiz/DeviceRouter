@@ -46,6 +46,35 @@ describe('createProbeEndpoint (hono)', () => {
     const setCookie = res.headers.get('set-cookie');
     expect(setCookie).toBeTruthy();
     expect(setCookie).toContain('dr_session=');
+    expect(setCookie).not.toContain('Secure');
+  });
+
+  it('does not set secure cookie by default', async () => {
+    const app = new Hono();
+    app.post('/probe', createProbeEndpoint({ storage }));
+
+    const res = await app.request('/probe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hardwareConcurrency: 4 }),
+    });
+
+    const setCookie = res.headers.get('set-cookie');
+    expect(setCookie).not.toContain('Secure');
+  });
+
+  it('enables secure cookie when cookieSecure is true', async () => {
+    const app = new Hono();
+    app.post('/probe', createProbeEndpoint({ storage, cookieSecure: true }));
+
+    const res = await app.request('/probe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hardwareConcurrency: 4 }),
+    });
+
+    const setCookie = res.headers.get('set-cookie');
+    expect(setCookie).toContain('Secure');
   });
 
   it('returns 400 for invalid payload', async () => {

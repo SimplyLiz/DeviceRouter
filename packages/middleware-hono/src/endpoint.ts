@@ -8,6 +8,7 @@ export interface EndpointOptions {
   storage: StorageAdapter;
   cookieName?: string;
   cookiePath?: string;
+  cookieSecure?: boolean;
   ttl?: number;
   rejectBots?: boolean;
 }
@@ -17,6 +18,7 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
     storage,
     cookieName = 'dr_session',
     cookiePath = '/',
+    cookieSecure = false,
     ttl = 86400,
     rejectBots = true,
   } = options;
@@ -36,13 +38,19 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
       const existingToken = getCookie(c, cookieName);
       const sessionToken = existingToken || globalThis.crypto.randomUUID();
 
+      const {
+        userAgent: _userAgent,
+        viewport: _viewport,
+        ...storedSignals
+      } = signals as RawSignals;
+
       const now = new Date();
       const profile: DeviceProfile = {
         schemaVersion: 1,
         sessionToken,
         createdAt: now.toISOString(),
         expiresAt: new Date(now.getTime() + ttl * 1000).toISOString(),
-        signals: signals as RawSignals,
+        signals: storedSignals,
       };
 
       await storage.set(sessionToken, profile, ttl);
@@ -50,6 +58,7 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
       setCookie(c, cookieName, sessionToken, {
         path: cookiePath,
         httpOnly: true,
+        secure: cookieSecure,
         sameSite: 'Lax',
         maxAge: ttl,
       });

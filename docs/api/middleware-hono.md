@@ -27,6 +27,7 @@ app.use('*', middleware);
 | `storage`             | `StorageAdapter`                     | required                 | Storage backend                                              |
 | `cookieName`          | `string`                             | `'dr_session'`           | Session cookie name                                          |
 | `cookiePath`          | `string`                             | `'/'`                    | Cookie path                                                  |
+| `cookieSecure`        | `boolean`                            | `false`                  | Set `Secure` flag on the session cookie                      |
 | `ttl`                 | `number`                             | `86400`                  | Profile TTL in seconds                                       |
 | `rejectBots`          | `boolean`                            | `true`                   | Reject bot/crawler probe submissions (returns 403)           |
 | `thresholds`          | `TierThresholds`                     | built-in defaults        | Custom tier classification thresholds (validated at startup) |

@@ -90,4 +90,31 @@ describe('RedisStorageAdapter', () => {
     await custom.set('tok5', profile, 3600);
     expect(client.set).toHaveBeenCalledWith('custom:tok5', expect.any(String), 'EX', '3600');
   });
+
+  describe('error handling', () => {
+    it('get returns null on connection error', async () => {
+      client.get.mockRejectedValueOnce(new Error('ECONNREFUSED'));
+      expect(await adapter.get('tok1')).toBeNull();
+    });
+
+    it('get returns null on corrupted JSON', async () => {
+      client.get.mockResolvedValueOnce('not-valid-json{{{');
+      expect(await adapter.get('tok1')).toBeNull();
+    });
+
+    it('set does not throw on connection error', async () => {
+      client.set.mockRejectedValueOnce(new Error('ECONNREFUSED'));
+      await expect(adapter.set('tok1', makeProfile('tok1'), 3600)).resolves.toBeUndefined();
+    });
+
+    it('delete does not throw on connection error', async () => {
+      client.del.mockRejectedValueOnce(new Error('ECONNREFUSED'));
+      await expect(adapter.delete('tok1')).resolves.toBeUndefined();
+    });
+
+    it('exists returns false on connection error', async () => {
+      client.exists.mockRejectedValueOnce(new Error('ECONNREFUSED'));
+      expect(await adapter.exists('tok1')).toBe(false);
+    });
+  });
 });

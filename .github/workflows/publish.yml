@@ -46,6 +46,10 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Extract release notes from changelog
+        id: release-notes
+        uses: ffurrer2/extract-release-notes@v3
+
       - uses: softprops/action-gh-release@v2
         with:
-          generate_release_notes: true
+          body: ${{ steps.release-notes.outputs.release_notes }}

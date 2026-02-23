@@ -55,8 +55,37 @@ describe('createProbeEndpoint', () => {
       expect.any(String),
       expect.objectContaining({
         httpOnly: true,
+        secure: false,
         sameSite: 'lax',
       }),
+    );
+  });
+
+  it('does not set secure cookie by default', async () => {
+    const handler = createProbeEndpoint({ storage });
+    const req = createMockReq({ hardwareConcurrency: 4 });
+    const reply = createMockReply();
+
+    await handler(req, reply);
+
+    expect(reply.setCookie).toHaveBeenCalledWith(
+      'dr_session',
+      expect.any(String),
+      expect.objectContaining({ secure: false }),
+    );
+  });
+
+  it('enables secure cookie when cookieSecure is true', async () => {
+    const handler = createProbeEndpoint({ storage, cookieSecure: true });
+    const req = createMockReq({ hardwareConcurrency: 4 });
+    const reply = createMockReply();
+
+    await handler(req, reply);
+
+    expect(reply.setCookie).toHaveBeenCalledWith(
+      'dr_session',
+      expect.any(String),
+      expect.objectContaining({ secure: true }),
     );
   });
 

@@ -2,12 +2,78 @@ import { describe, it, expect } from 'vitest';
 import { isValidSignals, validateThresholds } from '../validate.js';
 
 describe('isValidSignals', () => {
-  it('accepts valid signals with battery', () => {
-    expect(isValidSignals({ battery: { level: 0.5, charging: true } })).toBe(true);
+  it('accepts empty object', () => {
+    expect(isValidSignals({})).toBe(true);
   });
 
-  it('accepts signals without battery', () => {
-    expect(isValidSignals({ hardwareConcurrency: 4 })).toBe(true);
+  it('accepts full valid payload', () => {
+    expect(
+      isValidSignals({
+        hardwareConcurrency: 8,
+        deviceMemory: 4,
+        userAgent: 'Mozilla/5.0',
+        pixelRatio: 2,
+        prefersReducedMotion: false,
+        prefersColorScheme: 'dark',
+        gpuRenderer: 'ANGLE (Apple, M1)',
+        viewport: { width: 1920, height: 1080 },
+        battery: { level: 0.85, charging: true },
+        connection: { effectiveType: '4g', downlink: 10, rtt: 50 },
+      }),
+    ).toBe(true);
+  });
+
+  it('rejects null', () => {
+    expect(isValidSignals(null)).toBe(false);
+  });
+
+  it('rejects non-object types', () => {
+    expect(isValidSignals('string')).toBe(false);
+    expect(isValidSignals(42)).toBe(false);
+    expect(isValidSignals(true)).toBe(false);
+    expect(isValidSignals(undefined)).toBe(false);
+  });
+
+  it('rejects non-number hardwareConcurrency', () => {
+    expect(isValidSignals({ hardwareConcurrency: '4' })).toBe(false);
+  });
+
+  it('accepts undefined hardwareConcurrency', () => {
+    expect(isValidSignals({ hardwareConcurrency: undefined })).toBe(true);
+  });
+
+  it('rejects non-number deviceMemory', () => {
+    expect(isValidSignals({ deviceMemory: '4' })).toBe(false);
+  });
+
+  it('rejects non-string userAgent', () => {
+    expect(isValidSignals({ userAgent: 123 })).toBe(false);
+  });
+
+  it('rejects non-number pixelRatio', () => {
+    expect(isValidSignals({ pixelRatio: '2' })).toBe(false);
+  });
+
+  it('rejects non-boolean prefersReducedMotion', () => {
+    expect(isValidSignals({ prefersReducedMotion: 'yes' })).toBe(false);
+  });
+
+  it('rejects invalid prefersColorScheme', () => {
+    expect(isValidSignals({ prefersColorScheme: 'blue' })).toBe(false);
+  });
+
+  it('accepts valid prefersColorScheme values', () => {
+    expect(isValidSignals({ prefersColorScheme: 'light' })).toBe(true);
+    expect(isValidSignals({ prefersColorScheme: 'dark' })).toBe(true);
+    expect(isValidSignals({ prefersColorScheme: 'no-preference' })).toBe(true);
+  });
+
+  it('rejects non-string gpuRenderer', () => {
+    expect(isValidSignals({ gpuRenderer: 42 })).toBe(false);
+  });
+
+  it('accepts valid signals with battery', () => {
+    expect(isValidSignals({ battery: { level: 0.5, charging: true } })).toBe(true);
   });
 
   it('rejects non-object battery', () => {
@@ -18,11 +84,11 @@ describe('isValidSignals', () => {
     expect(isValidSignals({ battery: null })).toBe(false);
   });
 
-  it('rejects non-number level', () => {
+  it('rejects non-number battery level', () => {
     expect(isValidSignals({ battery: { level: '0.5', charging: true } })).toBe(false);
   });
 
-  it('rejects non-boolean charging', () => {
+  it('rejects non-boolean battery charging', () => {
     expect(isValidSignals({ battery: { level: 0.5, charging: 'yes' } })).toBe(false);
   });
 });

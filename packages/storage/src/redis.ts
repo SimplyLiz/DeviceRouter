@@ -25,26 +25,42 @@ export class RedisStorageAdapter implements StorageAdapter {
   }
 
   async get(sessionToken: string): Promise<DeviceProfile | null> {
-    const data = await this.client.get(this.key(sessionToken));
-    if (!data) return null;
-    return JSON.parse(data) as DeviceProfile;
+    try {
+      const data = await this.client.get(this.key(sessionToken));
+      if (!data) return null;
+      return JSON.parse(data) as DeviceProfile;
+    } catch {
+      return null;
+    }
   }
 
   async set(sessionToken: string, profile: DeviceProfile, ttlSeconds: number): Promise<void> {
-    await this.client.set(
-      this.key(sessionToken),
-      JSON.stringify(profile),
-      'EX',
-      String(ttlSeconds),
-    );
+    try {
+      await this.client.set(
+        this.key(sessionToken),
+        JSON.stringify(profile),
+        'EX',
+        String(ttlSeconds),
+      );
+    } catch {
+      // Gracefully degrade — profile won't be stored, probe will re-run next session
+    }
   }
 
   async delete(sessionToken: string): Promise<void> {
-    await this.client.del(this.key(sessionToken));
+    try {
+      await this.client.del(this.key(sessionToken));
+    } catch {
+      // Gracefully degrade — key will expire via TTL
+    }
   }
 
   async exists(sessionToken: string): Promise<boolean> {
-    const result = await this.client.exists(this.key(sessionToken));
-    return result > 0;
+    try {
+      const result = await this.client.exists(this.key(sessionToken));
+      return result > 0;
+    } catch {
+      return false;
+    }
   }
 }

@@ -237,12 +237,13 @@ pnpm dev
 
 Open http://localhost:3000 — the probe runs on first load, refresh to see your detected profile. Use `?force=lite` or `?force=full` to preview each mode without a real device.
 
-| Framework | Guide                                                       | Example                                  |
-| --------- | ----------------------------------------------------------- | ---------------------------------------- |
-| Express   | [Quick Start](docs/getting-started.md#quick-start--express) | [express-basic](examples/express-basic/) |
-| Fastify   | [Quick Start](docs/getting-started.md#quick-start--fastify) | [fastify-basic](examples/fastify-basic/) |
-| Hono      | [Quick Start](docs/getting-started.md#quick-start--hono)    | [hono-basic](examples/hono-basic/)       |
-| Koa       | [Quick Start](docs/getting-started.md#quick-start--koa)     | [koa-basic](examples/koa-basic/)         |
+| Framework     | Guide                                                       | Example                                  |
+| ------------- | ----------------------------------------------------------- | ---------------------------------------- |
+| Express       | [Quick Start](docs/getting-started.md#quick-start--express) | [express-basic](examples/express-basic/) |
+| Fastify       | [Quick Start](docs/getting-started.md#quick-start--fastify) | [fastify-basic](examples/fastify-basic/) |
+| Hono          | [Quick Start](docs/getting-started.md#quick-start--hono)    | [hono-basic](examples/hono-basic/)       |
+| Koa           | [Quick Start](docs/getting-started.md#quick-start--koa)     | [koa-basic](examples/koa-basic/)         |
+| Observability | [Observability guide](docs/observability.md)                | [observability](examples/observability/) |
 
 ## Documentation
 

@@ -16,12 +16,13 @@ The device profile follows a versioned JSON Schema (`schemas/device-profile.v1.j
 
 All fields are optional — the probe collects what it can based on browser API availability.
 
+> **Note:** The probe also collects `userAgent` for bot/crawler filtering, but it is stripped before the profile is stored.
+
 | Field                  | Type                                   | Description                        |
 | ---------------------- | -------------------------------------- | ---------------------------------- |
 | `hardwareConcurrency`  | `number`                               | Logical CPU cores                  |
 | `deviceMemory`         | `number`                               | Approximate device memory in GB    |
 | `connection`           | `ConnectionInfo`                       | Network connection info            |
-| `userAgent`            | `string`                               | Navigator user agent string        |
 | `viewport`             | `Viewport`                             | Viewport dimensions                |
 | `pixelRatio`           | `number`                               | Device pixel ratio                 |
 | `prefersReducedMotion` | `boolean`                              | Prefers reduced motion media query |

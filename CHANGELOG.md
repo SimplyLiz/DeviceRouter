@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Breaking Changes
+
+- **userAgent stripped from stored profiles** — `userAgent` is no longer persisted in device profiles. It is still collected by the probe and used for bot/crawler filtering at the endpoint, but stripped before storage. Stored `RawSignals` no longer contain a `userAgent` field
+
 ### Documentation
 
 - **Deployment guide** — New `docs/deployment.md` covering Docker (Node.js + Redis), Cloudflare Workers (Hono + KV), and serverless platforms (Lambda, Vercel). Includes Dockerfiles, docker-compose, custom StorageAdapter examples for edge runtimes, and production checklists

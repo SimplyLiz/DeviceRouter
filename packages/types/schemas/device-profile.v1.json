@@ -48,10 +48,6 @@
         "connection": {
           "$ref": "#/definitions/ConnectionInfo"
         },
-        "userAgent": {
-          "type": "string",
-          "description": "Navigator user agent string"
-        },
         "viewport": {
           "$ref": "#/definitions/Viewport"
         },

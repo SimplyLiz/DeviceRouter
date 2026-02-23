@@ -9,6 +9,10 @@
 ### Documentation
 
 - **Observability example** — New `examples/observability/` with Docker Compose stack (Express + Redis + Prometheus + Grafana), all 6 Prometheus metrics wired to `onEvent`, and a pre-built Grafana dashboard. Adds `device_router_hint_total` metric for tracking hint activation rates
+- **Meta-framework integration guide** — New `docs/meta-frameworks.md` covering Next.js (App Router), Remix, and SvelteKit integration using `classifyFromHeaders` and `deriveHints` directly from `@device-router/types`
+- **Client Hints browser compatibility** — Added browser compatibility table to the Getting Started guide documenting which Client Hints headers are available on Chrome, Edge, Safari, and Firefox, and what happens when headers are missing
+- **Rate limiting** — Added production checklist note that the probe endpoint has no built-in rate limiting and should be protected via reverse proxy or framework-level rate limiter
+- **Profile versioning** — Documented that changing classification thresholds on redeploy does not re-classify existing stored profiles, with strategies to rotate stale profiles
 
 ## 0.3.0 (2026-02-23)
 

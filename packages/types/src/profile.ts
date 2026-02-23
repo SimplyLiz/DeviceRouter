@@ -53,8 +53,13 @@ export interface RenderingHints {
   disable3dEffects: boolean;
 }
 
+export type ProfileSource = 'probe' | 'headers' | 'fallback';
+
+export type FallbackProfile = 'conservative' | 'optimistic' | DeviceTiers;
+
 export interface ClassifiedProfile {
   profile: DeviceProfile;
   tiers: DeviceTiers;
   hints: RenderingHints;
+  source: ProfileSource;
 }

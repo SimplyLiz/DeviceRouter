@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import type { StorageAdapter } from '@device-router/storage';
-import type { TierThresholds } from '@device-router/types';
+import type { TierThresholds, FallbackProfile } from '@device-router/types';
 import type { Context } from 'koa';
 import { createMiddleware } from './middleware.js';
 import { createProbeEndpoint } from './endpoint.js';
@@ -14,6 +14,8 @@ export interface DeviceRouterOptions {
   ttl?: number;
   thresholds?: TierThresholds;
   rejectBots?: boolean;
+  fallbackProfile?: FallbackProfile;
+  classifyFromHeaders?: boolean;
   injectProbe?: boolean;
   probePath?: string;
   probeNonce?: string | ((ctx: Context) => string);
@@ -27,6 +29,8 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     ttl = 86400,
     thresholds,
     rejectBots,
+    fallbackProfile,
+    classifyFromHeaders,
     injectProbe = false,
     probePath,
     probeNonce,
@@ -37,7 +41,13 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     probeEndpoint: ReturnType<typeof createProbeEndpoint>;
     injectionMiddleware?: ReturnType<typeof createInjectionMiddleware>;
   } = {
-    middleware: createMiddleware({ storage, cookieName, thresholds }),
+    middleware: createMiddleware({
+      storage,
+      cookieName,
+      thresholds,
+      fallbackProfile,
+      classifyFromHeaders,
+    }),
     probeEndpoint: createProbeEndpoint({ storage, cookieName, cookiePath, ttl, rejectBots }),
   };
 

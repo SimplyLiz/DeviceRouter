@@ -18,14 +18,25 @@ function createMockStorage(): StorageAdapter & { _store: Map<string, DeviceProfi
   } as StorageAdapter & { _store: Map<string, DeviceProfile> };
 }
 
-function createMockCtx(cookieValues: Record<string, string> = {}) {
+function createMockCtx(
+  cookieValues: Record<string, string> = {},
+  headers: Record<string, string> = {},
+) {
+  const responseHeaders: Record<string, string> = {};
   return {
     cookies: {
       get: vi.fn((name: string) => cookieValues[name]),
       set: vi.fn(),
     },
+    request: {
+      headers,
+    },
     state: {} as Record<string, unknown>,
-  } as unknown as import('koa').Context;
+    set: vi.fn((name: string, value: string) => {
+      responseHeaders[name] = value;
+    }),
+    _responseHeaders: responseHeaders,
+  } as unknown as import('koa').Context & { _responseHeaders: Record<string, string> };
 }
 
 describe('createMiddleware (koa)', () => {
@@ -78,6 +89,7 @@ describe('createMiddleware (koa)', () => {
     expect(ctx.state.deviceProfile!.tiers.cpu).toBe('high');
     expect(ctx.state.deviceProfile!.tiers.memory).toBe('high');
     expect(ctx.state.deviceProfile!.hints.deferHeavyComponents).toBe(false);
+    expect(ctx.state.deviceProfile!.source).toBe('probe');
     expect(next).toHaveBeenCalled();
   });
 
@@ -112,5 +124,132 @@ describe('createMiddleware (koa)', () => {
     await mw(ctx, next);
 
     expect(ctx.state.deviceProfile!.tiers.cpu).toBe('low');
+  });
+
+  describe('fallbackProfile', () => {
+    it('returns conservative fallback when configured', async () => {
+      const mw = createMiddleware({ storage, fallbackProfile: 'conservative' });
+      const ctx = createMockCtx();
+      const next = vi.fn();
+
+      await mw(ctx, next);
+
+      expect(ctx.state.deviceProfile!.source).toBe('fallback');
+      expect(ctx.state.deviceProfile!.tiers.cpu).toBe('low');
+      expect(ctx.state.deviceProfile!.tiers.connection).toBe('3g');
+    });
+
+    it('returns optimistic fallback when configured', async () => {
+      const mw = createMiddleware({ storage, fallbackProfile: 'optimistic' });
+      const ctx = createMockCtx();
+      const next = vi.fn();
+
+      await mw(ctx, next);
+
+      expect(ctx.state.deviceProfile!.source).toBe('fallback');
+      expect(ctx.state.deviceProfile!.tiers.cpu).toBe('high');
+      expect(ctx.state.deviceProfile!.tiers.connection).toBe('fast');
+    });
+
+    it('returns custom DeviceTiers fallback', async () => {
+      const mw = createMiddleware({
+        storage,
+        fallbackProfile: { cpu: 'mid', memory: 'mid', connection: '4g', gpu: 'low' },
+      });
+      const ctx = createMockCtx();
+      const next = vi.fn();
+
+      await mw(ctx, next);
+
+      expect(ctx.state.deviceProfile!.source).toBe('fallback');
+      expect(ctx.state.deviceProfile!.tiers).toEqual({
+        cpu: 'mid',
+        memory: 'mid',
+        connection: '4g',
+        gpu: 'low',
+      });
+    });
+
+    it('falls back when cookie exists but profile not in storage', async () => {
+      const mw = createMiddleware({ storage, fallbackProfile: 'conservative' });
+      const ctx = createMockCtx({ dr_session: 'expired-token' });
+      const next = vi.fn();
+
+      await mw(ctx, next);
+
+      expect(ctx.state.deviceProfile!.source).toBe('fallback');
+    });
+  });
+
+  describe('classifyFromHeaders', () => {
+    it('classifies mobile UA from headers', async () => {
+      const mw = createMiddleware({ storage, classifyFromHeaders: true });
+      const ctx = createMockCtx(
+        {},
+        { 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) AppleWebKit/605.1.15 Mobile' },
+      );
+      const next = vi.fn();
+
+      await mw(ctx, next);
+
+      expect(ctx.state.deviceProfile!.source).toBe('headers');
+      expect(ctx.state.deviceProfile!.tiers.cpu).toBe('low');
+    });
+
+    it('uses Client Hints when present', async () => {
+      const mw = createMiddleware({ storage, classifyFromHeaders: true });
+      const ctx = createMockCtx(
+        {},
+        {
+          'user-agent': 'Mozilla/5.0 Chrome/120.0.0.0',
+          'device-memory': '2',
+          'save-data': 'on',
+        },
+      );
+      const next = vi.fn();
+
+      await mw(ctx, next);
+
+      expect(ctx.state.deviceProfile!.tiers.memory).toBe('low');
+      expect(ctx.state.deviceProfile!.tiers.connection).toBe('3g');
+    });
+
+    it('takes priority over fallbackProfile', async () => {
+      const mw = createMiddleware({
+        storage,
+        classifyFromHeaders: true,
+        fallbackProfile: 'conservative',
+      });
+      const ctx = createMockCtx(
+        {},
+        { 'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X) Chrome/120.0.0.0' },
+      );
+      const next = vi.fn();
+
+      await mw(ctx, next);
+
+      expect(ctx.state.deviceProfile!.source).toBe('headers');
+      expect(ctx.state.deviceProfile!.tiers.cpu).toBe('high');
+    });
+
+    it('sets Accept-CH header when enabled', async () => {
+      const mw = createMiddleware({ storage, classifyFromHeaders: true });
+      const ctx = createMockCtx();
+      const next = vi.fn();
+
+      await mw(ctx, next);
+
+      expect(ctx._responseHeaders['Accept-CH']).toContain('Device-Memory');
+    });
+
+    it('does not set Accept-CH header by default', async () => {
+      const mw = createMiddleware({ storage });
+      const ctx = createMockCtx();
+      const next = vi.fn();
+
+      await mw(ctx, next);
+
+      expect(ctx._responseHeaders['Accept-CH']).toBeUndefined();
+    });
   });
 });

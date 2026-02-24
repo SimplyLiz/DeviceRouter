@@ -59,7 +59,7 @@ describe('createMiddleware (hono)', () => {
     });
 
     const res = await app.request('/test', {
-      headers: { Cookie: 'dr_session=tok1' },
+      headers: { Cookie: 'device-router-session=tok1' },
     });
     const data = (await res.json()) as { cpu: string; defer: boolean; source: string };
     expect(data.cpu).toBe('high');
@@ -88,7 +88,7 @@ describe('createMiddleware (hono)', () => {
     });
 
     const res = await app.request('/test', {
-      headers: { Cookie: 'dr_session=tok2' },
+      headers: { Cookie: 'device-router-session=tok2' },
     });
     const data = (await res.json()) as { cpu: string };
     expect(data.cpu).toBe('low');
@@ -142,7 +142,7 @@ describe('createMiddleware (hono)', () => {
       app.get('/test', (c) => c.json(c.get('deviceProfile')));
 
       const res = await app.request('/test', {
-        headers: { Cookie: 'dr_session=expired' },
+        headers: { Cookie: 'device-router-session=expired' },
       });
       const data = (await res.json()) as ClassifiedProfile;
       expect(data.source).toBe('fallback');
@@ -240,7 +240,7 @@ describe('createMiddleware (hono)', () => {
       app.get('/test', (c) => c.json(c.get('deviceProfile')));
 
       await app.request('/test', {
-        headers: { Cookie: 'dr_session=tok1' },
+        headers: { Cookie: 'device-router-session=tok1' },
       });
 
       expect(onEvent).toHaveBeenCalledOnce();
@@ -303,7 +303,7 @@ describe('createMiddleware (hono)', () => {
       app.get('/test', (c) => c.json(c.get('deviceProfile')));
 
       const res = await app.request('/test', {
-        headers: { Cookie: 'dr_session=tok1' },
+        headers: { Cookie: 'device-router-session=tok1' },
       });
 
       expect(res.status).toBe(500);
@@ -334,7 +334,7 @@ describe('createMiddleware (hono)', () => {
       app.get('/test', (c) => c.json({ ok: true }));
 
       const res = await app.request('/test', {
-        headers: { Cookie: 'dr_session=tok1' },
+        headers: { Cookie: 'device-router-session=tok1' },
       });
 
       expect(res.status).toBe(200);

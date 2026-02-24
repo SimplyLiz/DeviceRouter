@@ -27,7 +27,7 @@ export interface DeviceRouterOptions {
 export function createDeviceRouter(options: DeviceRouterOptions) {
   const {
     storage,
-    cookieName = 'dr_session',
+    cookieName = 'device-router-session',
     cookiePath = '/',
     cookieSecure,
     ttl = 86400,

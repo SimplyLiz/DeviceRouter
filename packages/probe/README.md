@@ -13,21 +13,21 @@ pnpm add @device-router/probe
 The probe runs once per session in the browser. It collects device signals using standard browser APIs, then POSTs them to your server's probe endpoint. A session cookie prevents repeated collection.
 
 ```
-Browser                          Server
-  │                                │
-  │  collectSignals()              │
-  │  getBattery()                  │
-  │                                │
-  │  POST /device-router/probe     │
-  │  ─────────────────────────>    │
-  │  { hardwareConcurrency: 8,     │
-  │    deviceMemory: 8, ... }      │
-  │                                │
-  │  { sessionToken: "abc123" }    │
-  │  <─────────────────────────    │
-  │                                │
-  │  Set cookie: dr_session=abc123 │
-  └────────────────────────────────┘
+Browser                                      Server
+  │                                            │
+  │  collectSignals()                          │
+  │  getBattery()                              │
+  │                                            │
+  │  POST /device-router/probe                 │
+  │  ─────────────────────────────────────>    │
+  │  { hardwareConcurrency: 8,                 │
+  │    deviceMemory: 8, ... }                  │
+  │                                            │
+  │  { sessionToken: "abc123" }                │
+  │  <─────────────────────────────────────    │
+  │                                            │
+  │  Set cookie: device-router-session=abc123  │
+  └────────────────────────────────────────────┘
 ```
 
 ## Usage
@@ -60,7 +60,7 @@ import { runProbe } from '@device-router/probe';
 
 await runProbe({
   endpoint: '/device-router/probe', // default
-  cookieName: 'dr_session', // default
+  cookieName: 'device-router-session', // default
   cookiePath: '/', // default
 });
 ```

@@ -52,7 +52,7 @@ describe('createProbeEndpoint', () => {
       sessionToken: expect.any(String),
     });
     expect(res.cookie).toHaveBeenCalledWith(
-      'dr_session',
+      'device-router-session',
       expect.any(String),
       expect.objectContaining({
         httpOnly: true,
@@ -70,7 +70,7 @@ describe('createProbeEndpoint', () => {
     await handler(req, res);
 
     expect(res.cookie).toHaveBeenCalledWith(
-      'dr_session',
+      'device-router-session',
       expect.any(String),
       expect.objectContaining({ secure: false }),
     );
@@ -84,7 +84,7 @@ describe('createProbeEndpoint', () => {
     await handler(req, res);
 
     expect(res.cookie).toHaveBeenCalledWith(
-      'dr_session',
+      'device-router-session',
       expect.any(String),
       expect.objectContaining({ secure: true }),
     );
@@ -92,7 +92,10 @@ describe('createProbeEndpoint', () => {
 
   it('reuses existing session token from cookie', async () => {
     const handler = createProbeEndpoint({ storage });
-    const req = createMockReq({ hardwareConcurrency: 4 }, { dr_session: 'existing-tok' });
+    const req = createMockReq(
+      { hardwareConcurrency: 4 },
+      { 'device-router-session': 'existing-tok' },
+    );
     const res = createMockRes();
 
     await handler(req, res);

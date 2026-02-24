@@ -17,7 +17,7 @@ import { runProbe } from '@device-router/probe';
 
 await runProbe({
   endpoint: '/device-router/probe', // POST endpoint
-  cookieName: 'dr_session', // Session cookie name
+  cookieName: 'device-router-session', // Session cookie name
   cookiePath: '/', // Cookie path
 });
 ```

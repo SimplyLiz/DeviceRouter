@@ -48,7 +48,7 @@ describe('createProbeEndpoint (koa)', () => {
     expect((ctx.body as { ok: boolean }).ok).toBe(true);
     expect((ctx.body as { sessionToken: string }).sessionToken).toBeTruthy();
     expect(ctx.cookies.set).toHaveBeenCalledWith(
-      'dr_session',
+      'device-router-session',
       expect.any(String),
       expect.objectContaining({
         httpOnly: true,
@@ -65,7 +65,7 @@ describe('createProbeEndpoint (koa)', () => {
     await handler(ctx);
 
     expect(ctx.cookies.set).toHaveBeenCalledWith(
-      'dr_session',
+      'device-router-session',
       expect.any(String),
       expect.objectContaining({ secure: false }),
     );
@@ -78,7 +78,7 @@ describe('createProbeEndpoint (koa)', () => {
     await handler(ctx);
 
     expect(ctx.cookies.set).toHaveBeenCalledWith(
-      'dr_session',
+      'device-router-session',
       expect.any(String),
       expect.objectContaining({ secure: true }),
     );
@@ -86,7 +86,10 @@ describe('createProbeEndpoint (koa)', () => {
 
   it('reuses existing session token from cookie', async () => {
     const handler = createProbeEndpoint({ storage });
-    const ctx = createMockCtx({ hardwareConcurrency: 4 }, { dr_session: 'existing-tok' });
+    const ctx = createMockCtx(
+      { hardwareConcurrency: 4 },
+      { 'device-router-session': 'existing-tok' },
+    );
 
     await handler(ctx);
 

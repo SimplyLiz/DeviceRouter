@@ -55,7 +55,7 @@ describe('createMiddleware', () => {
 
   it('sets deviceProfile to null when profile not found', async () => {
     const hook = createMiddleware({ storage });
-    const req = createMockReq({ dr_session: 'unknown' });
+    const req = createMockReq({ 'device-router-session': 'unknown' });
 
     await hook(req, createMockReply());
 
@@ -73,7 +73,7 @@ describe('createMiddleware', () => {
     storage._store.set('tok1', profile);
 
     const hook = createMiddleware({ storage });
-    const req = createMockReq({ dr_session: 'tok1' });
+    const req = createMockReq({ 'device-router-session': 'tok1' });
 
     await hook(req, createMockReply());
 
@@ -108,7 +108,7 @@ describe('createMiddleware', () => {
       storage,
       thresholds: { cpu: { lowUpperBound: 6, midUpperBound: 8 } },
     });
-    const req = createMockReq({ dr_session: 'tok2' });
+    const req = createMockReq({ 'device-router-session': 'tok2' });
 
     await hook(req, createMockReply());
 
@@ -159,7 +159,7 @@ describe('createMiddleware', () => {
 
     it('falls back when cookie exists but profile not in storage', async () => {
       const hook = createMiddleware({ storage, fallbackProfile: 'conservative' });
-      const req = createMockReq({ dr_session: 'expired-token' });
+      const req = createMockReq({ 'device-router-session': 'expired-token' });
 
       await hook(req, createMockReply());
 
@@ -249,7 +249,7 @@ describe('createMiddleware', () => {
       storage._store.set('tok1', profile);
 
       const hook = createMiddleware({ storage, onEvent });
-      const req = createMockReq({ dr_session: 'tok1' });
+      const req = createMockReq({ 'device-router-session': 'tok1' });
 
       await hook(req, createMockReply());
 
@@ -311,7 +311,7 @@ describe('createMiddleware', () => {
       storage.get = vi.fn().mockRejectedValue(new Error('Redis down'));
 
       const hook = createMiddleware({ storage, onEvent });
-      const req = createMockReq({ dr_session: 'tok1' });
+      const req = createMockReq({ 'device-router-session': 'tok1' });
 
       await expect(hook(req, createMockReply())).rejects.toThrow('Redis down');
 
@@ -342,7 +342,7 @@ describe('createMiddleware', () => {
       storage._store.set('tok1', profile);
 
       const hook = createMiddleware({ storage, onEvent });
-      const req = createMockReq({ dr_session: 'tok1' });
+      const req = createMockReq({ 'device-router-session': 'tok1' });
 
       await hook(req, createMockReply());
 

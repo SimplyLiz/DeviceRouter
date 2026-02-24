@@ -35,7 +35,7 @@ export type DeviceRouterEnv = {
 export function createMiddleware(options: MiddlewareOptions): MiddlewareHandler<DeviceRouterEnv> {
   const {
     storage,
-    cookieName = 'dr_session',
+    cookieName = 'device-router-session',
     thresholds,
     fallbackProfile,
     classifyFromHeaders: useHeaders,

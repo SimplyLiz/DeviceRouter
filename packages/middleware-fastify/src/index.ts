@@ -2,8 +2,8 @@ import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import type { StorageAdapter } from '@device-router/storage';
 import type { TierThresholds, FallbackProfile, OnEventCallback } from '@device-router/types';
-import { validateThresholds } from '@device-router/types';
-import type { FastifyRequest } from 'fastify';
+import { validateThresholds, createProbeHealthCheck } from '@device-router/types';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 import fp from 'fastify-plugin';
 import { createMiddleware } from './middleware.js';
 import { createProbeEndpoint } from './endpoint.js';
@@ -44,7 +44,18 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
 
   if (thresholds) validateThresholds(thresholds);
 
-  const hook = createMiddleware({
+  const isNonProd = process.env.NODE_ENV !== 'production';
+  const effectiveProbePath = probePath ?? '/device-router/probe';
+
+  if (isNonProd) {
+    console.info(`[DeviceRouter] Probe endpoint expected at POST ${effectiveProbePath}`);
+  }
+
+  const health = isNonProd
+    ? createProbeHealthCheck({ onEvent, probePath: effectiveProbePath })
+    : null;
+
+  const rawHook = createMiddleware({
     storage,
     cookieName,
     thresholds,
@@ -52,6 +63,13 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     classifyFromHeaders,
     onEvent,
   });
+
+  const hook = health
+    ? async (req: FastifyRequest, reply: FastifyReply) => {
+        health.onMiddlewareHit();
+        return rawHook(req, reply);
+      }
+    : rawHook;
 
   let injectionMiddleware: ReturnType<typeof createInjectionMiddleware> | undefined;
 
@@ -80,17 +98,24 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     { name: 'device-router' },
   );
 
+  const rawEndpoint = createProbeEndpoint({
+    storage,
+    cookieName,
+    cookiePath,
+    cookieSecure,
+    ttl,
+    rejectBots,
+    onEvent,
+  });
+
   return {
     middleware,
-    probeEndpoint: createProbeEndpoint({
-      storage,
-      cookieName,
-      cookiePath,
-      cookieSecure,
-      ttl,
-      rejectBots,
-      onEvent,
-    }),
+    probeEndpoint: health
+      ? async (req: FastifyRequest, reply: FastifyReply) => {
+          health.onProbeReceived();
+          return rawEndpoint(req, reply);
+        }
+      : rawEndpoint,
     injectionMiddleware,
   };
 }

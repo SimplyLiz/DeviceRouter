@@ -5,7 +5,7 @@ export interface InjectOptions {
   nonce?: string | ((req: FastifyRequest) => string);
 }
 
-export function createInjectionHook(options: InjectOptions) {
+export function createInjectionMiddleware(options: InjectOptions) {
   const { probeScript, nonce } = options;
 
   return (

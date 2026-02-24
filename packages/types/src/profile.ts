@@ -50,7 +50,6 @@ export interface RenderingHints {
   serveMinimalCSS: boolean;
   reduceAnimations: boolean;
   useImagePlaceholders: boolean;
-  disableAutoplay: boolean;
   preferServerRendering: boolean;
   disable3dEffects: boolean;
 }

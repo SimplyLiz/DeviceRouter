@@ -11,7 +11,6 @@ const sampleEvent: DeviceRouterEvent = {
     serveMinimalCSS: false,
     reduceAnimations: false,
     useImagePlaceholders: false,
-    disableAutoplay: false,
     preferServerRendering: false,
     disable3dEffects: false,
   },

@@ -74,6 +74,5 @@ The full classified result attached to requests by the middleware.
 | `serveMinimalCSS`       | `boolean` | Low-end device                                         |
 | `reduceAnimations`      | `boolean` | Low-end device, prefers reduced motion, or low battery |
 | `useImagePlaceholders`  | `boolean` | Slow connection (2g/3g)                                |
-| `disableAutoplay`       | `boolean` | Low-end device, slow connection, or low battery        |
 | `preferServerRendering` | `boolean` | Low-end device                                         |
 | `disable3dEffects`      | `boolean` | No GPU or software renderer                            |

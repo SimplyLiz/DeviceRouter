@@ -21,7 +21,7 @@ const tiers = classify({
 
 Derives rendering hints from device tiers.
 
-The `battery` signal bypasses tier classification entirely — it's transient state, not a capability. When the device is unplugged and below 15% charge, `deferHeavyComponents`, `reduceAnimations`, and `disableAutoplay` are forced on to conserve power.
+The `battery` signal bypasses tier classification entirely — it's transient state, not a capability. When the device is unplugged and below 15% charge, `deferHeavyComponents` and `reduceAnimations` are forced on to conserve power.
 
 ```typescript
 import { classify, deriveHints } from '@device-router/types';

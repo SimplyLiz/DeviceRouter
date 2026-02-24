@@ -8,6 +8,7 @@
 - **`classify()` and `deriveHints()` now accept `StoredSignals` instead of `RawSignals`** — These functions never used `userAgent` or `viewport` (which are stripped before storage). The narrower type makes the API honest. Existing call sites are unaffected — `RawSignals` is structurally assignable to `StoredSignals`
 - **`profile:store` event now carries `StoredSignals` instead of `RawSignals`** — The event previously emitted the raw probe payload (including `userAgent`/`viewport`), not what was actually stored. The `signals` field now matches the persisted data. `bot:reject` still carries `RawSignals` (it fires before stripping)
 - **Rename default cookie `dr_session` → `device-router-session`** — Self-documenting name before 1.0 locks the cookie in. If you hardcode `cookieName: 'dr_session'` in your options you are unaffected; if you rely on the default, existing sessions will reset once on deploy
+- **Remove `disableAutoplay` rendering hint** — `disableAutoplay` triggered on identical conditions to `deferHeavyComponents` (`isLowEnd || isSlowConnection || isBatteryConstrained`). Use `deferHeavyComponents` instead
 - **middleware-fastify: normalized return shape** — `createDeviceRouter()` now returns raw Fastify hooks instead of a `fastify-plugin` wrapped plugin. Migrate `await app.register(middleware)` → `app.addHook('preHandler', middleware)`. When using `injectProbe: true`, register the injection hook separately: `app.addHook('onSend', injectionMiddleware)`. Removed `fastify-plugin` dependency
 
 ### Features
@@ -60,7 +61,7 @@
 ### Features
 
 - **GPU detection** — Classify GPU tier from WebGL renderer string: software renderers → `low`, RTX/RX 5000+/Apple M-series → `high`, everything else → `mid`
-- **Battery API signal** — Collect battery level and charging status via `navigator.getBattery()` (Chromium-only, silently skipped elsewhere). When unplugged and below 15%, `deferHeavyComponents`, `reduceAnimations`, and `disableAutoplay` are forced on
+- **Battery API signal** — Collect battery level and charging status via `navigator.getBattery()` (Chromium-only, silently skipped elsewhere). When unplugged and below 15%, `deferHeavyComponents` and `reduceAnimations` are forced on
 - **Signal validation** — New `isValidSignals()` type guard for validating incoming probe payloads
 - **Custom GPU thresholds** — `softwarePattern` and `highEndPattern` are configurable via `GpuThresholds`
 

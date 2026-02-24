@@ -367,6 +367,5 @@ Based on device tiers, the middleware provides boolean rendering hints:
 - `serveMinimalCSS` — Send reduced stylesheets
 - `reduceAnimations` — Disable or simplify animations
 - `useImagePlaceholders` — Show placeholders instead of full images
-- `disableAutoplay` — Prevent auto-playing media
 - `preferServerRendering` — Favor SSR over client-side rendering
 - `disable3dEffects` — Disable WebGL/3D content (no GPU or software renderer)

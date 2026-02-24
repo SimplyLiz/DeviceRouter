@@ -1,6 +1,6 @@
 {
   "name": "@device-router/probe",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "module",
   "description": "Lightweight (~1 KB gzipped) client-side probe for collecting device capability signals",
   "license": "MIT",

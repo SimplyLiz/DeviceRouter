@@ -115,31 +115,13 @@ app.listen(port, () => console.log(`Listening on :${port}`));
 - **TTL** — the default session TTL is 24 hours. Lower it if you want profiles to refresh more frequently.
 - **Rate limiting** — DeviceRouter does not rate-limit the probe endpoint. Add rate limiting via your reverse proxy (nginx `limit_req`, Cloudflare rate limiting) or a framework-level rate limiter to prevent abuse.
 - **Error handler (Express)** — Express's default error handler renders stack traces in HTML responses. Malformed JSON sent to the probe endpoint will trigger this before DeviceRouter code runs. Add a [custom error handler](https://expressjs.com/en/guide/error-handling.html) to return clean JSON errors in production.
+- **Threshold changes take effect immediately** — storage holds raw signals, not classification results. The middleware calls `classify()` with current thresholds on every request, so updating thresholds requires no cache busting, storage flushing, or cookie rotation.
+
 ## Changing classification thresholds
 
-Stored profiles contain raw signals, not classification results. Classification happens on every request when the middleware reads a profile from storage. **However**, profiles that were stored under a previous deploy are not automatically re-collected — the same raw signals are re-classified with the new thresholds.
+Storage holds raw signals, not tiers or hints. The middleware calls `classify(signals, thresholds)` on every request using your current threshold configuration. **Changing thresholds takes effect immediately** — there is no stale-classification problem and no need to flush Redis, shorten TTLs, or rotate cookie names.
 
-This is usually fine: the raw signals don't change, and re-classification with updated thresholds produces correct results for the data that was collected. The issue arises when your new thresholds rely on signals that the **old probe version didn't collect**, or when you want a clean break from stale data.
-
-### When you need to worry
-
-- You changed the probe to collect **new signals** and your thresholds depend on them — old profiles won't have those fields
-- You want to guarantee every user gets a fresh classification from a clean probe submission
-
-### Mitigation strategies
-
-1. **Shorten TTL during rollout** — set `ttl: 3600` (1 hour) in the deploy that changes thresholds, then restore the normal TTL in the next deploy. Profiles rotate naturally.
-
-2. **Flush storage on deploy** — run `FLUSHDB` (Redis) or clear your storage adapter as a deploy step. All users re-probe on their next visit.
-
-   ```bash
-   # In your deploy script
-   redis-cli -u "$REDIS_URL" FLUSHDB
-   ```
-
-3. **Key-prefix rotation** — change `cookieName` (e.g. `dr_session_v2`). Existing cookies won't match, so every user starts fresh. Old keys expire via TTL.
-
-4. **Do nothing** — if your threshold change only adjusts numeric boundaries (e.g. moving the `cpu` high/mid boundary from 6 to 8 cores), existing raw signals are re-classified correctly on the next request. No action needed.
+The one edge case is deploying a **new probe version** that collects signal fields the old probe didn't. Stored profiles from the old probe won't have those fields. Classifiers handle missing fields by defaulting to conservative tiers, so the impact is limited: affected users simply classify conservatively until their profile expires and they re-probe with the new version.
 
 ## Cloudflare Workers (Edge)
 

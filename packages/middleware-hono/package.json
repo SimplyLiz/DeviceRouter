@@ -1,6 +1,6 @@
 {
   "name": "@device-router/middleware-hono",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "module",
   "description": "Hono middleware for DeviceRouter — device classification and rendering hints, edge-compatible",
   "license": "MIT",

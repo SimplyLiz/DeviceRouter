@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## 0.4.0 (2026-02-24)
+
+### Features
+
+- **Observability hooks** — New `onEvent` callback option on all middleware packages. Emits `profile:classify`, `profile:store`, `bot:reject`, and `error` events for plugging in logging, metrics, and monitoring without middleware wrapping. Callbacks are fire-and-forget with built-in error isolation
+
+### Documentation
+
+- **Observability example** — New `examples/observability/` with Docker Compose stack (Express + Redis + Prometheus + Grafana), all 6 Prometheus metrics wired to `onEvent`, and a pre-built Grafana dashboard. Adds `device_router_hint_total` metric for tracking hint activation rates
+- **Meta-framework integration guide** — New `docs/meta-frameworks.md` covering Next.js (App Router), Remix, and SvelteKit integration using `classifyFromHeaders` and `deriveHints` directly from `@device-router/types`
+- **Client Hints browser compatibility** — Added browser compatibility table to the Getting Started guide documenting which Client Hints headers are available on Chrome, Edge, Safari, and Firefox, and what happens when headers are missing
+- **Rate limiting** — Added production checklist note that the probe endpoint has no built-in rate limiting and should be protected via reverse proxy or framework-level rate limiter
+- **Threshold staleness fix** — Corrected deployment guide: threshold changes take effect immediately since classification runs on every request. Removed misleading flush/TTL/cookie-rotation mitigation strategies
+
 ## 0.3.0 (2026-02-23)
 
 ### Breaking Changes

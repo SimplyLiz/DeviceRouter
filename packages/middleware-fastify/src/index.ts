@@ -1,13 +1,13 @@
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import type { StorageAdapter } from '@device-router/storage';
-import type { TierThresholds, FallbackProfile } from '@device-router/types';
-import { validateThresholds } from '@device-router/types';
-import type { FastifyRequest } from 'fastify';
+import type { TierThresholds, FallbackProfile, OnEventCallback } from '@device-router/types';
+import { validateThresholds, createProbeHealthCheck } from '@device-router/types';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 import fp from 'fastify-plugin';
 import { createMiddleware } from './middleware.js';
 import { createProbeEndpoint } from './endpoint.js';
-import { createInjectionHook } from './inject.js';
+import { createInjectionMiddleware } from './inject.js';
 
 export interface DeviceRouterOptions {
   storage: StorageAdapter;
@@ -19,6 +19,7 @@ export interface DeviceRouterOptions {
   rejectBots?: boolean;
   fallbackProfile?: FallbackProfile;
   classifyFromHeaders?: boolean;
+  onEvent?: OnEventCallback;
   injectProbe?: boolean;
   probePath?: string;
   probeNonce?: string | ((req: FastifyRequest) => string);
@@ -35,6 +36,7 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     rejectBots,
     fallbackProfile,
     classifyFromHeaders,
+    onEvent,
     injectProbe = false,
     probePath,
     probeNonce,
@@ -42,15 +44,34 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
 
   if (thresholds) validateThresholds(thresholds);
 
-  const hook = createMiddleware({
+  const isNonProd = process.env.NODE_ENV !== 'production';
+  const effectiveProbePath = probePath ?? '/device-router/probe';
+
+  if (isNonProd) {
+    console.info(`[DeviceRouter] Probe endpoint expected at POST ${effectiveProbePath}`);
+  }
+
+  const health = isNonProd
+    ? createProbeHealthCheck({ onEvent, probePath: effectiveProbePath })
+    : null;
+
+  const rawHook = createMiddleware({
     storage,
     cookieName,
     thresholds,
     fallbackProfile,
     classifyFromHeaders,
+    onEvent,
   });
 
-  let injectionHook: ReturnType<typeof createInjectionHook> | undefined;
+  const hook = health
+    ? async (req: FastifyRequest, reply: FastifyReply) => {
+        health.onMiddlewareHit();
+        return rawHook(req, reply);
+      }
+    : rawHook;
+
+  let injectionMiddleware: ReturnType<typeof createInjectionMiddleware> | undefined;
 
   if (injectProbe) {
     const require = createRequire(import.meta.url);
@@ -61,42 +82,47 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
       probeScript = probeScript.replace('"/device-router/probe"', JSON.stringify(probePath));
     }
 
-    injectionHook = createInjectionHook({
+    injectionMiddleware = createInjectionMiddleware({
       probeScript,
       nonce: probeNonce,
     });
   }
 
-  const plugin = fp(
+  const middleware = fp(
     async (fastify) => {
       fastify.addHook('preHandler', hook);
-      if (injectionHook) {
-        fastify.addHook('onSend', injectionHook);
+      if (injectionMiddleware) {
+        fastify.addHook('onSend', injectionMiddleware);
       }
     },
     { name: 'device-router' },
   );
 
-  const pluginOptions = {};
+  const rawEndpoint = createProbeEndpoint({
+    storage,
+    cookieName,
+    cookiePath,
+    cookieSecure,
+    ttl,
+    rejectBots,
+    onEvent,
+  });
 
   return {
-    plugin,
-    pluginOptions,
-    probeEndpoint: createProbeEndpoint({
-      storage,
-      cookieName,
-      cookiePath,
-      cookieSecure,
-      ttl,
-      rejectBots,
-    }),
-    injectionHook,
+    middleware,
+    probeEndpoint: health
+      ? async (req: FastifyRequest, reply: FastifyReply) => {
+          health.onProbeReceived();
+          return rawEndpoint(req, reply);
+        }
+      : rawEndpoint,
+    injectionMiddleware,
   };
 }
 
 export { createMiddleware } from './middleware.js';
 export { createProbeEndpoint } from './endpoint.js';
-export { createInjectionHook } from './inject.js';
+export { createInjectionMiddleware } from './inject.js';
 export type { MiddlewareOptions } from './middleware.js';
 export type { EndpointOptions } from './endpoint.js';
 export type { InjectOptions } from './inject.js';

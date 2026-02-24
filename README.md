@@ -1,6 +1,6 @@
 # DeviceRouter
 
-[![npm](https://img.shields.io/npm/v/@device-router/types?label=npm&color=cb3837)](https://www.npmjs.com/search?q=%40device-router)
+[![npm](https://img.shields.io/npm/v/@device-router/types?label=npm&color=cb3837)](https://www.npmjs.com/package/@device-router/types)
 [![CI](https://img.shields.io/github/actions/workflow/status/SimplyLiz/DeviceRouter/ci.yml?branch=main&label=CI)](https://github.com/SimplyLiz/DeviceRouter/actions/workflows/ci.yml)
 [![bundle size](https://img.shields.io/badge/probe-~1%20KB%20gzipped-blue)](https://github.com/SimplyLiz/DeviceRouter/tree/main/packages/probe)
 [![license](https://img.shields.io/github/license/SimplyLiz/DeviceRouter)](https://github.com/SimplyLiz/DeviceRouter/blob/main/LICENSE)
@@ -175,6 +175,23 @@ When `classifyFromHeaders` is enabled, mobile/tablet/desktop detection happens f
 
 See [Getting Started — First-Request Handling](docs/getting-started.md#first-request-handling) for details.
 
+## Observability
+
+Plug in logging and metrics with a single callback — no middleware wrapping needed:
+
+```typescript
+const { middleware, probeEndpoint } = createDeviceRouter({
+  storage,
+  onEvent: (event) => {
+    if (event.type === 'profile:classify') {
+      logger.info('classified', { source: event.source, cpu: event.tiers.cpu });
+    }
+  },
+});
+```
+
+Events: `profile:classify`, `profile:store`, `bot:reject`, `error`. See the [Observability guide](docs/observability.md).
+
 ## Packages
 
 | Package                                                               | Description                                           | Size              |
@@ -220,17 +237,20 @@ pnpm dev
 
 Open http://localhost:3000 — the probe runs on first load, refresh to see your detected profile. Use `?force=lite` or `?force=full` to preview each mode without a real device.
 
-| Framework | Guide                                                       | Example                                  |
-| --------- | ----------------------------------------------------------- | ---------------------------------------- |
-| Express   | [Quick Start](docs/getting-started.md#quick-start--express) | [express-basic](examples/express-basic/) |
-| Fastify   | [Quick Start](docs/getting-started.md#quick-start--fastify) | [fastify-basic](examples/fastify-basic/) |
-| Hono      | [Quick Start](docs/getting-started.md#quick-start--hono)    | [hono-basic](examples/hono-basic/)       |
-| Koa       | [Quick Start](docs/getting-started.md#quick-start--koa)     | [koa-basic](examples/koa-basic/)         |
+| Framework     | Guide                                                       | Example                                  |
+| ------------- | ----------------------------------------------------------- | ---------------------------------------- |
+| Express       | [Quick Start](docs/getting-started.md#quick-start--express) | [express-basic](examples/express-basic/) |
+| Fastify       | [Quick Start](docs/getting-started.md#quick-start--fastify) | [fastify-basic](examples/fastify-basic/) |
+| Hono          | [Quick Start](docs/getting-started.md#quick-start--hono)    | [hono-basic](examples/hono-basic/)       |
+| Koa           | [Quick Start](docs/getting-started.md#quick-start--koa)     | [koa-basic](examples/koa-basic/)         |
+| Observability | [Observability guide](docs/observability.md)                | [observability](examples/observability/) |
 
 ## Documentation
 
 - [Getting Started](docs/getting-started.md)
+- [Observability](docs/observability.md) — Logging, metrics, and monitoring hooks
 - [Deployment Guide](docs/deployment.md) — Docker, Cloudflare Workers, serverless
+- [Meta-Framework Integration](docs/meta-frameworks.md) — Next.js, Remix, SvelteKit
 - [Profile Schema Reference](docs/profile-schema.md)
 - API Reference: [types](docs/api/types.md) | [probe](docs/api/probe.md) | [storage](docs/api/storage.md) | [express](docs/api/middleware-express.md) | [fastify](docs/api/middleware-fastify.md) | [hono](docs/api/middleware-hono.md) | [koa](docs/api/middleware-koa.md)
 

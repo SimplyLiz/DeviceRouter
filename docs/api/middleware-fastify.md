@@ -2,7 +2,7 @@
 
 ## createDeviceRouter(options)
 
-Factory that creates the Fastify plugin and probe endpoint.
+Factory that creates the Fastify middleware and probe endpoint.
 
 ```typescript
 import Fastify from 'fastify';
@@ -13,43 +13,43 @@ import { MemoryStorageAdapter } from '@device-router/storage';
 const app = Fastify();
 await app.register(cookie);
 
-const { plugin, pluginOptions, probeEndpoint } = createDeviceRouter({
+const { middleware, probeEndpoint } = createDeviceRouter({
   storage: new MemoryStorageAdapter(),
 });
 
 app.post('/device-router/probe', probeEndpoint);
-await app.register(plugin, pluginOptions);
+await app.register(middleware);
 ```
 
 ### Options
 
-| Option                | Type                                          | Default                  | Description                                                  |
-| --------------------- | --------------------------------------------- | ------------------------ | ------------------------------------------------------------ |
-| `storage`             | `StorageAdapter`                              | required                 | Storage backend                                              |
-| `cookieName`          | `string`                                      | `'dr_session'`           | Session cookie name                                          |
-| `cookiePath`          | `string`                                      | `'/'`                    | Cookie path                                                  |
-| `cookieSecure`        | `boolean`                                     | `false`                  | Set `Secure` flag on the session cookie                      |
-| `ttl`                 | `number`                                      | `86400`                  | Profile TTL in seconds                                       |
-| `rejectBots`          | `boolean`                                     | `true`                   | Reject bot/crawler probe submissions (returns 403)           |
-| `thresholds`          | `TierThresholds`                              | built-in defaults        | Custom tier classification thresholds (validated at startup) |
-| `injectProbe`         | `boolean`                                     | `false`                  | Auto-inject probe script into HTML responses                 |
-| `probePath`           | `string`                                      | `'/device-router/probe'` | Custom probe endpoint path for injected script               |
-| `probeNonce`          | `string \| ((req: FastifyRequest) => string)` | —                        | CSP nonce for the injected script tag                        |
-| `fallbackProfile`     | `FallbackProfile`                             | —                        | Fallback profile for first requests without probe data       |
-| `classifyFromHeaders` | `boolean`                                     | `false`                  | Classify from UA/Client Hints on first request               |
+| Option                | Type                                          | Default                  | Description                                                               |
+| --------------------- | --------------------------------------------- | ------------------------ | ------------------------------------------------------------------------- |
+| `storage`             | `StorageAdapter`                              | required                 | Storage backend                                                           |
+| `cookieName`          | `string`                                      | `'dr_session'`           | Session cookie name                                                       |
+| `cookiePath`          | `string`                                      | `'/'`                    | Cookie path                                                               |
+| `cookieSecure`        | `boolean`                                     | `false`                  | Set `Secure` flag on the session cookie                                   |
+| `ttl`                 | `number`                                      | `86400`                  | Profile TTL in seconds                                                    |
+| `rejectBots`          | `boolean`                                     | `true`                   | Reject bot/crawler probe submissions (returns 403)                        |
+| `thresholds`          | `TierThresholds`                              | built-in defaults        | Custom tier classification thresholds (validated at startup)              |
+| `injectProbe`         | `boolean`                                     | `false`                  | Auto-inject probe script into HTML responses                              |
+| `probePath`           | `string`                                      | `'/device-router/probe'` | Custom probe endpoint path for injected script                            |
+| `probeNonce`          | `string \| ((req: FastifyRequest) => string)` | —                        | CSP nonce for the injected script tag                                     |
+| `fallbackProfile`     | `FallbackProfile`                             | —                        | Fallback profile for first requests without probe data                    |
+| `classifyFromHeaders` | `boolean`                                     | `false`                  | Classify from UA/Client Hints on first request                            |
+| `onEvent`             | `OnEventCallback`                             | —                        | Observability callback for logging/metrics ([guide](../observability.md)) |
 
 ### Returns
 
-| Property        | Type                         | Description                                                     |
-| --------------- | ---------------------------- | --------------------------------------------------------------- |
-| `plugin`        | Fastify plugin               | Registers `preHandler` hook (and `onSend` hook if injecting)    |
-| `pluginOptions` | `object`                     | Options object to pass to `app.register(plugin, pluginOptions)` |
-| `probeEndpoint` | Fastify route handler        | Handles `POST` from probe, validates and stores signals         |
-| `injectionHook` | `onSend` hook or `undefined` | Only present when `injectProbe: true`                           |
+| Property              | Type                         | Description                                                  |
+| --------------------- | ---------------------------- | ------------------------------------------------------------ |
+| `middleware`          | Fastify plugin               | Registers `preHandler` hook (and `onSend` hook if injecting) |
+| `probeEndpoint`       | Fastify route handler        | Handles `POST` from probe, validates and stores signals      |
+| `injectionMiddleware` | `onSend` hook or `undefined` | Only present when `injectProbe: true`                        |
 
 ## req.deviceProfile
 
-The plugin attaches a `ClassifiedProfile | null` to `req.deviceProfile`:
+The middleware attaches a `ClassifiedProfile | null` to `req.deviceProfile`:
 
 ```typescript
 interface ClassifiedProfile {
@@ -64,10 +64,10 @@ interface ClassifiedProfile {
 
 ## Probe Auto-Injection
 
-When `injectProbe: true`, the plugin registers an `onSend` hook that automatically injects the probe `<script>` into HTML responses. Requires `@device-router/probe` to be installed.
+When `injectProbe: true`, the middleware registers an `onSend` hook that automatically injects the probe `<script>` into HTML responses. Requires `@device-router/probe` to be installed.
 
 ```typescript
-const { plugin, pluginOptions, probeEndpoint } = createDeviceRouter({
+const { middleware, probeEndpoint } = createDeviceRouter({
   storage,
   injectProbe: true,
   probeNonce: 'my-nonce', // or (req) => req.headers['x-nonce']
@@ -78,5 +78,5 @@ The script is injected before `</head>`, falling back to `</body>`. JSON and oth
 
 ## Requirements
 
-- `@fastify/cookie` must be registered before the DeviceRouter plugin
+- `@fastify/cookie` must be registered before the DeviceRouter middleware
 - `@device-router/probe` must be installed when using `injectProbe: true`

@@ -23,12 +23,14 @@ export interface RawSignals {
   battery?: { level: number; charging: boolean };
 }
 
+export type StoredSignals = Omit<RawSignals, 'userAgent' | 'viewport'>;
+
 export interface DeviceProfile {
   schemaVersion: 1;
   sessionToken: string;
   createdAt: string;
   expiresAt: string;
-  signals: RawSignals;
+  signals: StoredSignals;
 }
 
 export type CpuTier = 'low' | 'mid' | 'high';

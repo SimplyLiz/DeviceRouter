@@ -33,6 +33,15 @@ jobs:
 
       - run: pnpm format:check
 
+      - name: Verify dist artifacts exist
+        run: |
+          for pkg in types probe storage middleware-express middleware-fastify middleware-hono middleware-koa; do
+            if ! ls packages/$pkg/dist/*.js &>/dev/null || ! ls packages/$pkg/dist/*.d.ts &>/dev/null; then
+              echo "Missing dist artifacts in packages/$pkg"
+              exit 1
+            fi
+          done
+
       - name: Validate version matches tag
         run: |
           TAG_VERSION="${GITHUB_REF_NAME#v}"
@@ -42,7 +51,7 @@ jobs:
             exit 1
           fi
 
-      - run: pnpm -r publish --no-git-checks --access public
+      - run: pnpm -r publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

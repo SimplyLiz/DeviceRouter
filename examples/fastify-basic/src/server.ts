@@ -14,7 +14,7 @@ const PORT = parseInt(process.env.PORT || '3000', 10);
 // Storage — swap MemoryStorageAdapter for RedisStorageAdapter in production
 const storage = new MemoryStorageAdapter();
 
-const { plugin, pluginOptions, probeEndpoint } = createDeviceRouter({
+const { middleware, probeEndpoint } = createDeviceRouter({
   storage,
   ttl: 86400,
 });
@@ -31,8 +31,8 @@ app.get('/device-router-probe.min.js', (_req, reply) => {
   reply.type('application/javascript').send(script);
 });
 
-// Register the device-router plugin (adds preHandler hook)
-await app.register(plugin, pluginOptions);
+// Register the device-router middleware (adds preHandler hook)
+await app.register(middleware);
 
 // Routes
 app.get('/', (req, reply) => {

@@ -1,8 +1,8 @@
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import type { StorageAdapter } from '@device-router/storage';
-import type { TierThresholds, FallbackProfile } from '@device-router/types';
-import { validateThresholds } from '@device-router/types';
+import type { TierThresholds, FallbackProfile, OnEventCallback } from '@device-router/types';
+import { validateThresholds, createProbeHealthCheck } from '@device-router/types';
 import type { Context } from 'koa';
 import { createMiddleware } from './middleware.js';
 import { createProbeEndpoint } from './endpoint.js';
@@ -18,6 +18,7 @@ export interface DeviceRouterOptions {
   rejectBots?: boolean;
   fallbackProfile?: FallbackProfile;
   classifyFromHeaders?: boolean;
+  onEvent?: OnEventCallback;
   injectProbe?: boolean;
   probePath?: string;
   probeNonce?: string | ((ctx: Context) => string);
@@ -34,6 +35,7 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     rejectBots,
     fallbackProfile,
     classifyFromHeaders,
+    onEvent,
     injectProbe = false,
     probePath,
     probeNonce,
@@ -41,26 +43,53 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
 
   if (thresholds) validateThresholds(thresholds);
 
+  const isNonProd = process.env.NODE_ENV !== 'production';
+  const effectiveProbePath = probePath ?? '/device-router/probe';
+
+  if (isNonProd) {
+    console.info(`[DeviceRouter] Probe endpoint expected at POST ${effectiveProbePath}`);
+  }
+
+  const health = isNonProd
+    ? createProbeHealthCheck({ onEvent, probePath: effectiveProbePath })
+    : null;
+
+  const rawMiddleware = createMiddleware({
+    storage,
+    cookieName,
+    thresholds,
+    fallbackProfile,
+    classifyFromHeaders,
+    onEvent,
+  });
+
+  const rawEndpoint = createProbeEndpoint({
+    storage,
+    cookieName,
+    cookiePath,
+    cookieSecure,
+    ttl,
+    rejectBots,
+    onEvent,
+  });
+
   const result: {
     middleware: ReturnType<typeof createMiddleware>;
     probeEndpoint: ReturnType<typeof createProbeEndpoint>;
     injectionMiddleware?: ReturnType<typeof createInjectionMiddleware>;
   } = {
-    middleware: createMiddleware({
-      storage,
-      cookieName,
-      thresholds,
-      fallbackProfile,
-      classifyFromHeaders,
-    }),
-    probeEndpoint: createProbeEndpoint({
-      storage,
-      cookieName,
-      cookiePath,
-      cookieSecure,
-      ttl,
-      rejectBots,
-    }),
+    middleware: health
+      ? async (ctx, next) => {
+          health.onMiddlewareHit();
+          return rawMiddleware(ctx, next);
+        }
+      : rawMiddleware,
+    probeEndpoint: health
+      ? async (ctx) => {
+          health.onProbeReceived();
+          return rawEndpoint(ctx);
+        }
+      : rawEndpoint,
   };
 
   if (injectProbe) {

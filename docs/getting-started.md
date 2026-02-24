@@ -57,12 +57,12 @@ import { MemoryStorageAdapter } from '@device-router/storage';
 const app = Fastify();
 await app.register(cookie);
 
-const { plugin, pluginOptions, probeEndpoint } = createDeviceRouter({
+const { middleware, probeEndpoint } = createDeviceRouter({
   storage: new MemoryStorageAdapter(),
 });
 
 app.post('/device-router/probe', probeEndpoint);
-await app.register(plugin, pluginOptions);
+await app.register(middleware);
 
 app.get('/', (req, reply) => {
   const profile = req.deviceProfile;
@@ -168,6 +168,25 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 
 This sets `deviceProfile.source` to `'headers'` on first requests. The middleware also sends an `Accept-CH` response header to request Client Hints from Chromium browsers on subsequent requests. Once the probe runs, `source` becomes `'probe'`.
 
+#### Browser compatibility
+
+`classifyFromHeaders` relies on Client Hints headers that are only available on Chromium-based browsers. Safari and Firefox do not send these headers, so classification falls back to User-Agent string parsing alone.
+
+| Header               | Chrome | Edge | Safari | Firefox |
+| -------------------- | ------ | ---- | ------ | ------- |
+| `Sec-CH-UA-Mobile`   | Yes    | Yes  | No     | No      |
+| `Sec-CH-UA-Platform` | Yes    | Yes  | No     | No      |
+| `Device-Memory`      | Yes    | Yes  | No     | No      |
+| `Save-Data`          | Yes    | Yes  | No     | No      |
+
+On Safari and Firefox, `classifyFromHeaders` uses only the User-Agent string. This means:
+
+- Mobile vs. desktop detection still works (UA patterns are reliable)
+- Memory, connection, and GPU tiers use defaults for the device category (mobile → low, desktop → high)
+- No `Device-Memory` refinement and no `Save-Data` detection
+
+**Recommendation:** If you rely on `classifyFromHeaders` for first-request accuracy, combine it with `fallbackProfile: 'conservative'` so non-Chromium browsers get safe defaults rather than potentially optimistic header-only guesses. The probe (which works on all browsers) will refine the profile on the next request.
+
 ### Fallback profile
 
 Provide structured defaults instead of `null`:
@@ -208,6 +227,21 @@ if (profile?.source === 'probe') {
 }
 ```
 
+## Observability
+
+Pass an `onEvent` callback to receive events for classification, storage, bot rejection, and errors:
+
+```typescript
+const { middleware, probeEndpoint } = createDeviceRouter({
+  storage,
+  onEvent: (event) => {
+    console.log(`[device-router] ${event.type}`, event);
+  },
+});
+```
+
+See the [Observability guide](observability.md) for structured logging and Prometheus examples.
+
 ## Custom Thresholds
 
 Override the default tier boundaries:
@@ -224,6 +258,8 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 ```
 
 Thresholds are validated at startup — inverted bounds, non-positive values, or non-RegExp GPU patterns throw immediately with a descriptive error. Partial thresholds are merged with defaults before validation, so ordering is checked against the full resolved config.
+
+> **Note:** Changing thresholds does not re-classify profiles already stored from a previous deploy. See [Profile versioning](deployment.md#profile-versioning) in the Deployment Guide for strategies to handle threshold changes.
 
 ## Configuration
 

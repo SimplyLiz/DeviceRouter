@@ -1,8 +1,19 @@
 import type { Context, MiddlewareHandler } from 'hono';
 import { getCookie } from 'hono/cookie';
 import type { StorageAdapter } from '@device-router/storage';
-import { classify, deriveHints, classifyFromHeaders, resolveFallback } from '@device-router/types';
-import type { ClassifiedProfile, TierThresholds, FallbackProfile } from '@device-router/types';
+import {
+  classify,
+  deriveHints,
+  classifyFromHeaders,
+  resolveFallback,
+  emitEvent,
+} from '@device-router/types';
+import type {
+  ClassifiedProfile,
+  TierThresholds,
+  FallbackProfile,
+  OnEventCallback,
+} from '@device-router/types';
 import { ACCEPT_CH_VALUE } from '@device-router/types';
 
 export interface MiddlewareOptions {
@@ -11,6 +22,7 @@ export interface MiddlewareOptions {
   thresholds?: TierThresholds;
   fallbackProfile?: FallbackProfile;
   classifyFromHeaders?: boolean;
+  onEvent?: OnEventCallback;
 }
 
 export type DeviceRouterEnv = {
@@ -26,34 +38,79 @@ export function createMiddleware(options: MiddlewareOptions): MiddlewareHandler<
     thresholds,
     fallbackProfile,
     classifyFromHeaders: useHeaders,
+    onEvent,
   } = options;
 
   return async (c: Context<DeviceRouterEnv>, next) => {
-    if (useHeaders) {
-      c.header('Accept-CH', ACCEPT_CH_VALUE);
-    }
+    try {
+      if (useHeaders) {
+        c.header('Accept-CH', ACCEPT_CH_VALUE);
+      }
 
-    const sessionToken = getCookie(c, cookieName);
+      const sessionToken = getCookie(c, cookieName);
 
-    if (!sessionToken) {
-      c.set('deviceProfile', resolveFirstRequest(c, useHeaders, fallbackProfile));
+      if (!sessionToken) {
+        const start = performance.now();
+        const result = resolveFirstRequest(c, useHeaders, fallbackProfile);
+        c.set('deviceProfile', result);
+        if (result) {
+          emitEvent(onEvent, {
+            type: 'profile:classify',
+            sessionToken: '',
+            tiers: result.tiers,
+            hints: result.hints,
+            source: result.source,
+            durationMs: performance.now() - start,
+          });
+        }
+        await next();
+        return;
+      }
+
+      const profile = await storage.get(sessionToken);
+
+      if (!profile) {
+        const start = performance.now();
+        const result = resolveFirstRequest(c, useHeaders, fallbackProfile);
+        c.set('deviceProfile', result);
+        if (result) {
+          emitEvent(onEvent, {
+            type: 'profile:classify',
+            sessionToken,
+            tiers: result.tiers,
+            hints: result.hints,
+            source: result.source,
+            durationMs: performance.now() - start,
+          });
+        }
+        await next();
+        return;
+      }
+
+      const start = performance.now();
+      const tiers = classify(profile.signals, thresholds);
+      const hints = deriveHints(tiers, profile.signals);
+      const durationMs = performance.now() - start;
+
+      c.set('deviceProfile', { profile, tiers, hints, source: 'probe' });
+      emitEvent(onEvent, {
+        type: 'profile:classify',
+        sessionToken,
+        tiers,
+        hints,
+        source: 'probe',
+        durationMs,
+      });
       await next();
-      return;
+    } catch (err) {
+      emitEvent(onEvent, {
+        type: 'error',
+        error: err,
+        phase: 'middleware',
+        sessionToken: getCookie(c, cookieName),
+      });
+      throw err;
     }
-
-    const profile = await storage.get(sessionToken);
-
-    if (!profile) {
-      c.set('deviceProfile', resolveFirstRequest(c, useHeaders, fallbackProfile));
-      await next();
-      return;
-    }
-
-    const tiers = classify(profile.signals, thresholds);
-    const hints = deriveHints(tiers, profile.signals);
-
-    c.set('deviceProfile', { profile, tiers, hints, source: 'probe' });
-    await next();
   };
 }
 

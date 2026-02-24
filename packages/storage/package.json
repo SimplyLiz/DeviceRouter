@@ -1,21 +1,42 @@
 {
   "name": "@device-router/storage",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "module",
+  "description": "Storage adapters (memory, Redis) for persisting device profiles in DeviceRouter",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SimplyLiz/DeviceRouter.git",
+    "directory": "packages/storage"
+  },
+  "homepage": "https://github.com/SimplyLiz/DeviceRouter/tree/main/packages/storage#readme",
+  "bugs": {
+    "url": "https://github.com/SimplyLiz/DeviceRouter/issues"
+  },
+  "keywords": [
+    "device-router",
+    "storage-adapter",
+    "redis",
+    "session-storage",
+    "device-profiles"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     }
   },
   "files": [
     "dist"
   ],
+  "funding": "https://github.com/sponsors/SimplyLiz",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "engines": {
     "node": ">=20"

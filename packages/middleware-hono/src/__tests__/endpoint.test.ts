@@ -196,6 +196,31 @@ describe('createProbeEndpoint (hono)', () => {
       expect(typeof (event as { durationMs: number }).durationMs).toBe('number');
     });
 
+    it('strips userAgent and viewport from profile:store signals', async () => {
+      const onEvent = vi.fn();
+      const app = new Hono();
+      app.post('/probe', createProbeEndpoint({ storage, onEvent }));
+
+      const res = await app.request('/probe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hardwareConcurrency: 4,
+          userAgent: 'Mozilla/5.0 Test',
+          viewport: { width: 1920, height: 1080 },
+        }),
+      });
+
+      expect(res.status).toBe(200);
+      const event = onEvent.mock.calls[0][0] as Extract<
+        DeviceRouterEvent,
+        { type: 'profile:store' }
+      >;
+      expect(event.signals).toEqual({ hardwareConcurrency: 4 });
+      expect(event.signals).not.toHaveProperty('userAgent');
+      expect(event.signals).not.toHaveProperty('viewport');
+    });
+
     it('emits bot:reject when bot detected', async () => {
       const onEvent = vi.fn();
       const app = new Hono();

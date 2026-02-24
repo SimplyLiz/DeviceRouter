@@ -256,6 +256,31 @@ describe('createProbeEndpoint', () => {
       expect(typeof event.durationMs).toBe('number');
     });
 
+    it('strips userAgent and viewport from profile:store signals', async () => {
+      const events: DeviceRouterEvent[] = [];
+      const onEvent = vi.fn((e: DeviceRouterEvent) => {
+        events.push(e);
+      });
+
+      const handler = createProbeEndpoint({ storage, onEvent });
+      const req = createMockReq({
+        hardwareConcurrency: 4,
+        userAgent: 'Mozilla/5.0 Test',
+        viewport: { width: 1920, height: 1080 },
+      });
+      const res = createMockRes();
+
+      await handler(req, res);
+
+      const event = events.find((e) => e.type === 'profile:store') as Extract<
+        DeviceRouterEvent,
+        { type: 'profile:store' }
+      >;
+      expect(event.signals).toEqual({ hardwareConcurrency: 4 });
+      expect(event.signals).not.toHaveProperty('userAgent');
+      expect(event.signals).not.toHaveProperty('viewport');
+    });
+
     it('emits bot:reject when bot detected', async () => {
       const events: DeviceRouterEvent[] = [];
       const onEvent = vi.fn((e: DeviceRouterEvent) => {

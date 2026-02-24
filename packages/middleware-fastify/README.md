@@ -1,6 +1,6 @@
 # @device-router/middleware-fastify
 
-Fastify plugin for [DeviceRouter](https://github.com/SimplyLiz/DeviceRouter). Adds device classification and rendering hints to every request.
+Fastify middleware for [DeviceRouter](https://github.com/SimplyLiz/DeviceRouter). Adds device classification and rendering hints to every request.
 
 ## Installation
 
@@ -23,12 +23,12 @@ import { createDeviceRouter } from '@device-router/middleware-fastify';
 import { MemoryStorageAdapter } from '@device-router/storage';
 
 const app = Fastify();
-const { plugin, probeEndpoint } = createDeviceRouter({
+const { middleware, probeEndpoint } = createDeviceRouter({
   storage: new MemoryStorageAdapter(),
 });
 
 await app.register(cookie);
-await app.register(plugin);
+await app.register(middleware);
 
 app.post('/device-router/probe', probeEndpoint);
 
@@ -50,7 +50,7 @@ app.listen({ port: 3000 });
 ## How it works
 
 1. **Probe endpoint** receives device signals from the browser and stores a classified profile
-2. **Plugin** registers a `preHandler` hook that reads the session cookie, loads the profile from storage, and attaches it to `req.deviceProfile`
+2. **Middleware** registers a `preHandler` hook that reads the session cookie, loads the profile from storage, and attaches it to `req.deviceProfile`
 3. Your route handlers use `req.deviceProfile.hints` and `req.deviceProfile.tiers` to adapt responses
 
 ## Probe auto-injection
@@ -58,21 +58,21 @@ app.listen({ port: 3000 });
 Automatically inject the probe `<script>` into HTML responses:
 
 ```typescript
-const { plugin, probeEndpoint, injectionHook } = createDeviceRouter({
+const { middleware, probeEndpoint, injectionMiddleware } = createDeviceRouter({
   storage: new MemoryStorageAdapter(),
   injectProbe: true,
   probeNonce: 'my-csp-nonce', // optional
 });
 ```
 
-When `injectProbe` is enabled, the plugin registers an `onSend` hook that injects the script before `</head>`.
+When `injectProbe` is enabled, the middleware registers an `onSend` hook that injects the script before `</head>`.
 
 > **Streaming responses:** The `onSend` hook receives the serialized payload as a string. If you stream responses via `reply.raw`, the hook is bypassed and injection is skipped. Add the probe `<script>` tag to your HTML shell manually instead.
 
 ## Custom thresholds
 
 ```typescript
-const { plugin, probeEndpoint } = createDeviceRouter({
+const { middleware, probeEndpoint } = createDeviceRouter({
   storage,
   thresholds: {
     cpu: { lowUpperBound: 4, midUpperBound: 8 },
@@ -104,7 +104,7 @@ const { plugin, probeEndpoint } = createDeviceRouter({
 Pass an `onEvent` callback to receive events for classification, storage, bot rejection, and errors:
 
 ```typescript
-const { plugin, probeEndpoint } = createDeviceRouter({
+const { middleware, probeEndpoint } = createDeviceRouter({
   storage,
   onEvent: (event) => {
     console.log(`[device-router] ${event.type}`, event);
@@ -116,10 +116,10 @@ See the [Observability guide](https://github.com/SimplyLiz/DeviceRouter/blob/mai
 
 ## Exports
 
-- `createDeviceRouter(options)` — All-in-one setup returning `{ plugin, probeEndpoint, injectionHook? }`
+- `createDeviceRouter(options)` — All-in-one setup returning `{ middleware, probeEndpoint, injectionMiddleware? }`
 - `createMiddleware(options)` — Standalone preHandler hook
 - `createProbeEndpoint(options)` — Standalone probe endpoint handler
-- `createInjectionHook(options)` — Standalone onSend injection hook
+- `createInjectionMiddleware(options)` — Standalone onSend injection hook
 
 ## Compatibility
 

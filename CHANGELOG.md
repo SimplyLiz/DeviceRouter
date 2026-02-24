@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Features
+
+- **Composable middleware** — `createMiddleware()`, `createProbeEndpoint()`, and `createInjectionMiddleware()` are now first-class exports with full threshold validation and documentation. Use them independently for fine-grained control without the `createDeviceRouter()` factory
+- **`loadProbeScript()` utility** — New helper exported from all middleware packages that reads the minified probe bundle and optionally rewrites the endpoint URL. Pairs with `createInjectionMiddleware()` for standalone probe injection
+
 ## 0.4.0 (2026-02-24)
 
 ### Features

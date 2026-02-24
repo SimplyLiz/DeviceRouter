@@ -106,7 +106,7 @@ describe('createMiddleware', () => {
 
     const hook = createMiddleware({
       storage,
-      thresholds: { cpu: { lowUpperBound: 6 } },
+      thresholds: { cpu: { lowUpperBound: 6, midUpperBound: 8 } },
     });
     const req = createMockReq({ dr_session: 'tok2' });
 

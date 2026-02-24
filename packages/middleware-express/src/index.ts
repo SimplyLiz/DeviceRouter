@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import type { StorageAdapter } from '@device-router/storage';
 import type { TierThresholds, FallbackProfile, OnEventCallback } from '@device-router/types';
-import { validateThresholds, createProbeHealthCheck } from '@device-router/types';
+import { createProbeHealthCheck } from '@device-router/types';
 import { createMiddleware } from './middleware.js';
 import { createProbeEndpoint } from './endpoint.js';
 import { createInjectionMiddleware } from './inject.js';
@@ -39,8 +39,6 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     classifyFromHeaders,
     onEvent,
   } = options;
-
-  if (thresholds) validateThresholds(thresholds);
 
   const isNonProd = process.env.NODE_ENV !== 'production';
   const effectiveProbePath = probePath ?? '/device-router/probe';
@@ -92,21 +90,23 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
   };
 
   if (injectProbe) {
-    const require = createRequire(import.meta.url);
-    const probeBundlePath = require.resolve('@device-router/probe/dist/device-router-probe.min.js');
-    let probeScript = readFileSync(probeBundlePath, 'utf-8');
-
-    if (probePath) {
-      probeScript = probeScript.replace('"/device-router/probe"', JSON.stringify(probePath));
-    }
-
     result.injectionMiddleware = createInjectionMiddleware({
-      probeScript,
+      probeScript: loadProbeScript({ probePath }),
       nonce: probeNonce,
     });
   }
 
   return result;
+}
+
+export function loadProbeScript(options?: { probePath?: string }): string {
+  const require = createRequire(import.meta.url);
+  const bundlePath = require.resolve('@device-router/probe/dist/device-router-probe.min.js');
+  let script = readFileSync(bundlePath, 'utf-8');
+  if (options?.probePath) {
+    script = script.replace('"/device-router/probe"', JSON.stringify(options.probePath));
+  }
+  return script;
 }
 
 export { createMiddleware } from './middleware.js';

@@ -157,6 +157,27 @@ const { middleware, probeEndpoint, injectionMiddleware } = createDeviceRouter({
 
 No need to manually add `<script>` tags — the probe is injected before `</head>` in every HTML response.
 
+## Composable Middleware
+
+Don't need the full factory? Use the individual pieces directly:
+
+```typescript
+import {
+  createMiddleware,
+  createProbeEndpoint,
+  createInjectionMiddleware,
+  loadProbeScript,
+} from '@device-router/middleware-express';
+
+const middleware = createMiddleware({ storage, thresholds });
+const endpoint = createProbeEndpoint({ storage, ttl: 3600 });
+const injection = createInjectionMiddleware({
+  probeScript: loadProbeScript(),
+});
+```
+
+Each piece validates its own options at creation time. See the [API docs](docs/api/middleware-express.md#standalone-functions) for full option tables.
+
 ## First-Request Handling
 
 By default, `deviceProfile` is `null` on the first page load before the probe runs. Two opt-in strategies provide immediate classification:

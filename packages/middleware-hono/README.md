@@ -122,12 +122,39 @@ const app = new Hono<DeviceRouterEnv>();
 // c.get('deviceProfile') is now typed
 ```
 
+## Standalone usage
+
+Use the individual pieces when you need fine-grained control over each component:
+
+```typescript
+import {
+  createMiddleware,
+  createProbeEndpoint,
+  createInjectionMiddleware,
+  loadProbeScript,
+} from '@device-router/middleware-hono';
+
+// Use only what you need
+const middleware = createMiddleware({ storage, thresholds });
+const endpoint = createProbeEndpoint({ storage, ttl: 3600 });
+const injection = createInjectionMiddleware({
+  probeScript: loadProbeScript(),
+});
+
+app.use('*', injection);
+app.use('*', middleware);
+app.post('/device-router/probe', endpoint);
+```
+
+`loadProbeScript()` reads the `@device-router/probe` bundle and optionally rewrites the endpoint URL via `{ probePath }`. Thresholds passed to `createMiddleware()` are validated at creation time.
+
 ## Exports
 
 - `createDeviceRouter(options)` — All-in-one setup returning `{ middleware, probeEndpoint, injectionMiddleware? }`
-- `createMiddleware(options)` — Standalone middleware
+- `createMiddleware(options)` — Standalone middleware (validates thresholds)
 - `createProbeEndpoint(options)` — Standalone probe endpoint handler
 - `createInjectionMiddleware(options)` — Standalone injection middleware
+- `loadProbeScript(options?)` — Load the minified probe script for use with `createInjectionMiddleware()`
 - `DeviceRouterEnv` — Hono env type for typed context access
 
 ## Compatibility

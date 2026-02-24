@@ -46,6 +46,17 @@ describe('emitEvent', () => {
     await new Promise((r) => setTimeout(r, 10));
   });
 
+  it('accepts diagnostic:no-probe-data event', () => {
+    const cb = vi.fn();
+    const diagnosticEvent: DeviceRouterEvent = {
+      type: 'diagnostic:no-probe-data',
+      middlewareInvocations: 50,
+      probePath: '/device-router/probe',
+    };
+    emitEvent(cb, diagnosticEvent);
+    expect(cb).toHaveBeenCalledWith(diagnosticEvent);
+  });
+
   it('swallows async callback that throws', async () => {
     const cb = vi.fn(async () => {
       throw new Error('boom');

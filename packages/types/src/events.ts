@@ -25,6 +25,11 @@ export type DeviceRouterEvent =
       error: unknown;
       phase: 'middleware' | 'endpoint';
       sessionToken?: string;
+    }
+  | {
+      type: 'diagnostic:no-probe-data';
+      middlewareInvocations: number;
+      probePath: string;
     };
 
 export type OnEventCallback = (event: DeviceRouterEvent) => void | Promise<void>;

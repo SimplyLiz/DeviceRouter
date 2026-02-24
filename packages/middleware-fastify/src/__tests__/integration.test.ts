@@ -15,10 +15,10 @@ describe('integration: probe → middleware → route (fastify)', () => {
     app = Fastify();
     await app.register(cookie);
 
-    const { plugin, pluginOptions, probeEndpoint } = createDeviceRouter({ storage });
+    const { middleware, probeEndpoint } = createDeviceRouter({ storage });
 
     app.post('/device-router/probe', probeEndpoint);
-    await app.register(plugin, pluginOptions);
+    await app.register(middleware);
 
     app.get('/test', (req, reply) => {
       if (req.deviceProfile) {
@@ -87,12 +87,12 @@ describe('integration: probe injection (fastify)', () => {
     app = Fastify();
     await app.register(cookie);
 
-    const { plugin, pluginOptions } = createDeviceRouter({
+    const { middleware } = createDeviceRouter({
       storage,
       injectProbe: true,
     });
 
-    await app.register(plugin, pluginOptions);
+    await app.register(middleware);
 
     app.get('/html', (_req, reply) => {
       reply.type('text/html').send('<html><head><title>Test</title></head><body></body></html>');

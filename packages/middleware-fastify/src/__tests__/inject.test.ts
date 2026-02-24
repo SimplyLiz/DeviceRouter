@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createInjectionHook } from '../inject.js';
+import { createInjectionMiddleware } from '../inject.js';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 
 function createMockReq() {
@@ -12,11 +12,11 @@ function createMockReply(contentType?: string) {
   } as unknown as FastifyReply;
 }
 
-describe('createInjectionHook', () => {
+describe('createInjectionMiddleware', () => {
   const probeScript = '(function(){console.log("probe")})()';
 
   it('injects script before </head> in HTML payload', () => {
-    const hook = createInjectionHook({ probeScript });
+    const hook = createInjectionMiddleware({ probeScript });
     const done = vi.fn();
 
     hook(
@@ -33,7 +33,7 @@ describe('createInjectionHook', () => {
   });
 
   it('falls back to </body> when no </head>', () => {
-    const hook = createInjectionHook({ probeScript });
+    const hook = createInjectionMiddleware({ probeScript });
     const done = vi.fn();
 
     hook(
@@ -50,7 +50,7 @@ describe('createInjectionHook', () => {
   });
 
   it('does not inject into non-HTML responses', () => {
-    const hook = createInjectionHook({ probeScript });
+    const hook = createInjectionMiddleware({ probeScript });
     const done = vi.fn();
     const jsonPayload = JSON.stringify({ ok: true });
 
@@ -60,7 +60,7 @@ describe('createInjectionHook', () => {
   });
 
   it('does not inject into non-string payloads', () => {
-    const hook = createInjectionHook({ probeScript });
+    const hook = createInjectionMiddleware({ probeScript });
     const done = vi.fn();
 
     hook(
@@ -74,7 +74,7 @@ describe('createInjectionHook', () => {
   });
 
   it('adds nonce attribute with static string', () => {
-    const hook = createInjectionHook({ probeScript, nonce: 'abc123' });
+    const hook = createInjectionMiddleware({ probeScript, nonce: 'abc123' });
     const done = vi.fn();
 
     hook(
@@ -92,7 +92,7 @@ describe('createInjectionHook', () => {
 
   it('adds nonce attribute with function', () => {
     const getNonce = vi.fn(() => 'dynamic-nonce');
-    const hook = createInjectionHook({ probeScript, nonce: getNonce });
+    const hook = createInjectionMiddleware({ probeScript, nonce: getNonce });
     const req = createMockReq();
     const done = vi.fn();
 
@@ -106,7 +106,7 @@ describe('createInjectionHook', () => {
   });
 
   it('does not modify HTML without </head> or </body>', () => {
-    const hook = createInjectionHook({ probeScript });
+    const hook = createInjectionMiddleware({ probeScript });
     const done = vi.fn();
     const partial = '<div>fragment</div>';
 
@@ -116,7 +116,7 @@ describe('createInjectionHook', () => {
   });
 
   it('does not inject when content-type header is not set', () => {
-    const hook = createInjectionHook({ probeScript });
+    const hook = createInjectionMiddleware({ probeScript });
     const done = vi.fn();
 
     hook(

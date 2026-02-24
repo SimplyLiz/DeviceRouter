@@ -57,12 +57,12 @@ import { MemoryStorageAdapter } from '@device-router/storage';
 const app = Fastify();
 await app.register(cookie);
 
-const { plugin, pluginOptions, probeEndpoint } = createDeviceRouter({
+const { middleware, probeEndpoint } = createDeviceRouter({
   storage: new MemoryStorageAdapter(),
 });
 
 app.post('/device-router/probe', probeEndpoint);
-await app.register(plugin, pluginOptions);
+await app.register(middleware);
 
 app.get('/', (req, reply) => {
   const profile = req.deviceProfile;

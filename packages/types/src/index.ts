@@ -2,6 +2,7 @@ export type {
   ConnectionInfo,
   Viewport,
   RawSignals,
+  StoredSignals,
   DeviceProfile,
   CpuTier,
   MemoryTier,

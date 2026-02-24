@@ -5,7 +5,7 @@ import type { DeviceRouterEvent } from '../events.js';
 const sampleEvent: DeviceRouterEvent = {
   type: 'profile:classify',
   sessionToken: 'tok1',
-  tiers: { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'mid' },
+  tiers: { cpu: 'high', memory: 'high', connection: 'high', gpu: 'mid' },
   hints: {
     deferHeavyComponents: false,
     serveMinimalCSS: false,

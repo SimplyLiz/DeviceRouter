@@ -14,7 +14,7 @@ const tiers = classify({
   deviceMemory: 8,
   connection: { effectiveType: '4g', downlink: 50 },
 });
-// { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'none' }
+// { cpu: 'high', memory: 'high', connection: 'high', gpu: 'none' }
 ```
 
 ### `deriveHints(tiers: DeviceTiers, signals?: RawSignals): RenderingHints`
@@ -100,7 +100,7 @@ const tiers = classifyFromHeaders({
 });
 // Mobile UA → { cpu: 'low', memory: 'low', connection: '4g', gpu: 'mid' }
 // Tablet UA → { cpu: 'mid', memory: 'mid', connection: '4g', gpu: 'mid' }
-// Desktop UA → { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'mid' }
+// Desktop UA → { cpu: 'high', memory: 'high', connection: 'high', gpu: 'mid' }
 ```
 
 Client Hints refine the base classification when present:
@@ -130,7 +130,7 @@ Preset `DeviceTiers` for a conservative (low-end) assumption: `{ cpu: 'low', mem
 
 ### `OPTIMISTIC_TIERS`
 
-Preset `DeviceTiers` for an optimistic (high-end) assumption: `{ cpu: 'high', memory: 'high', connection: 'fast', gpu: 'mid' }`.
+Preset `DeviceTiers` for an optimistic (high-end) assumption: `{ cpu: 'high', memory: 'high', connection: 'high', gpu: 'mid' }`.
 
 ### `ACCEPT_CH_VALUE`
 

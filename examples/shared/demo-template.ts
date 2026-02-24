@@ -50,7 +50,7 @@ export function renderDemoPage({
 
   // Connection tier -> badge class
   const connClass = profile
-    ? profile.tiers.connection === 'fast' || profile.tiers.connection === '4g'
+    ? profile.tiers.connection === 'high' || profile.tiers.connection === '4g'
       ? 'high'
       : profile.tiers.connection === '3g'
         ? 'mid'

@@ -136,7 +136,7 @@ describe('createMiddleware', () => {
 
       expect(req.deviceProfile!.source).toBe('fallback');
       expect(req.deviceProfile!.tiers.cpu).toBe('high');
-      expect(req.deviceProfile!.tiers.connection).toBe('fast');
+      expect(req.deviceProfile!.tiers.connection).toBe('high');
     });
 
     it('returns custom DeviceTiers fallback', async () => {

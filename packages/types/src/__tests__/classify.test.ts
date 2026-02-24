@@ -81,14 +81,14 @@ describe('classifyConnection', () => {
   });
 
   it('returns fast for 4g with high downlink', () => {
-    expect(classifyConnection('4g', 10)).toBe('fast');
+    expect(classifyConnection('4g', 10)).toBe('high');
   });
 
   it('classifies by downlink alone when no effectiveType', () => {
     expect(classifyConnection(undefined, 0.3)).toBe('2g');
     expect(classifyConnection(undefined, 1)).toBe('3g');
     expect(classifyConnection(undefined, 3)).toBe('4g');
-    expect(classifyConnection(undefined, 10)).toBe('fast');
+    expect(classifyConnection(undefined, 10)).toBe('high');
   });
 
   it('uses custom downlink thresholds', () => {
@@ -99,7 +99,7 @@ describe('classifyConnection', () => {
 
     // Custom 4g upper bound
     expect(classifyConnection(undefined, 8, { downlink4gUpperBound: 10 })).toBe('4g');
-    expect(classifyConnection(undefined, 8)).toBe('fast');
+    expect(classifyConnection(undefined, 8)).toBe('high');
   });
 
   it('effectiveType string matches are not affected by thresholds', () => {
@@ -181,7 +181,7 @@ describe('classify', () => {
       deviceMemory: 8,
       connection: { effectiveType: '4g', downlink: 50 },
     });
-    expect(result).toEqual({ cpu: 'high', memory: 'high', connection: 'fast', gpu: 'none' });
+    expect(result).toEqual({ cpu: 'high', memory: 'high', connection: 'high', gpu: 'none' });
   });
 
   it('classifies with missing signals', () => {
@@ -207,7 +207,7 @@ describe('classify', () => {
         connection: { downlink4gUpperBound: 3 },
       },
     );
-    expect(result).toEqual({ cpu: 'low', memory: 'low', connection: 'fast', gpu: 'none' });
+    expect(result).toEqual({ cpu: 'low', memory: 'low', connection: 'high', gpu: 'none' });
   });
 
   it('applies custom GPU thresholds', () => {

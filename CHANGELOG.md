@@ -4,6 +4,7 @@
 
 ### Breaking Changes
 
+- **Rename `ConnectionTier` value `'fast'` → `'high'`** — Aligns connection tier vocabulary with CPU, memory, and GPU tiers which all use `'low' | 'mid' | 'high'`. Update any code comparing `tiers.connection === 'fast'` to use `'high'` instead
 - **middleware-fastify: normalized return shape** — `createDeviceRouter()` now returns raw Fastify hooks instead of a `fastify-plugin` wrapped plugin. Migrate `await app.register(middleware)` → `app.addHook('preHandler', middleware)`. When using `injectProbe: true`, register the injection hook separately: `app.addHook('onSend', injectionMiddleware)`. Removed `fastify-plugin` dependency
 
 ### Features

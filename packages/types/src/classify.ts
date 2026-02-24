@@ -47,12 +47,12 @@ export function classifyConnection(
   if (effectiveType === 'slow-2g' || effectiveType === '2g') return '2g';
   if (effectiveType === '3g') return '3g';
   if (effectiveType === '4g' && downlink != null && downlink < downlink4gUpperBound) return '4g';
-  if (effectiveType === '4g') return 'fast';
+  if (effectiveType === '4g') return 'high';
   if (downlink != null) {
     if (downlink < downlink2gUpperBound) return '2g';
     if (downlink < downlink3gUpperBound) return '3g';
     if (downlink < downlink4gUpperBound) return '4g';
-    return 'fast';
+    return 'high';
   }
   return '4g';
 }
@@ -91,6 +91,6 @@ export const CONSERVATIVE_TIERS: DeviceTiers = {
 export const OPTIMISTIC_TIERS: DeviceTiers = {
   cpu: 'high',
   memory: 'high',
-  connection: 'fast',
+  connection: 'high',
   gpu: 'mid',
 };

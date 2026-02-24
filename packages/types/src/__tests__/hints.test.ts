@@ -16,7 +16,7 @@ describe('deriveHints', () => {
   });
 
   it('returns permissive hints for high-end device', () => {
-    const hints = deriveHints({ cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' });
+    const hints = deriveHints({ cpu: 'high', memory: 'high', connection: 'high', gpu: 'high' });
     expect(hints).toEqual({
       deferHeavyComponents: false,
       serveMinimalCSS: false,
@@ -30,7 +30,7 @@ describe('deriveHints', () => {
 
   it('respects prefersReducedMotion signal', () => {
     const hints = deriveHints(
-      { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' },
+      { cpu: 'high', memory: 'high', connection: 'high', gpu: 'high' },
       { prefersReducedMotion: true },
     );
     expect(hints.reduceAnimations).toBe(true);
@@ -46,34 +46,34 @@ describe('deriveHints', () => {
   });
 
   it('serves minimal CSS for low CPU regardless of connection', () => {
-    const hints = deriveHints({ cpu: 'low', memory: 'high', connection: 'fast', gpu: 'high' });
+    const hints = deriveHints({ cpu: 'low', memory: 'high', connection: 'high', gpu: 'high' });
     expect(hints.serveMinimalCSS).toBe(true);
     expect(hints.preferServerRendering).toBe(true);
   });
 
   it('disables 3d effects for no GPU', () => {
-    const hints = deriveHints({ cpu: 'high', memory: 'high', connection: 'fast', gpu: 'none' });
+    const hints = deriveHints({ cpu: 'high', memory: 'high', connection: 'high', gpu: 'none' });
     expect(hints.disable3dEffects).toBe(true);
   });
 
   it('disables 3d effects for low GPU', () => {
-    const hints = deriveHints({ cpu: 'high', memory: 'high', connection: 'fast', gpu: 'low' });
+    const hints = deriveHints({ cpu: 'high', memory: 'high', connection: 'high', gpu: 'low' });
     expect(hints.disable3dEffects).toBe(true);
   });
 
   it('enables 3d effects for mid GPU', () => {
-    const hints = deriveHints({ cpu: 'high', memory: 'high', connection: 'fast', gpu: 'mid' });
+    const hints = deriveHints({ cpu: 'high', memory: 'high', connection: 'high', gpu: 'mid' });
     expect(hints.disable3dEffects).toBe(false);
   });
 
   it('enables 3d effects for high GPU', () => {
-    const hints = deriveHints({ cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' });
+    const hints = deriveHints({ cpu: 'high', memory: 'high', connection: 'high', gpu: 'high' });
     expect(hints.disable3dEffects).toBe(false);
   });
 
   it('constrains hints on low battery unplugged even for high-end device', () => {
     const hints = deriveHints(
-      { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' },
+      { cpu: 'high', memory: 'high', connection: 'high', gpu: 'high' },
       { battery: { level: 0.08, charging: false } },
     );
     expect(hints.deferHeavyComponents).toBe(true);
@@ -88,7 +88,7 @@ describe('deriveHints', () => {
 
   it('does not constrain when low battery but charging', () => {
     const hints = deriveHints(
-      { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' },
+      { cpu: 'high', memory: 'high', connection: 'high', gpu: 'high' },
       { battery: { level: 0.05, charging: true } },
     );
     expect(hints.deferHeavyComponents).toBe(false);
@@ -98,7 +98,7 @@ describe('deriveHints', () => {
 
   it('does not constrain when battery above threshold', () => {
     const hints = deriveHints(
-      { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' },
+      { cpu: 'high', memory: 'high', connection: 'high', gpu: 'high' },
       { battery: { level: 0.5, charging: false } },
     );
     expect(hints.deferHeavyComponents).toBe(false);
@@ -107,7 +107,7 @@ describe('deriveHints', () => {
   });
 
   it('does not change behavior when battery signal is absent', () => {
-    const hints = deriveHints({ cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' }, {});
+    const hints = deriveHints({ cpu: 'high', memory: 'high', connection: 'high', gpu: 'high' }, {});
     expect(hints.deferHeavyComponents).toBe(false);
     expect(hints.reduceAnimations).toBe(false);
     expect(hints.disableAutoplay).toBe(false);
@@ -115,7 +115,7 @@ describe('deriveHints', () => {
 
   it('does not constrain at exactly 0.15 (strict less-than)', () => {
     const hints = deriveHints(
-      { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' },
+      { cpu: 'high', memory: 'high', connection: 'high', gpu: 'high' },
       { battery: { level: 0.15, charging: false } },
     );
     expect(hints.deferHeavyComponents).toBe(false);

@@ -64,7 +64,7 @@ import { classify } from '@device-router/types';
 const tiers = classify(signals, {
   cpu: { lowUpperBound: 4, midUpperBound: 8 },
   memory: { midUpperBound: 8 },
-  connection: { downlink4gUpperBound: 10 },
+  connection: { highUpperBound: 10 },
   gpu: { highEndPattern: /\bRTX\b|\bGTX\b/i },
 });
 ```

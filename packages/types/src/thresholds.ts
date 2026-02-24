@@ -9,9 +9,9 @@ export interface MemoryThresholds {
 }
 
 export interface ConnectionThresholds {
-  downlink2gUpperBound: number;
-  downlink3gUpperBound: number;
-  downlink4gUpperBound: number;
+  lowUpperBound: number;
+  midUpperBound: number;
+  highUpperBound: number;
 }
 
 export interface GpuThresholds {
@@ -37,9 +37,9 @@ export const DEFAULT_MEMORY_THRESHOLDS: MemoryThresholds = {
 };
 
 export const DEFAULT_CONNECTION_THRESHOLDS: ConnectionThresholds = {
-  downlink2gUpperBound: 0.5,
-  downlink3gUpperBound: 2,
-  downlink4gUpperBound: 5,
+  lowUpperBound: 0.5,
+  midUpperBound: 2,
+  highUpperBound: 5,
 };
 
 export const DEFAULT_GPU_THRESHOLDS: GpuThresholds = {

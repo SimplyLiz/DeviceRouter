@@ -4,6 +4,7 @@
 
 ### Breaking Changes
 
+- **Normalize `ConnectionThresholds` field names** — Renamed `downlink2gUpperBound` → `lowUpperBound`, `downlink3gUpperBound` → `midUpperBound`, `downlink4gUpperBound` → `highUpperBound` to match the `CpuThresholds`/`MemoryThresholds` naming pattern. Update any custom `connection` threshold objects in your `thresholds` config
 - **Rename `ConnectionTier` value `'fast'` → `'high'`** — Aligns connection tier vocabulary with CPU, memory, and GPU tiers which all use `'low' | 'mid' | 'high'`. Update any code comparing `tiers.connection === 'fast'` to use `'high'` instead
 - **`classify()` and `deriveHints()` now accept `StoredSignals` instead of `RawSignals`** — These functions never used `userAgent` or `viewport` (which are stripped before storage). The narrower type makes the API honest. Existing call sites are unaffected — `RawSignals` is structurally assignable to `StoredSignals`
 - **`profile:store` event now carries `StoredSignals` instead of `RawSignals`** — The event previously emitted the raw probe payload (including `userAgent`/`viewport`), not what was actually stored. The `signals` field now matches the persisted data. `bot:reject` still carries `RawSignals` (it fires before stripping)

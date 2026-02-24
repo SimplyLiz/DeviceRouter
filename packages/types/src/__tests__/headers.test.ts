@@ -8,7 +8,7 @@ describe('classifyFromHeaders', () => {
       'user-agent':
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0',
     });
-    expect(tiers).toEqual({ cpu: 'high', memory: 'high', connection: 'fast', gpu: 'mid' });
+    expect(tiers).toEqual({ cpu: 'high', memory: 'high', connection: 'high', gpu: 'mid' });
   });
 
   it('classifies iPhone UA as mobile', () => {
@@ -47,13 +47,13 @@ describe('classifyFromHeaders', () => {
     expect(classifyFromHeaders({})).toEqual({
       cpu: 'high',
       memory: 'high',
-      connection: 'fast',
+      connection: 'high',
       gpu: 'mid',
     });
     expect(classifyFromHeaders({ 'user-agent': '' })).toEqual({
       cpu: 'high',
       memory: 'high',
-      connection: 'fast',
+      connection: 'high',
       gpu: 'mid',
     });
   });
@@ -175,7 +175,7 @@ describe('preset constants', () => {
     expect(OPTIMISTIC_TIERS).toEqual({
       cpu: 'high',
       memory: 'high',
-      connection: 'fast',
+      connection: 'high',
       gpu: 'mid',
     });
   });

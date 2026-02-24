@@ -21,7 +21,7 @@ const tiers = classify({
   connection: { effectiveType: '4g', downlink: 50 },
   gpuRenderer: 'ANGLE (Apple, Apple M2 Pro, OpenGL 4.1)',
 });
-// { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' }
+// { cpu: 'high', memory: 'high', connection: 'high', gpu: 'high' }
 ```
 
 ### Derive rendering hints
@@ -103,7 +103,7 @@ if (isValidSignals(requestBody)) {
 | -------------- | ----------------- | ------------ | ----------------------------- |
 | **CPU**        | 1-2 cores         | 3-4 cores    | 5+ cores                      |
 | **Memory**     | <=2 GB            | 2-4 GB       | >4 GB                         |
-| **Connection** | 2G                | 3G / slow 4G | Fast 4G+ (>=5 Mbps)           |
+| **Connection** | 2G                | 3G / slow 4G | 4G+ (>=5 Mbps)                |
 | **GPU**        | Software renderer | Mid-range    | RTX, RX 5000+, Apple M-series |
 
 ## Exports

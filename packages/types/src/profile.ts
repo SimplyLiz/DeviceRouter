@@ -35,7 +35,7 @@ export interface DeviceProfile {
 
 export type CpuTier = 'low' | 'mid' | 'high';
 export type MemoryTier = 'low' | 'mid' | 'high';
-export type ConnectionTier = '2g' | '3g' | '4g' | 'fast';
+export type ConnectionTier = '2g' | '3g' | '4g' | 'high';
 export type GpuTier = 'none' | 'low' | 'mid' | 'high';
 
 export interface DeviceTiers {

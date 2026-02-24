@@ -148,7 +148,7 @@ describe('createMiddleware (koa)', () => {
 
       expect(ctx.state.deviceProfile!.source).toBe('fallback');
       expect(ctx.state.deviceProfile!.tiers.cpu).toBe('high');
-      expect(ctx.state.deviceProfile!.tiers.connection).toBe('fast');
+      expect(ctx.state.deviceProfile!.tiers.connection).toBe('high');
     });
 
     it('returns custom DeviceTiers fallback', async () => {

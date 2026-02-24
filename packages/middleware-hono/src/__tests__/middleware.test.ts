@@ -116,7 +116,7 @@ describe('createMiddleware (hono)', () => {
       const data = (await res.json()) as ClassifiedProfile;
       expect(data.source).toBe('fallback');
       expect(data.tiers.cpu).toBe('high');
-      expect(data.tiers.connection).toBe('fast');
+      expect(data.tiers.connection).toBe('high');
     });
 
     it('returns custom DeviceTiers fallback', async () => {

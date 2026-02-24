@@ -357,7 +357,7 @@ The middleware classifies devices into tiers based on collected signals:
 | None | —         | —      | —          | No WebGL                      |
 | Low  | 1-2 cores | ≤2 GB  | 2g         | Software renderer             |
 | Mid  | 3-4 cores | 2-4 GB | 3g, 4g     | Integrated / older discrete   |
-| High | 5+ cores  | >4 GB  | fast       | RTX, RX 5000+, Apple M-series |
+| High | 5+ cores  | >4 GB  | high       | RTX, RX 5000+, Apple M-series |
 
 ## Rendering Hints
 

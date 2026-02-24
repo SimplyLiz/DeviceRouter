@@ -44,7 +44,7 @@ All fields are optional — the probe collects what it can based on browser API 
 | ------------ | ------------------------------------ | ---------------------------------- |
 | `cpu`        | `'low' \| 'mid' \| 'high'`           | CPU tier based on core count       |
 | `memory`     | `'low' \| 'mid' \| 'high'`           | Memory tier based on device memory |
-| `connection` | `'2g' \| '3g' \| '4g' \| 'fast'`     | Connection tier                    |
+| `connection` | `'2g' \| '3g' \| '4g' \| 'high'`     | Connection tier                    |
 | `gpu`        | `'none' \| 'low' \| 'mid' \| 'high'` | GPU tier based on renderer string  |
 
 ## ClassifiedProfile (derived)

@@ -125,7 +125,7 @@ Language-specific adapters that sit in the request pipeline. On each incoming re
 The capability object exposes three abstraction levels:
 
 - **Raw signals:** the actual values collected by the probe (e.g. `hardwareConcurrency: 4`).
-- **Inferred tiers:** normalised classifications (`cpu: 'low' | 'mid' | 'high'`, `connection: '2g' | '3g' | '4g' | 'fast'`).
+- **Inferred tiers:** normalised classifications (`cpu: 'low' | 'mid' | 'high'`, `connection: '2g' | '3g' | '4g' | 'high'`).
 - **Rendering hints:** opinionated suggestions (`deferHeavyComponents: true`, `serveMinimalCSS: true`) derived from the tier data.
 
 **Official adapters for v1:** Node.js / Express, Node.js / Fastify, Python / FastAPI, Python / Django, Go / net/http.

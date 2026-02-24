@@ -224,7 +224,7 @@ type DeviceRouterEvent =
       source: ProfileSource;
       durationMs: number;
     }
-  | { type: 'profile:store'; sessionToken: string; signals: RawSignals; durationMs: number }
+  | { type: 'profile:store'; sessionToken: string; signals: StoredSignals; durationMs: number }
   | { type: 'bot:reject'; sessionToken: string; signals: RawSignals }
   | { type: 'error'; error: unknown; phase: 'middleware' | 'endpoint'; sessionToken?: string };
 ```

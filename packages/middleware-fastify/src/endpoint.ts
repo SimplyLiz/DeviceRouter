@@ -64,7 +64,12 @@ export function createProbeEndpoint(options: EndpointOptions) {
       await storage.set(sessionToken, profile, ttl);
       const durationMs = performance.now() - start;
 
-      emitEvent(onEvent, { type: 'profile:store', sessionToken, signals, durationMs });
+      emitEvent(onEvent, {
+        type: 'profile:store',
+        sessionToken,
+        signals: storedSignals,
+        durationMs,
+      });
 
       reply.setCookie(cookieName, sessionToken, {
         path: cookiePath,

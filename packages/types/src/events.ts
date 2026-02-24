@@ -1,4 +1,10 @@
-import type { DeviceTiers, RenderingHints, RawSignals, ProfileSource } from './profile.js';
+import type {
+  DeviceTiers,
+  RenderingHints,
+  StoredSignals,
+  RawSignals,
+  ProfileSource,
+} from './profile.js';
 
 export type DeviceRouterEvent =
   | {
@@ -12,7 +18,7 @@ export type DeviceRouterEvent =
   | {
       type: 'profile:store';
       sessionToken: string;
-      signals: RawSignals;
+      signals: StoredSignals;
       durationMs: number;
     }
   | {

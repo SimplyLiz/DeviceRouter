@@ -132,7 +132,10 @@ describe('createMiddleware', () => {
     // Custom thresholds: raise lowUpperBound to 6 → 4 cores = low
     const mwCustom = createMiddleware({
       storage,
-      thresholds: { cpu: { lowUpperBound: 6 }, memory: { lowUpperBound: 6 } },
+      thresholds: {
+        cpu: { lowUpperBound: 6, midUpperBound: 8 },
+        memory: { lowUpperBound: 6, midUpperBound: 8 },
+      },
     });
     const req2 = createMockReq({ dr_session: 'tok2' });
     await mwCustom(req2, createMockRes(), vi.fn());

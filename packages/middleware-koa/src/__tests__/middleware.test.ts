@@ -116,7 +116,7 @@ describe('createMiddleware (koa)', () => {
 
     const mw = createMiddleware({
       storage,
-      thresholds: { cpu: { lowUpperBound: 6 } },
+      thresholds: { cpu: { lowUpperBound: 6, midUpperBound: 8 } },
     });
     const ctx = createMockCtx({ dr_session: 'tok2' });
     const next = vi.fn();

@@ -78,7 +78,10 @@ describe('createMiddleware (hono)', () => {
     storage._store.set('tok2', profile);
 
     const app = new Hono<DeviceRouterEnv>();
-    app.use('*', createMiddleware({ storage, thresholds: { cpu: { lowUpperBound: 6 } } }));
+    app.use(
+      '*',
+      createMiddleware({ storage, thresholds: { cpu: { lowUpperBound: 6, midUpperBound: 8 } } }),
+    );
     app.get('/test', (c) => {
       const dp = c.get('deviceProfile');
       return c.json({ cpu: dp?.tiers.cpu });

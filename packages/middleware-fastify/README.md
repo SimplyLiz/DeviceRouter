@@ -114,12 +114,39 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 
 See the [Observability guide](https://github.com/SimplyLiz/DeviceRouter/blob/main/docs/observability.md) for details.
 
+## Standalone usage
+
+Use the individual pieces when you need fine-grained control over each component:
+
+```typescript
+import {
+  createMiddleware,
+  createProbeEndpoint,
+  createInjectionMiddleware,
+  loadProbeScript,
+} from '@device-router/middleware-fastify';
+
+// Use only what you need
+const hook = createMiddleware({ storage, thresholds });
+const endpoint = createProbeEndpoint({ storage, ttl: 3600 });
+const injection = createInjectionMiddleware({
+  probeScript: loadProbeScript(),
+});
+
+app.addHook('preHandler', hook);
+app.addHook('onSend', injection);
+app.post('/device-router/probe', endpoint);
+```
+
+`loadProbeScript()` reads the `@device-router/probe` bundle and optionally rewrites the endpoint URL via `{ probePath }`. Thresholds passed to `createMiddleware()` are validated at creation time.
+
 ## Exports
 
 - `createDeviceRouter(options)` — All-in-one setup returning `{ middleware, probeEndpoint, injectionMiddleware? }`
-- `createMiddleware(options)` — Standalone preHandler hook
+- `createMiddleware(options)` — Standalone preHandler hook (validates thresholds)
 - `createProbeEndpoint(options)` — Standalone probe endpoint handler
 - `createInjectionMiddleware(options)` — Standalone onSend injection hook
+- `loadProbeScript(options?)` — Load the minified probe script for use with `createInjectionMiddleware()`
 
 ## Compatibility
 

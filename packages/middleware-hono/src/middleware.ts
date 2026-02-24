@@ -7,6 +7,7 @@ import {
   classifyFromHeaders,
   resolveFallback,
   emitEvent,
+  validateThresholds,
 } from '@device-router/types';
 import type {
   ClassifiedProfile,
@@ -40,6 +41,8 @@ export function createMiddleware(options: MiddlewareOptions): MiddlewareHandler<
     classifyFromHeaders: useHeaders,
     onEvent,
   } = options;
+
+  if (thresholds) validateThresholds(thresholds);
 
   return async (c: Context<DeviceRouterEnv>, next) => {
     try {

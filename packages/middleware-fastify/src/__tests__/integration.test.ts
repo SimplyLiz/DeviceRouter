@@ -68,7 +68,7 @@ describe('integration: probe → middleware → route (fastify)', () => {
     expect(setCookie).toBeTruthy();
 
     const testRes = await fetch(`${baseUrl}/test`, {
-      headers: { Cookie: `dr_session=${probeData.sessionToken}` },
+      headers: { Cookie: `device-router-session=${probeData.sessionToken}` },
     });
 
     const testData = (await testRes.json()) as { tier: string; hints: Record<string, boolean> };

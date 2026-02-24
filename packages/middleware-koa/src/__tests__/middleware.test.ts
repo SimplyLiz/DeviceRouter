@@ -59,7 +59,7 @@ describe('createMiddleware (koa)', () => {
 
   it('sets deviceProfile to null when profile not found', async () => {
     const mw = createMiddleware({ storage });
-    const ctx = createMockCtx({ dr_session: 'unknown' });
+    const ctx = createMockCtx({ 'device-router-session': 'unknown' });
     const next = vi.fn();
 
     await mw(ctx, next);
@@ -79,7 +79,7 @@ describe('createMiddleware (koa)', () => {
     storage._store.set('tok1', profile);
 
     const mw = createMiddleware({ storage });
-    const ctx = createMockCtx({ dr_session: 'tok1' });
+    const ctx = createMockCtx({ 'device-router-session': 'tok1' });
     const next = vi.fn();
 
     await mw(ctx, next);
@@ -118,7 +118,7 @@ describe('createMiddleware (koa)', () => {
       storage,
       thresholds: { cpu: { lowUpperBound: 6, midUpperBound: 8 } },
     });
-    const ctx = createMockCtx({ dr_session: 'tok2' });
+    const ctx = createMockCtx({ 'device-router-session': 'tok2' });
     const next = vi.fn();
 
     await mw(ctx, next);
@@ -172,7 +172,7 @@ describe('createMiddleware (koa)', () => {
 
     it('falls back when cookie exists but profile not in storage', async () => {
       const mw = createMiddleware({ storage, fallbackProfile: 'conservative' });
-      const ctx = createMockCtx({ dr_session: 'expired-token' });
+      const ctx = createMockCtx({ 'device-router-session': 'expired-token' });
       const next = vi.fn();
 
       await mw(ctx, next);
@@ -270,7 +270,7 @@ describe('createMiddleware (koa)', () => {
       storage._store.set('tok1', profile);
 
       const mw = createMiddleware({ storage, onEvent });
-      const ctx = createMockCtx({ dr_session: 'tok1' });
+      const ctx = createMockCtx({ 'device-router-session': 'tok1' });
       const next = vi.fn();
 
       await mw(ctx, next);
@@ -342,7 +342,7 @@ describe('createMiddleware (koa)', () => {
 
       storage.get = vi.fn().mockRejectedValue(new Error('Storage down'));
       const mw = createMiddleware({ storage, onEvent });
-      const ctx = createMockCtx({ dr_session: 'tok-err' });
+      const ctx = createMockCtx({ 'device-router-session': 'tok-err' });
       const next = vi.fn();
 
       await expect(mw(ctx, next)).rejects.toThrow('Storage down');
@@ -370,7 +370,7 @@ describe('createMiddleware (koa)', () => {
       storage._store.set('tok-safe', profile);
 
       const mw = createMiddleware({ storage, onEvent });
-      const ctx = createMockCtx({ dr_session: 'tok-safe' });
+      const ctx = createMockCtx({ 'device-router-session': 'tok-safe' });
       const next = vi.fn();
 
       await mw(ctx, next);

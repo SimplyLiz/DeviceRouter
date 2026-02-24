@@ -266,7 +266,7 @@ Thresholds are validated at startup — inverted bounds, non-positive values, or
 ```typescript
 const { middleware, probeEndpoint } = createDeviceRouter({
   storage,              // Required: StorageAdapter instance
-  cookieName: 'dr_session',   // Default: 'dr_session'
+  cookieName: 'device-router-session',   // Default: 'device-router-session'
   cookiePath: '/',            // Default: '/'
   cookieSecure: false,        // Default: false — set to true for HTTPS deployments
   ttl: 86400,                 // Default: 86400 (24 hours)
@@ -316,7 +316,7 @@ The signals DeviceRouter collects overlap with known browser fingerprinting vect
 
 Two regulations apply independently:
 
-- **ePrivacy Directive (Article 5(3))** covers both setting the `dr_session` cookie _and_ reading device signals from browser APIs. Both count as accessing information stored on terminal equipment. The "strictly necessary" exemption is interpreted narrowly by the EDPB, CNIL, and ICO — it requires that the service _cannot function_ without the data, not that it functions _better_ with it. Adaptive rendering has not been recognized as strictly necessary by any regulator.
+- **ePrivacy Directive (Article 5(3))** covers both setting the `device-router-session` cookie _and_ reading device signals from browser APIs. Both count as accessing information stored on terminal equipment. The "strictly necessary" exemption is interpreted narrowly by the EDPB, CNIL, and ICO — it requires that the service _cannot function_ without the data, not that it functions _better_ with it. Adaptive rendering has not been recognized as strictly necessary by any regulator.
 
 - **GDPR** applies because the collected signals in aggregate constitute personal data (Recital 30 explicitly references device identifiers and the profiles they can create). You need a lawful basis under Article 6 — consent (Article 6(1)(a)) is the most defensible option.
 

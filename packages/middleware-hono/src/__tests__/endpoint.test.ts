@@ -46,7 +46,7 @@ describe('createProbeEndpoint (hono)', () => {
 
     const setCookie = res.headers.get('set-cookie');
     expect(setCookie).toBeTruthy();
-    expect(setCookie).toContain('dr_session=');
+    expect(setCookie).toContain('device-router-session=');
     expect(setCookie).not.toContain('Secure');
   });
 

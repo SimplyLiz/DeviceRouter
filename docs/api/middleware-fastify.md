@@ -23,21 +23,21 @@ app.addHook('preHandler', middleware);
 
 ### Options
 
-| Option                | Type                                          | Default                  | Description                                                               |
-| --------------------- | --------------------------------------------- | ------------------------ | ------------------------------------------------------------------------- |
-| `storage`             | `StorageAdapter`                              | required                 | Storage backend                                                           |
-| `cookieName`          | `string`                                      | `'dr_session'`           | Session cookie name                                                       |
-| `cookiePath`          | `string`                                      | `'/'`                    | Cookie path                                                               |
-| `cookieSecure`        | `boolean`                                     | `false`                  | Set `Secure` flag on the session cookie                                   |
-| `ttl`                 | `number`                                      | `86400`                  | Profile TTL in seconds                                                    |
-| `rejectBots`          | `boolean`                                     | `true`                   | Reject bot/crawler probe submissions (returns 403)                        |
-| `thresholds`          | `TierThresholds`                              | built-in defaults        | Custom tier classification thresholds (validated at startup)              |
-| `injectProbe`         | `boolean`                                     | `false`                  | Auto-inject probe script into HTML responses                              |
-| `probePath`           | `string`                                      | `'/device-router/probe'` | Custom probe endpoint path for injected script                            |
-| `probeNonce`          | `string \| ((req: FastifyRequest) => string)` | —                        | CSP nonce for the injected script tag                                     |
-| `fallbackProfile`     | `FallbackProfile`                             | —                        | Fallback profile for first requests without probe data                    |
-| `classifyFromHeaders` | `boolean`                                     | `false`                  | Classify from UA/Client Hints on first request                            |
-| `onEvent`             | `OnEventCallback`                             | —                        | Observability callback for logging/metrics ([guide](../observability.md)) |
+| Option                | Type                                          | Default                   | Description                                                               |
+| --------------------- | --------------------------------------------- | ------------------------- | ------------------------------------------------------------------------- |
+| `storage`             | `StorageAdapter`                              | required                  | Storage backend                                                           |
+| `cookieName`          | `string`                                      | `'device-router-session'` | Session cookie name                                                       |
+| `cookiePath`          | `string`                                      | `'/'`                     | Cookie path                                                               |
+| `cookieSecure`        | `boolean`                                     | `false`                   | Set `Secure` flag on the session cookie                                   |
+| `ttl`                 | `number`                                      | `86400`                   | Profile TTL in seconds                                                    |
+| `rejectBots`          | `boolean`                                     | `true`                    | Reject bot/crawler probe submissions (returns 403)                        |
+| `thresholds`          | `TierThresholds`                              | built-in defaults         | Custom tier classification thresholds (validated at startup)              |
+| `injectProbe`         | `boolean`                                     | `false`                   | Auto-inject probe script into HTML responses                              |
+| `probePath`           | `string`                                      | `'/device-router/probe'`  | Custom probe endpoint path for injected script                            |
+| `probeNonce`          | `string \| ((req: FastifyRequest) => string)` | —                         | CSP nonce for the injected script tag                                     |
+| `fallbackProfile`     | `FallbackProfile`                             | —                         | Fallback profile for first requests without probe data                    |
+| `classifyFromHeaders` | `boolean`                                     | `false`                   | Classify from UA/Client Hints on first request                            |
+| `onEvent`             | `OnEventCallback`                             | —                         | Observability callback for logging/metrics ([guide](../observability.md)) |
 
 ### Returns
 
@@ -118,14 +118,14 @@ app.addHook('preHandler', hook);
 
 #### MiddlewareOptions
 
-| Option                | Type              | Default        | Description                                    |
-| --------------------- | ----------------- | -------------- | ---------------------------------------------- |
-| `storage`             | `StorageAdapter`  | _(required)_   | Storage backend for profiles                   |
-| `cookieName`          | `string`          | `'dr_session'` | Session cookie name                            |
-| `thresholds`          | `TierThresholds`  | Built-in       | Custom tier thresholds (validated at creation) |
-| `fallbackProfile`     | `FallbackProfile` | —              | Fallback profile for first requests            |
-| `classifyFromHeaders` | `boolean`         | `false`        | Classify from UA/Client Hints on first request |
-| `onEvent`             | `OnEventCallback` | —              | Observability callback                         |
+| Option                | Type              | Default                   | Description                                    |
+| --------------------- | ----------------- | ------------------------- | ---------------------------------------------- |
+| `storage`             | `StorageAdapter`  | _(required)_              | Storage backend for profiles                   |
+| `cookieName`          | `string`          | `'device-router-session'` | Session cookie name                            |
+| `thresholds`          | `TierThresholds`  | Built-in                  | Custom tier thresholds (validated at creation) |
+| `fallbackProfile`     | `FallbackProfile` | —                         | Fallback profile for first requests            |
+| `classifyFromHeaders` | `boolean`         | `false`                   | Classify from UA/Client Hints on first request |
+| `onEvent`             | `OnEventCallback` | —                         | Observability callback                         |
 
 ### createProbeEndpoint(options)
 
@@ -145,15 +145,15 @@ app.post('/device-router/probe', endpoint);
 
 #### EndpointOptions
 
-| Option         | Type              | Default        | Description                          |
-| -------------- | ----------------- | -------------- | ------------------------------------ |
-| `storage`      | `StorageAdapter`  | _(required)_   | Storage backend for profiles         |
-| `cookieName`   | `string`          | `'dr_session'` | Session cookie name                  |
-| `cookiePath`   | `string`          | `'/'`          | Cookie path                          |
-| `cookieSecure` | `boolean`         | `false`        | Set `Secure` flag on the cookie      |
-| `ttl`          | `number`          | `86400`        | Profile TTL in seconds               |
-| `rejectBots`   | `boolean`         | `true`         | Reject bot/crawler probe submissions |
-| `onEvent`      | `OnEventCallback` | —              | Observability callback               |
+| Option         | Type              | Default                   | Description                          |
+| -------------- | ----------------- | ------------------------- | ------------------------------------ |
+| `storage`      | `StorageAdapter`  | _(required)_              | Storage backend for profiles         |
+| `cookieName`   | `string`          | `'device-router-session'` | Session cookie name                  |
+| `cookiePath`   | `string`          | `'/'`                     | Cookie path                          |
+| `cookieSecure` | `boolean`         | `false`                   | Set `Secure` flag on the cookie      |
+| `ttl`          | `number`          | `86400`                   | Profile TTL in seconds               |
+| `rejectBots`   | `boolean`         | `true`                    | Reject bot/crawler probe submissions |
+| `onEvent`      | `OnEventCallback` | —                         | Observability callback               |
 
 ### createInjectionMiddleware(options)
 

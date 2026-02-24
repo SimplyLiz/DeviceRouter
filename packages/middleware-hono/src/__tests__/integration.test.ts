@@ -51,7 +51,7 @@ describe('integration: probe → middleware → route (hono)', () => {
     expect(probeData.sessionToken).toBeTruthy();
 
     const testRes = await app.request('/test', {
-      headers: { Cookie: `dr_session=${probeData.sessionToken}` },
+      headers: { Cookie: `device-router-session=${probeData.sessionToken}` },
     });
 
     const testData = (await testRes.json()) as { tier: string; hints: Record<string, boolean> };

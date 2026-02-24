@@ -37,7 +37,7 @@ export interface MiddlewareOptions {
 export function createMiddleware(options: MiddlewareOptions) {
   const {
     storage,
-    cookieName = 'dr_session',
+    cookieName = 'device-router-session',
     thresholds,
     fallbackProfile,
     classifyFromHeaders: useHeaders,

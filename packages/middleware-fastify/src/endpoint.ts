@@ -18,7 +18,7 @@ export interface EndpointOptions {
 export function createProbeEndpoint(options: EndpointOptions) {
   const {
     storage,
-    cookieName = 'dr_session',
+    cookieName = 'device-router-session',
     cookiePath = '/',
     cookieSecure = false,
     ttl = 86400,

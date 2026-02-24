@@ -1,6 +1,6 @@
-import type { DeviceTiers, RenderingHints, RawSignals } from './profile.js';
+import type { DeviceTiers, RenderingHints, StoredSignals } from './profile.js';
 
-export function deriveHints(tiers: DeviceTiers, signals?: RawSignals): RenderingHints {
+export function deriveHints(tiers: DeviceTiers, signals?: StoredSignals): RenderingHints {
   const isLowEnd = tiers.cpu === 'low' || tiers.memory === 'low';
   const isSlowConnection = tiers.connection === '2g' || tiers.connection === '3g';
   const isBatteryConstrained =

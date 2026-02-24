@@ -2,9 +2,9 @@
 
 ## Functions
 
-### `classify(signals: RawSignals): DeviceTiers`
+### `classify(signals: StoredSignals): DeviceTiers`
 
-Classifies raw device signals into capability tiers.
+Classifies device signals into capability tiers.
 
 ```typescript
 import { classify } from '@device-router/types';
@@ -17,7 +17,7 @@ const tiers = classify({
 // { cpu: 'high', memory: 'high', connection: 'high', gpu: 'none' }
 ```
 
-### `deriveHints(tiers: DeviceTiers, signals?: RawSignals): RenderingHints`
+### `deriveHints(tiers: DeviceTiers, signals?: StoredSignals): RenderingHints`
 
 Derives rendering hints from device tiers.
 

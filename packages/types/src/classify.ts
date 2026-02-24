@@ -1,5 +1,5 @@
 import type {
-  RawSignals,
+  StoredSignals,
   CpuTier,
   MemoryTier,
   ConnectionTier,
@@ -68,7 +68,7 @@ export function classifyGpu(
   return 'mid';
 }
 
-export function classify(signals: RawSignals, thresholds?: TierThresholds): DeviceTiers {
+export function classify(signals: StoredSignals, thresholds?: TierThresholds): DeviceTiers {
   return {
     cpu: classifyCpu(signals.hardwareConcurrency, thresholds?.cpu),
     memory: classifyMemory(signals.deviceMemory, thresholds?.memory),

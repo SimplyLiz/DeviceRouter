@@ -99,7 +99,7 @@ describe('validateThresholds', () => {
       validateThresholds({
         cpu: { lowUpperBound: 2, midUpperBound: 4 },
         memory: { lowUpperBound: 2, midUpperBound: 8 },
-        connection: { downlink2gUpperBound: 0.5, downlink3gUpperBound: 2, downlink4gUpperBound: 5 },
+        connection: { lowUpperBound: 0.5, midUpperBound: 2, highUpperBound: 5 },
         gpu: { softwarePattern: /SwiftShader/i, highEndPattern: /RTX/i },
       }),
     ).not.toThrow();
@@ -138,19 +138,17 @@ describe('validateThresholds', () => {
     );
   });
 
-  it('throws on inverted connection bounds (2g >= 3g)', () => {
+  it('throws on inverted connection bounds (low >= mid)', () => {
     expect(() =>
-      validateThresholds({ connection: { downlink2gUpperBound: 5, downlink3gUpperBound: 2 } }),
-    ).toThrow(
-      /connection\.downlink2gUpperBound \(5\) must be less than connection\.downlink3gUpperBound \(2\)/,
-    );
+      validateThresholds({ connection: { lowUpperBound: 5, midUpperBound: 2 } }),
+    ).toThrow(/connection\.lowUpperBound \(5\) must be less than connection\.midUpperBound \(2\)/);
   });
 
-  it('throws on inverted connection bounds (3g >= 4g)', () => {
+  it('throws on inverted connection bounds (mid >= high)', () => {
     expect(() =>
-      validateThresholds({ connection: { downlink3gUpperBound: 10, downlink4gUpperBound: 5 } }),
+      validateThresholds({ connection: { midUpperBound: 10, highUpperBound: 5 } }),
     ).toThrow(
-      /connection\.downlink3gUpperBound \(10\) must be less than connection\.downlink4gUpperBound \(5\)/,
+      /connection\.midUpperBound \(10\) must be less than connection\.highUpperBound \(5\)/,
     );
   });
 
@@ -167,8 +165,8 @@ describe('validateThresholds', () => {
   });
 
   it('throws on negative connection threshold', () => {
-    expect(() => validateThresholds({ connection: { downlink2gUpperBound: -0.5 } })).toThrow(
-      /connection\.downlink2gUpperBound must be positive/,
+    expect(() => validateThresholds({ connection: { lowUpperBound: -0.5 } })).toThrow(
+      /connection\.lowUpperBound must be positive/,
     );
   });
 

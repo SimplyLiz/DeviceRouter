@@ -18,7 +18,6 @@ export function renderDemoPage({
           serveMinimalCSS: true,
           reduceAnimations: true,
           useImagePlaceholders: true,
-          disableAutoplay: true,
           preferServerRendering: true,
           disable3dEffects: true,
         }
@@ -28,18 +27,16 @@ export function renderDemoPage({
             serveMinimalCSS: false,
             reduceAnimations: false,
             useImagePlaceholders: false,
-            disableAutoplay: false,
             preferServerRendering: false,
             disable3dEffects: false,
           }
         : profile?.hints;
 
-  // Five booleans derived from hints drive all rendering decisions
+  // Four booleans derived from hints drive all rendering decisions
   const full = !hints?.deferHeavyComponents;
   const animate = !hints?.reduceAnimations;
   const richCSS = !hints?.serveMinimalCSS;
   const showImages = !hints?.useImagePlaceholders;
-  const autoplay = !hints?.disableAutoplay;
 
   const activeMode = forceParam === 'full' ? 'full' : forceParam === 'lite' ? 'lite' : 'auto';
 
@@ -97,10 +94,6 @@ export function renderDemoPage({
     .gallery-tile{background:#fff;border-radius:12px;padding:1.5rem;text-align:center;border:1px solid #e2e8f0}
     .gallery-tile h4{margin-top:0.75rem;font-size:0.8125rem;color:#64748b;font-weight:500}
     .placeholder{background:#e2e8f0;border-radius:8px;height:120px;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:0.8rem}
-    .autoplay-section{text-align:center;padding:1.5rem;max-width:960px;margin:0 auto}
-    .autoplay-bars{display:flex;gap:4px;justify-content:center;align-items:flex-end;height:40px;margin-bottom:0.75rem}
-    .autoplay-bars span{display:block;width:6px;background:#4f46e5;border-radius:3px}
-    .autoplay-label{font-size:0.8125rem;color:#64748b}
     .profile-panel{max-width:960px;margin:1.5rem auto;padding:0 1.5rem}
     .profile-panel summary{cursor:pointer;font-weight:600;padding:0.75rem 0;font-size:1rem}
     .profile-panel pre{background:#f1f5f9;padding:1rem;border-radius:8px;overflow-x:auto;font-size:0.8rem;line-height:1.6}
@@ -139,13 +132,6 @@ ${
     .gallery-tile:nth-child(2){animation-delay:0.15s}
     .gallery-tile:nth-child(3){animation-delay:0.3s}
     @keyframes bounce{0%,100%{height:8px}50%{height:100%}}
-    .autoplay-bars.animated span{animation:bounce 0.8s ease-in-out infinite}
-    .autoplay-bars.animated span:nth-child(2){animation-delay:0.1s}
-    .autoplay-bars.animated span:nth-child(3){animation-delay:0.2s}
-    .autoplay-bars.animated span:nth-child(4){animation-delay:0.3s}
-    .autoplay-bars.animated span:nth-child(5){animation-delay:0.4s}
-    .autoplay-bars.animated span:nth-child(6){animation-delay:0.5s}
-    .autoplay-bars.animated span:nth-child(7){animation-delay:0.6s}
   </style>`
     : ''
 }
@@ -221,19 +207,6 @@ ${
       <h4>Response Times</h4>
     </div>`
 }
-  </div>
-
-  <div class="autoplay-section">
-    <div class="autoplay-bars${autoplay ? ' animated' : ''}">
-      <span style="height:12px"></span>
-      <span style="height:28px"></span>
-      <span style="height:20px"></span>
-      <span style="height:36px"></span>
-      <span style="height:16px"></span>
-      <span style="height:32px"></span>
-      <span style="height:24px"></span>
-    </div>
-    <div class="autoplay-label">Autoplay: ${autoplay ? 'On' : 'Disabled'}</div>
   </div>
 
   <details class="profile-panel">

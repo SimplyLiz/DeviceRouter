@@ -11,7 +11,6 @@ export function deriveHints(tiers: DeviceTiers, signals?: StoredSignals): Render
     serveMinimalCSS: isLowEnd,
     reduceAnimations: isLowEnd || signals?.prefersReducedMotion === true || isBatteryConstrained,
     useImagePlaceholders: isSlowConnection,
-    disableAutoplay: isLowEnd || isSlowConnection || isBatteryConstrained,
     preferServerRendering: isLowEnd,
     disable3dEffects: tiers.gpu === 'none' || tiers.gpu === 'low',
   };

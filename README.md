@@ -18,7 +18,7 @@ A **~1 KB** client probe. One middleware call. Full device awareness on every re
 Responsive design adapts layout. DeviceRouter adapts **what you serve**.
 
 - A budget phone on 2G? Skip the heavy animations, defer non-critical components, prefer server-side rendering.
-- A flagship on fiber? Go all out — autoplay, full interactivity, rich visuals.
+- A flagship on fiber? Go all out — full interactivity, rich visuals.
 
 No user-agent sniffing. No guesswork. Real signals from real devices, classified into actionable tiers and rendering hints your server can act on immediately.
 
@@ -120,7 +120,6 @@ Based on tiers and user preferences, DeviceRouter derives actionable booleans:
 | `serveMinimalCSS`       | Low-end device                                         |
 | `reduceAnimations`      | Low-end device, prefers reduced motion, or low battery |
 | `useImagePlaceholders`  | Slow connection (2G/3G)                                |
-| `disableAutoplay`       | Low-end device, slow connection, or low battery        |
 | `preferServerRendering` | Low-end device                                         |
 | `disable3dEffects`      | No GPU or software renderer                            |
 
@@ -245,8 +244,8 @@ new RedisStorageAdapter(redisClient, { prefix: 'dr:profile:' });
 
 Each framework has an example app that renders a product landing page adapting in real time to device capabilities:
 
-- **Full experience** (high-end device) — animated gradient hero, SVG icons, inline charts, pulsing CTA, hover transitions, autoplay visualizer
-- **Lite experience** (low-end device) — flat solid backgrounds, Unicode icons, placeholder boxes, no animations, autoplay disabled
+- **Full experience** (high-end device) — animated gradient hero, SVG icons, inline charts, pulsing CTA, hover transitions
+- **Lite experience** (low-end device) — flat solid backgrounds, Unicode icons, placeholder boxes, no animations
 
 Run any example to see it in action:
 

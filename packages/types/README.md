@@ -36,7 +36,6 @@ const hints = deriveHints(tiers, signals);
 //   serveMinimalCSS: false,
 //   reduceAnimations: false,
 //   useImagePlaceholders: false,
-//   disableAutoplay: false,
 //   preferServerRendering: false,
 //   disable3dEffects: false,
 // }
@@ -50,7 +49,6 @@ Rendering hints are derived from tiers and transient signals:
 | `serveMinimalCSS`       | Low-end device                                         |
 | `reduceAnimations`      | Low-end device, prefers reduced motion, or low battery |
 | `useImagePlaceholders`  | Slow connection (2G/3G)                                |
-| `disableAutoplay`       | Low-end device, slow connection, or low battery        |
 | `preferServerRendering` | Low-end device                                         |
 | `disable3dEffects`      | No GPU or software renderer                            |
 
@@ -66,7 +64,7 @@ import { classify } from '@device-router/types';
 const tiers = classify(signals, {
   cpu: { lowUpperBound: 4, midUpperBound: 8 },
   memory: { midUpperBound: 8 },
-  connection: { downlink4gUpperBound: 10 },
+  connection: { highUpperBound: 10 },
   gpu: { highEndPattern: /\bRTX\b|\bGTX\b/i },
 });
 ```

@@ -21,7 +21,7 @@ const tiers = classify({
 
 Derives rendering hints from device tiers.
 
-The `battery` signal bypasses tier classification entirely — it's transient state, not a capability. When the device is unplugged and below 15% charge, `deferHeavyComponents`, `reduceAnimations`, and `disableAutoplay` are forced on to conserve power.
+The `battery` signal bypasses tier classification entirely — it's transient state, not a capability. When the device is unplugged and below 15% charge, `deferHeavyComponents` and `reduceAnimations` are forced on to conserve power.
 
 ```typescript
 import { classify, deriveHints } from '@device-router/types';
@@ -54,7 +54,7 @@ Validates custom tier thresholds after merging with defaults. Throws a descripti
 **Validation rules:**
 
 - **CPU/Memory**: `lowUpperBound` must be less than `midUpperBound`
-- **Connection**: `downlink2gUpperBound` < `downlink3gUpperBound` < `downlink4gUpperBound`
+- **Connection**: `lowUpperBound` < `midUpperBound` < `highUpperBound`
 - **GPU**: `softwarePattern` and `highEndPattern` must be `RegExp` instances
 - All numeric values must be positive (> 0)
 
@@ -156,11 +156,11 @@ Custom thresholds for tier classification. All fields are optional — unset fie
 
 ### ConnectionThresholds
 
-| Field                  | Type     | Default | Description                    |
-| ---------------------- | -------- | ------- | ------------------------------ |
-| `downlink2gUpperBound` | `number` | `0.5`   | Mbps at or below → `'2g'` tier |
-| `downlink3gUpperBound` | `number` | `2`     | Mbps at or below → `'3g'` tier |
-| `downlink4gUpperBound` | `number` | `5`     | Mbps at or below → `'4g'` tier |
+| Field            | Type     | Default | Description                    |
+| ---------------- | -------- | ------- | ------------------------------ |
+| `lowUpperBound`  | `number` | `0.5`   | Mbps at or below → `'2g'` tier |
+| `midUpperBound`  | `number` | `2`     | Mbps at or below → `'3g'` tier |
+| `highUpperBound` | `number` | `5`     | Mbps at or below → `'4g'` tier |
 
 ### GpuThresholds
 
@@ -177,7 +177,7 @@ import { classify } from '@device-router/types';
 const tiers = classify(signals, {
   cpu: { lowUpperBound: 4, midUpperBound: 8 },
   memory: { midUpperBound: 8 },
-  connection: { downlink4gUpperBound: 10 },
+  connection: { highUpperBound: 10 },
   gpu: { highEndPattern: /\bRTX\b|\bGTX\b/i },
 });
 ```

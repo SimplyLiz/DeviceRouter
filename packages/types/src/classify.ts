@@ -39,19 +39,19 @@ export function classifyConnection(
   downlink?: number,
   thresholds?: Partial<import('./thresholds.js').ConnectionThresholds>,
 ): ConnectionTier {
-  const { downlink2gUpperBound, downlink3gUpperBound, downlink4gUpperBound } = {
+  const { lowUpperBound, midUpperBound, highUpperBound } = {
     ...DEFAULT_CONNECTION_THRESHOLDS,
     ...thresholds,
   };
 
   if (effectiveType === 'slow-2g' || effectiveType === '2g') return '2g';
   if (effectiveType === '3g') return '3g';
-  if (effectiveType === '4g' && downlink != null && downlink < downlink4gUpperBound) return '4g';
+  if (effectiveType === '4g' && downlink != null && downlink < highUpperBound) return '4g';
   if (effectiveType === '4g') return 'high';
   if (downlink != null) {
-    if (downlink < downlink2gUpperBound) return '2g';
-    if (downlink < downlink3gUpperBound) return '3g';
-    if (downlink < downlink4gUpperBound) return '4g';
+    if (downlink < lowUpperBound) return '2g';
+    if (downlink < midUpperBound) return '3g';
+    if (downlink < highUpperBound) return '4g';
     return 'high';
   }
   return '4g';

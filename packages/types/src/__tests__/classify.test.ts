@@ -93,18 +93,18 @@ describe('classifyConnection', () => {
 
   it('uses custom downlink thresholds', () => {
     // With wider 2g band (up to 1 Mbps)
-    expect(classifyConnection(undefined, 0.8, { downlink2gUpperBound: 1 })).toBe('2g');
+    expect(classifyConnection(undefined, 0.8, { lowUpperBound: 1 })).toBe('2g');
     // Default would classify 0.8 as 3g, custom keeps it as 2g
     expect(classifyConnection(undefined, 0.8)).toBe('3g');
 
     // Custom 4g upper bound
-    expect(classifyConnection(undefined, 8, { downlink4gUpperBound: 10 })).toBe('4g');
+    expect(classifyConnection(undefined, 8, { highUpperBound: 10 })).toBe('4g');
     expect(classifyConnection(undefined, 8)).toBe('high');
   });
 
   it('effectiveType string matches are not affected by thresholds', () => {
-    expect(classifyConnection('2g', undefined, { downlink2gUpperBound: 0.1 })).toBe('2g');
-    expect(classifyConnection('3g', undefined, { downlink3gUpperBound: 0.1 })).toBe('3g');
+    expect(classifyConnection('2g', undefined, { lowUpperBound: 0.1 })).toBe('2g');
+    expect(classifyConnection('3g', undefined, { midUpperBound: 0.1 })).toBe('3g');
   });
 });
 
@@ -204,7 +204,7 @@ describe('classify', () => {
       {
         cpu: { lowUpperBound: 4 },
         memory: { lowUpperBound: 4 },
-        connection: { downlink4gUpperBound: 3 },
+        connection: { highUpperBound: 3 },
       },
     );
     expect(result).toEqual({ cpu: 'low', memory: 'low', connection: 'high', gpu: 'none' });

@@ -9,7 +9,6 @@ describe('deriveHints', () => {
       serveMinimalCSS: true,
       reduceAnimations: true,
       useImagePlaceholders: true,
-      disableAutoplay: true,
       preferServerRendering: true,
       disable3dEffects: true,
     });
@@ -22,7 +21,6 @@ describe('deriveHints', () => {
       serveMinimalCSS: false,
       reduceAnimations: false,
       useImagePlaceholders: false,
-      disableAutoplay: false,
       preferServerRendering: false,
       disable3dEffects: false,
     });
@@ -40,7 +38,6 @@ describe('deriveHints', () => {
     const hints = deriveHints({ cpu: 'high', memory: 'high', connection: '3g', gpu: 'high' });
     expect(hints.deferHeavyComponents).toBe(true);
     expect(hints.useImagePlaceholders).toBe(true);
-    expect(hints.disableAutoplay).toBe(true);
     expect(hints.serveMinimalCSS).toBe(false);
     expect(hints.preferServerRendering).toBe(false);
   });
@@ -78,7 +75,6 @@ describe('deriveHints', () => {
     );
     expect(hints.deferHeavyComponents).toBe(true);
     expect(hints.reduceAnimations).toBe(true);
-    expect(hints.disableAutoplay).toBe(true);
     // Capability-based hints stay permissive
     expect(hints.serveMinimalCSS).toBe(false);
     expect(hints.useImagePlaceholders).toBe(false);
@@ -93,7 +89,6 @@ describe('deriveHints', () => {
     );
     expect(hints.deferHeavyComponents).toBe(false);
     expect(hints.reduceAnimations).toBe(false);
-    expect(hints.disableAutoplay).toBe(false);
   });
 
   it('does not constrain when battery above threshold', () => {
@@ -103,14 +98,12 @@ describe('deriveHints', () => {
     );
     expect(hints.deferHeavyComponents).toBe(false);
     expect(hints.reduceAnimations).toBe(false);
-    expect(hints.disableAutoplay).toBe(false);
   });
 
   it('does not change behavior when battery signal is absent', () => {
     const hints = deriveHints({ cpu: 'high', memory: 'high', connection: 'high', gpu: 'high' }, {});
     expect(hints.deferHeavyComponents).toBe(false);
     expect(hints.reduceAnimations).toBe(false);
-    expect(hints.disableAutoplay).toBe(false);
   });
 
   it('does not constrain at exactly 0.15 (strict less-than)', () => {
@@ -120,6 +113,5 @@ describe('deriveHints', () => {
     );
     expect(hints.deferHeavyComponents).toBe(false);
     expect(hints.reduceAnimations).toBe(false);
-    expect(hints.disableAutoplay).toBe(false);
   });
 });

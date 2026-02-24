@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Breaking Changes
+
+- **middleware-fastify: normalized return shape** — `createDeviceRouter()` now returns raw Fastify hooks instead of a `fastify-plugin` wrapped plugin. Migrate `await app.register(middleware)` → `app.addHook('preHandler', middleware)`. When using `injectProbe: true`, register the injection hook separately: `app.addHook('onSend', injectionMiddleware)`. Removed `fastify-plugin` dependency
+
 ### Features
 
 - **Composable middleware** — `createMiddleware()`, `createProbeEndpoint()`, and `createInjectionMiddleware()` are now first-class exports with full threshold validation and documentation. Use them independently for fine-grained control without the `createDeviceRouter()` factory

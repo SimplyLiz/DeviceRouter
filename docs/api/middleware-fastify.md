@@ -18,7 +18,7 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 });
 
 app.post('/device-router/probe', probeEndpoint);
-await app.register(middleware);
+app.addHook('preHandler', middleware);
 ```
 
 ### Options
@@ -41,11 +41,11 @@ await app.register(middleware);
 
 ### Returns
 
-| Property              | Type                         | Description                                                  |
-| --------------------- | ---------------------------- | ------------------------------------------------------------ |
-| `middleware`          | Fastify plugin               | Registers `preHandler` hook (and `onSend` hook if injecting) |
-| `probeEndpoint`       | Fastify route handler        | Handles `POST` from probe, validates and stores signals      |
-| `injectionMiddleware` | `onSend` hook or `undefined` | Only present when `injectProbe: true`                        |
+| Property              | Type                         | Description                                             |
+| --------------------- | ---------------------------- | ------------------------------------------------------- |
+| `middleware`          | `preHandler` hook            | Classifies the device and attaches profile to `req`     |
+| `probeEndpoint`       | Fastify route handler        | Handles `POST` from probe, validates and stores signals |
+| `injectionMiddleware` | `onSend` hook or `undefined` | Only present when `injectProbe: true`                   |
 
 ## req.deviceProfile
 
@@ -64,14 +64,19 @@ interface ClassifiedProfile {
 
 ## Probe Auto-Injection
 
-When `injectProbe: true`, the middleware registers an `onSend` hook that automatically injects the probe `<script>` into HTML responses. Requires `@device-router/probe` to be installed.
+When `injectProbe: true`, `injectionMiddleware` is returned as an `onSend` hook that injects the probe `<script>` into HTML responses. Register it yourself. Requires `@device-router/probe` to be installed.
 
 ```typescript
-const { middleware, probeEndpoint } = createDeviceRouter({
+const { middleware, probeEndpoint, injectionMiddleware } = createDeviceRouter({
   storage,
   injectProbe: true,
   probeNonce: 'my-nonce', // or (req) => req.headers['x-nonce']
 });
+
+app.addHook('preHandler', middleware);
+if (injectionMiddleware) {
+  app.addHook('onSend', injectionMiddleware);
+}
 ```
 
 The script is injected before `</head>`, falling back to `</body>`. JSON and other non-HTML responses pass through unmodified.

@@ -62,7 +62,7 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 });
 
 app.post('/device-router/probe', probeEndpoint);
-await app.register(middleware);
+app.addHook('preHandler', middleware);
 
 app.get('/', (req, reply) => {
   const profile = req.deviceProfile;

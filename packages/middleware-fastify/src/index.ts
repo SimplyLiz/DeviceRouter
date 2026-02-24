@@ -4,7 +4,6 @@ import type { StorageAdapter } from '@device-router/storage';
 import type { TierThresholds, FallbackProfile, OnEventCallback } from '@device-router/types';
 import { createProbeHealthCheck } from '@device-router/types';
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import fp from 'fastify-plugin';
 import { createMiddleware } from './middleware.js';
 import { createProbeEndpoint } from './endpoint.js';
 import { createInjectionMiddleware } from './inject.js';
@@ -78,16 +77,6 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
     });
   }
 
-  const middleware = fp(
-    async (fastify) => {
-      fastify.addHook('preHandler', hook);
-      if (injectionMiddleware) {
-        fastify.addHook('onSend', injectionMiddleware);
-      }
-    },
-    { name: 'device-router' },
-  );
-
   const rawEndpoint = createProbeEndpoint({
     storage,
     cookieName,
@@ -99,7 +88,7 @@ export function createDeviceRouter(options: DeviceRouterOptions) {
   });
 
   return {
-    middleware,
+    middleware: hook,
     probeEndpoint: health
       ? async (req: FastifyRequest, reply: FastifyReply) => {
           health.onProbeReceived();

@@ -13,5 +13,8 @@ export function deriveHints(tiers: DeviceTiers, signals?: StoredSignals): Render
     useImagePlaceholders: isSlowConnection,
     preferServerRendering: isLowEnd,
     disable3dEffects: tiers.gpu === 'none' || tiers.gpu === 'low',
+    limitVideoQuality: isSlowConnection || isBatteryConstrained,
+    useSystemFonts: isLowEnd || isSlowConnection,
+    disablePrefetch: isSlowConnection || isBatteryConstrained,
   };
 }

@@ -6,8 +6,9 @@ export interface RedisStorageOptions {
   client: {
     get(key: string): Promise<string | null>;
     set(key: string, value: string, ...args: string[]): Promise<unknown>;
-    del(key: string): Promise<number>;
+    del(key: string | string[]): Promise<number>;
     exists(key: string): Promise<number>;
+    keys(pattern: string): Promise<string[]>;
   };
 }
 
@@ -62,5 +63,38 @@ export class RedisStorageAdapter implements StorageAdapter {
     } catch {
       return false;
     }
+  }
+
+  async clear(): Promise<void> {
+    try {
+      const keys = await this.client.keys(`${this.prefix}*`);
+      if (keys.length > 0) {
+        await this.client.del(keys);
+      }
+    } catch {
+      // Gracefully degrade — keys will expire via TTL
+    }
+  }
+
+  async count(): Promise<number> {
+    try {
+      const keys = await this.client.keys(`${this.prefix}*`);
+      return keys.length;
+    } catch {
+      return 0;
+    }
+  }
+
+  async keys(): Promise<string[]> {
+    try {
+      const keys = await this.client.keys(`${this.prefix}*`);
+      return keys.map((k) => k.slice(this.prefix.length));
+    } catch {
+      return [];
+    }
+  }
+
+  async has(sessionToken: string): Promise<boolean> {
+    return this.exists(sessionToken);
   }
 }

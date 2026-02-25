@@ -16,6 +16,12 @@
 
 - **Composable middleware** — `createMiddleware()`, `createProbeEndpoint()`, and `createInjectionMiddleware()` are now first-class exports with full threshold validation and documentation. Use them independently for fine-grained control without the `createDeviceRouter()` factory
 - **`loadProbeScript()` utility** — New helper exported from all middleware packages that reads the minified probe bundle and optionally rewrites the endpoint URL. Pairs with `createInjectionMiddleware()` for standalone probe injection
+- **`clear()` on StorageAdapter** — `clear()` is now part of the `StorageAdapter` interface. `MemoryStorageAdapter` and `RedisStorageAdapter` both implement it. Redis implementation uses `KEYS` + `DEL` with graceful error handling
+- **StorageAdapter introspection** — New `count()`, `keys()`, and `has()` methods on `StorageAdapter` for inspecting stored profiles. `keys()` returns session tokens (not prefixed keys). All methods handle errors gracefully on Redis
+- **`durationMs` on `bot:reject` event** — The `bot:reject` event now includes `durationMs` measuring validation and bot detection time, matching the pattern used by `profile:store`
+- **`errorMessage` on error events** — Error events now include a pre-extracted `errorMessage: string` field, avoiding the need to narrow the `error: unknown` field. New `extractErrorMessage()` helper exported from `@device-router/types`
+- **New rendering hints** — Three new hints: `limitVideoQuality` (slow connection or low battery), `useSystemFonts` (low-end device or slow connection), `disablePrefetch` (slow connection or low battery)
+- **Probe retry logic** — New `runProbeWithRetry()` function with exponential backoff and jitter. Exported from `@device-router/probe` as an ESM-only export (does not affect the IIFE bundle size)
 
 ## 0.4.0 (2026-02-24)
 

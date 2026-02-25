@@ -25,10 +25,12 @@ export type DeviceRouterEvent =
       type: 'bot:reject';
       sessionToken: string;
       signals: RawSignals;
+      durationMs: number;
     }
   | {
       type: 'error';
       error: unknown;
+      errorMessage: string;
       phase: 'middleware' | 'endpoint';
       sessionToken?: string;
     }
@@ -39,6 +41,11 @@ export type DeviceRouterEvent =
     };
 
 export type OnEventCallback = (event: DeviceRouterEvent) => void | Promise<void>;
+
+export function extractErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  return String(err);
+}
 
 export function emitEvent(onEvent: OnEventCallback | undefined, event: DeviceRouterEvent): void {
   if (!onEvent) return;

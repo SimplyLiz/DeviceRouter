@@ -52,6 +52,9 @@ export interface RenderingHints {
   useImagePlaceholders: boolean;
   preferServerRendering: boolean;
   disable3dEffects: boolean;
+  limitVideoQuality: boolean;
+  useSystemFonts: boolean;
+  disablePrefetch: boolean;
 }
 
 export type ProfileSource = 'probe' | 'headers' | 'fallback';

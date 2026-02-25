@@ -369,3 +369,6 @@ Based on device tiers, the middleware provides boolean rendering hints:
 - `useImagePlaceholders` — Show placeholders instead of full images
 - `preferServerRendering` — Favor SSR over client-side rendering
 - `disable3dEffects` — Disable WebGL/3D content (no GPU or software renderer)
+- `limitVideoQuality` — Serve lower resolution video, skip HD streams
+- `useSystemFonts` — Skip loading custom web fonts
+- `disablePrefetch` — Don't speculatively fetch resources

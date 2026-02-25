@@ -20,6 +20,9 @@ export function renderDemoPage({
           useImagePlaceholders: true,
           preferServerRendering: true,
           disable3dEffects: true,
+          limitVideoQuality: true,
+          useSystemFonts: true,
+          disablePrefetch: true,
         }
       : forceParam === 'full'
         ? {
@@ -29,6 +32,9 @@ export function renderDemoPage({
             useImagePlaceholders: false,
             preferServerRendering: false,
             disable3dEffects: false,
+            limitVideoQuality: false,
+            useSystemFonts: false,
+            disablePrefetch: false,
           }
         : profile?.hints;
 

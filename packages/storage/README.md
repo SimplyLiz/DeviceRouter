@@ -64,6 +64,18 @@ class MyAdapter implements StorageAdapter {
   async exists(sessionToken: string): Promise<boolean> {
     /* ... */
   }
+  async clear(): Promise<void> {
+    /* ... */
+  }
+  async count(): Promise<number> {
+    /* ... */
+  }
+  async keys(): Promise<string[]> {
+    /* ... */
+  }
+  async has(sessionToken: string): Promise<boolean> {
+    /* ... */
+  }
 }
 ```
 
@@ -71,18 +83,25 @@ class MyAdapter implements StorageAdapter {
 
 ### `StorageAdapter` interface
 
-| Method   | Signature                                                                      | Description               |
-| -------- | ------------------------------------------------------------------------------ | ------------------------- |
-| `get`    | `(sessionToken: string) => Promise<DeviceProfile \| null>`                     | Retrieve a profile        |
-| `set`    | `(sessionToken: string, profile: DeviceProfile, ttl: number) => Promise<void>` | Store with TTL (seconds)  |
-| `delete` | `(sessionToken: string) => Promise<void>`                                      | Remove a profile          |
-| `exists` | `(sessionToken: string) => Promise<boolean>`                                   | Check if a profile exists |
+| Method   | Signature                                                                      | Description                                    |
+| -------- | ------------------------------------------------------------------------------ | ---------------------------------------------- |
+| `get`    | `(sessionToken: string) => Promise<DeviceProfile \| null>`                     | Retrieve a profile                             |
+| `set`    | `(sessionToken: string, profile: DeviceProfile, ttl: number) => Promise<void>` | Store with TTL (seconds)                       |
+| `delete` | `(sessionToken: string) => Promise<void>`                                      | Remove a profile                               |
+| `exists` | `(sessionToken: string) => Promise<boolean>`                                   | Check if a profile exists                      |
+| `clear`  | `() => Promise<void>`                                                          | Remove all entries                             |
+| `count`  | `() => Promise<number>`                                                        | Count stored profiles                          |
+| `keys`   | `() => Promise<string[]>`                                                      | List session tokens                            |
+| `has`    | `(sessionToken: string) => Promise<boolean>`                                   | Check if a profile exists (alias for `exists`) |
 
 ### `MemoryStorageAdapter`
 
 Implements `StorageAdapter` plus:
 
 - `clear()` — Remove all entries and cancel timers
+- `count()` — Count stored profiles
+- `keys()` — List session tokens
+- `has(sessionToken)` — Check if a profile exists (alias for `exists`)
 
 ### `RedisStorageAdapter`
 

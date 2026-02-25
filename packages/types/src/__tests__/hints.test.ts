@@ -11,6 +11,9 @@ describe('deriveHints', () => {
       useImagePlaceholders: true,
       preferServerRendering: true,
       disable3dEffects: true,
+      limitVideoQuality: true,
+      useSystemFonts: true,
+      disablePrefetch: true,
     });
   });
 
@@ -23,6 +26,9 @@ describe('deriveHints', () => {
       useImagePlaceholders: false,
       preferServerRendering: false,
       disable3dEffects: false,
+      limitVideoQuality: false,
+      useSystemFonts: false,
+      disablePrefetch: false,
     });
   });
 
@@ -40,6 +46,9 @@ describe('deriveHints', () => {
     expect(hints.useImagePlaceholders).toBe(true);
     expect(hints.serveMinimalCSS).toBe(false);
     expect(hints.preferServerRendering).toBe(false);
+    expect(hints.limitVideoQuality).toBe(true);
+    expect(hints.useSystemFonts).toBe(true);
+    expect(hints.disablePrefetch).toBe(true);
   });
 
   it('serves minimal CSS for low CPU regardless of connection', () => {
@@ -80,6 +89,10 @@ describe('deriveHints', () => {
     expect(hints.useImagePlaceholders).toBe(false);
     expect(hints.preferServerRendering).toBe(false);
     expect(hints.disable3dEffects).toBe(false);
+    // Battery-constrained hints
+    expect(hints.limitVideoQuality).toBe(true);
+    expect(hints.disablePrefetch).toBe(true);
+    expect(hints.useSystemFonts).toBe(false);
   });
 
   it('does not constrain when low battery but charging', () => {

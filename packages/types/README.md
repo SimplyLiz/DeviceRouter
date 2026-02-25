@@ -38,6 +38,9 @@ const hints = deriveHints(tiers, signals);
 //   useImagePlaceholders: false,
 //   preferServerRendering: false,
 //   disable3dEffects: false,
+//   limitVideoQuality: false,
+//   useSystemFonts: false,
+//   disablePrefetch: false,
 // }
 ```
 
@@ -51,6 +54,9 @@ Rendering hints are derived from tiers and transient signals:
 | `useImagePlaceholders`  | Slow connection (2G/3G)                                |
 | `preferServerRendering` | Low-end device                                         |
 | `disable3dEffects`      | No GPU or software renderer                            |
+| `limitVideoQuality`     | Slow connection or low battery                         |
+| `useSystemFonts`        | Low-end device or slow connection                      |
+| `disablePrefetch`       | Slow connection or low battery                         |
 
 The `battery` signal bypasses tier classification — it's transient state, not a capability. When unplugged and below 15% charge, power-sensitive hints are forced on.
 
@@ -119,6 +125,7 @@ if (isValidSignals(requestBody)) {
 - `isBotSignals(signals)` — Detect bot/crawler/headless browser probe submissions
 - `classifyFromHeaders(headers)` — Classify from UA/Client Hints headers
 - `resolveFallback(fallback)` — Resolve a fallback profile preset or custom tiers
+- `extractErrorMessage(err)` — Extract a string message from an unknown error value
 
 ### Constants
 

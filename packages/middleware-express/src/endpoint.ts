@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import type { StorageAdapter } from '@device-router/storage';
 import type { DeviceProfile, RawSignals, OnEventCallback } from '@device-router/types';
-import { isValidSignals, isBotSignals, emitEvent } from '@device-router/types';
+import { isValidSignals, isBotSignals, emitEvent, extractErrorMessage } from '@device-router/types';
 import { randomUUID } from 'node:crypto';
 
 export interface EndpointOptions {
@@ -29,6 +29,7 @@ export function createProbeEndpoint(options: EndpointOptions) {
     let sessionToken: string | undefined;
     try {
       const signals = req.body as unknown;
+      const validationStart = performance.now();
 
       if (!isValidSignals(signals)) {
         res.status(400).json({ ok: false, error: 'Invalid probe payload' });
@@ -39,7 +40,8 @@ export function createProbeEndpoint(options: EndpointOptions) {
       sessionToken = existingToken || randomUUID();
 
       if (rejectBots && isBotSignals(signals)) {
-        emitEvent(onEvent, { type: 'bot:reject', sessionToken, signals });
+        const durationMs = performance.now() - validationStart;
+        emitEvent(onEvent, { type: 'bot:reject', sessionToken, signals, durationMs });
         res.status(403).json({ ok: false, error: 'Bot detected' });
         return;
       }
@@ -83,6 +85,7 @@ export function createProbeEndpoint(options: EndpointOptions) {
       emitEvent(onEvent, {
         type: 'error',
         error: err,
+        errorMessage: extractErrorMessage(err),
         phase: 'endpoint',
         sessionToken,
       });

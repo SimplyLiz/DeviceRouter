@@ -76,3 +76,6 @@ The full classified result attached to requests by the middleware.
 | `useImagePlaceholders`  | `boolean` | Slow connection (2g/3g)                                |
 | `preferServerRendering` | `boolean` | Low-end device                                         |
 | `disable3dEffects`      | `boolean` | No GPU or software renderer                            |
+| `limitVideoQuality`     | `boolean` | Slow connection or low battery                         |
+| `useSystemFonts`        | `boolean` | Low-end device or slow connection                      |
+| `disablePrefetch`       | `boolean` | Slow connection or low battery                         |

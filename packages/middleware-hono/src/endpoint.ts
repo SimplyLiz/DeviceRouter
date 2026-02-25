@@ -2,7 +2,7 @@ import type { Context, Handler } from 'hono';
 import { getCookie, setCookie } from 'hono/cookie';
 import type { StorageAdapter } from '@device-router/storage';
 import type { DeviceProfile, RawSignals, OnEventCallback } from '@device-router/types';
-import { isValidSignals, isBotSignals, emitEvent } from '@device-router/types';
+import { isValidSignals, isBotSignals, emitEvent, extractErrorMessage } from '@device-router/types';
 
 export interface EndpointOptions {
   storage: StorageAdapter;
@@ -35,6 +35,8 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
         return c.json({ ok: false, error: 'Invalid probe payload' }, 400);
       }
 
+      const validationStart = performance.now();
+
       if (!isValidSignals(signals)) {
         return c.json({ ok: false, error: 'Invalid probe payload' }, 400);
       }
@@ -43,7 +45,8 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
       sessionToken = existingToken || globalThis.crypto.randomUUID();
 
       if (rejectBots && isBotSignals(signals)) {
-        emitEvent(onEvent, { type: 'bot:reject', sessionToken, signals });
+        const durationMs = performance.now() - validationStart;
+        emitEvent(onEvent, { type: 'bot:reject', sessionToken, signals, durationMs });
         return c.json({ ok: false, error: 'Bot detected' }, 403);
       }
 
@@ -86,6 +89,7 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
       emitEvent(onEvent, {
         type: 'error',
         error: err,
+        errorMessage: extractErrorMessage(err),
         phase: 'endpoint',
         sessionToken,
       });

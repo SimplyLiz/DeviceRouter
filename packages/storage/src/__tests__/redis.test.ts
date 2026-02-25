@@ -30,11 +30,22 @@ function createMockClient() {
       store.set(key, entry);
       return 'OK';
     }),
-    del: vi.fn(async (key: string) => {
+    del: vi.fn(async (key: string | string[]) => {
+      if (Array.isArray(key)) {
+        let count = 0;
+        for (const k of key) {
+          if (store.delete(k)) count++;
+        }
+        return count;
+      }
       return store.delete(key) ? 1 : 0;
     }),
     exists: vi.fn(async (key: string) => {
       return store.has(key) ? 1 : 0;
+    }),
+    keys: vi.fn(async (pattern: string) => {
+      const prefix = pattern.replace('*', '');
+      return [...store.keys()].filter((k) => k.startsWith(prefix));
     }),
     _store: store,
   };
@@ -115,6 +126,86 @@ describe('RedisStorageAdapter', () => {
     it('exists returns false on connection error', async () => {
       client.exists.mockRejectedValueOnce(new Error('ECONNREFUSED'));
       expect(await adapter.exists('tok1')).toBe(false);
+    });
+  });
+
+  describe('clear', () => {
+    it('deletes all keys matching the prefix', async () => {
+      await adapter.set('tok1', makeProfile('tok1'), 3600);
+      await adapter.set('tok2', makeProfile('tok2'), 3600);
+
+      await adapter.clear();
+
+      expect(client.keys).toHaveBeenCalledWith('dr:profile:*');
+      expect(client.del).toHaveBeenCalled();
+      expect(await adapter.get('tok1')).toBeNull();
+      expect(await adapter.get('tok2')).toBeNull();
+    });
+
+    it('does not call del when no keys match', async () => {
+      client.del.mockClear();
+      await adapter.clear();
+
+      expect(client.keys).toHaveBeenCalledWith('dr:profile:*');
+      expect(client.del).not.toHaveBeenCalled();
+    });
+
+    it('does not throw on connection error', async () => {
+      client.keys.mockRejectedValueOnce(new Error('ECONNREFUSED'));
+      await expect(adapter.clear()).resolves.toBeUndefined();
+    });
+  });
+
+  describe('count', () => {
+    it('returns the number of stored entries', async () => {
+      await adapter.set('tok1', makeProfile('tok1'), 3600);
+      await adapter.set('tok2', makeProfile('tok2'), 3600);
+      expect(await adapter.count()).toBe(2);
+    });
+
+    it('returns 0 when empty', async () => {
+      expect(await adapter.count()).toBe(0);
+    });
+
+    it('returns 0 on connection error', async () => {
+      client.keys.mockRejectedValueOnce(new Error('ECONNREFUSED'));
+      expect(await adapter.count()).toBe(0);
+    });
+  });
+
+  describe('keys', () => {
+    it('returns session tokens without prefix', async () => {
+      await adapter.set('tok1', makeProfile('tok1'), 3600);
+      await adapter.set('tok2', makeProfile('tok2'), 3600);
+      const keys = await adapter.keys();
+      expect(keys).toHaveLength(2);
+      expect(keys).toContain('tok1');
+      expect(keys).toContain('tok2');
+    });
+
+    it('returns empty array when empty', async () => {
+      expect(await adapter.keys()).toEqual([]);
+    });
+
+    it('returns empty array on connection error', async () => {
+      client.keys.mockRejectedValueOnce(new Error('ECONNREFUSED'));
+      expect(await adapter.keys()).toEqual([]);
+    });
+  });
+
+  describe('has', () => {
+    it('returns true for existing key', async () => {
+      await adapter.set('tok1', makeProfile('tok1'), 3600);
+      expect(await adapter.has('tok1')).toBe(true);
+    });
+
+    it('returns false for non-existent key', async () => {
+      expect(await adapter.has('missing')).toBe(false);
+    });
+
+    it('returns false on connection error', async () => {
+      client.exists.mockRejectedValueOnce(new Error('ECONNREFUSED'));
+      expect(await adapter.has('tok1')).toBe(false);
     });
   });
 });

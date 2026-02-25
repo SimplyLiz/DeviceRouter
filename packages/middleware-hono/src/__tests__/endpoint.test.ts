@@ -10,6 +10,10 @@ function createMockStorage(): StorageAdapter {
     set: vi.fn().mockResolvedValue(undefined),
     delete: vi.fn().mockResolvedValue(undefined),
     exists: vi.fn().mockResolvedValue(false),
+    clear: vi.fn().mockResolvedValue(undefined),
+    count: vi.fn().mockResolvedValue(0),
+    keys: vi.fn().mockResolvedValue([]),
+    has: vi.fn().mockResolvedValue(false),
   };
 }
 
@@ -238,6 +242,7 @@ describe('createProbeEndpoint (hono)', () => {
       expect(event.type).toBe('bot:reject');
       const botEvent = event as Extract<DeviceRouterEvent, { type: 'bot:reject' }>;
       expect(botEvent.signals).toEqual({});
+      expect(typeof botEvent.durationMs).toBe('number');
     });
 
     it('emits error event on storage failure', async () => {
@@ -261,6 +266,7 @@ describe('createProbeEndpoint (hono)', () => {
       const errorEvent = event as Extract<DeviceRouterEvent, { type: 'error' }>;
       expect(errorEvent.error).toBeInstanceOf(Error);
       expect((errorEvent.error as Error).message).toBe('storage down');
+      expect(errorEvent.errorMessage).toBe('storage down');
     });
 
     it('callback errors do not break endpoint', async () => {

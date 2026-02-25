@@ -85,6 +85,10 @@ if (isBotSignals(signals)) {
 }
 ```
 
+### `extractErrorMessage(err: unknown): string`
+
+Extracts a string message from an unknown error value. Returns `err.message` for `Error` instances, otherwise `String(err)`.
+
 ### `classifyFromHeaders(headers): DeviceTiers`
 
 Classifies device capabilities from HTTP request headers (User-Agent and Client Hints). Useful for first-request classification before the probe has run.
@@ -225,8 +229,14 @@ type DeviceRouterEvent =
       durationMs: number;
     }
   | { type: 'profile:store'; sessionToken: string; signals: StoredSignals; durationMs: number }
-  | { type: 'bot:reject'; sessionToken: string; signals: RawSignals }
-  | { type: 'error'; error: unknown; phase: 'middleware' | 'endpoint'; sessionToken?: string };
+  | { type: 'bot:reject'; sessionToken: string; signals: RawSignals; durationMs: number }
+  | {
+      type: 'error';
+      error: unknown;
+      errorMessage: string;
+      phase: 'middleware' | 'endpoint';
+      sessionToken?: string;
+    };
 ```
 
 ### `OnEventCallback`

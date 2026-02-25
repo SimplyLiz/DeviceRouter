@@ -14,6 +14,9 @@ function createMockStorage(): StorageAdapter & { _store: Map<string, DeviceProfi
       store.delete(token);
     }),
     exists: vi.fn(async (token: string) => store.has(token)),
+    clear: vi.fn(async () => store.clear()),
+    count: vi.fn(async () => store.size),
+    keys: vi.fn(async () => [...store.keys()]),
     _store: store,
   } as StorageAdapter & { _store: Map<string, DeviceProfile> };
 }
@@ -353,6 +356,7 @@ describe('createMiddleware (koa)', () => {
       expect(event.phase).toBe('middleware');
       expect(event.error).toBeInstanceOf(Error);
       expect((event.error as Error).message).toBe('Storage down');
+      expect(event.errorMessage).toBe('Storage down');
     });
 
     it('callback errors do not break middleware', async () => {

@@ -7,6 +7,7 @@ import {
   classifyFromHeaders,
   resolveFallback,
   emitEvent,
+  extractErrorMessage,
   validateThresholds,
 } from '@device-router/types';
 import type {
@@ -109,6 +110,7 @@ export function createMiddleware(options: MiddlewareOptions): MiddlewareHandler<
       emitEvent(onEvent, {
         type: 'error',
         error: err,
+        errorMessage: extractErrorMessage(err),
         phase: 'middleware',
         sessionToken: getCookie(c, cookieName),
       });

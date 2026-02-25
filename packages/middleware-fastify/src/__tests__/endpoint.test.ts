@@ -8,6 +8,9 @@ function createMockStorage(): StorageAdapter {
     set: vi.fn().mockResolvedValue(undefined),
     delete: vi.fn().mockResolvedValue(undefined),
     exists: vi.fn().mockResolvedValue(false),
+    clear: vi.fn().mockResolvedValue(undefined),
+    count: vi.fn().mockResolvedValue(0),
+    keys: vi.fn().mockResolvedValue([]),
   };
 }
 
@@ -252,6 +255,7 @@ describe('createProbeEndpoint', () => {
           type: 'bot:reject',
           sessionToken: expect.any(String),
           signals: {},
+          durationMs: expect.any(Number),
         }),
       );
     });
@@ -270,6 +274,7 @@ describe('createProbeEndpoint', () => {
           type: 'error',
           phase: 'endpoint',
           error: expect.any(Error),
+          errorMessage: 'Redis down',
         }),
       );
       const event = onEvent.mock.calls.find(

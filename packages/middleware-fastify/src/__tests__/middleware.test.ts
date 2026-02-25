@@ -14,6 +14,9 @@ function createMockStorage(): StorageAdapter {
       store.delete(token);
     }),
     exists: vi.fn(async (token: string) => store.has(token)),
+    clear: vi.fn(async () => store.clear()),
+    count: vi.fn(async () => store.size),
+    keys: vi.fn(async () => [...store.keys()]),
     _store: store,
   } as StorageAdapter & { _store: Map<string, DeviceProfile> };
 }
@@ -320,6 +323,7 @@ describe('createMiddleware', () => {
           type: 'error',
           phase: 'middleware',
           error: expect.any(Error),
+          errorMessage: 'Redis down',
         }),
       );
       const event = onEvent.mock.calls.find(

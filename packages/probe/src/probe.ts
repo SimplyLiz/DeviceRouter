@@ -6,12 +6,12 @@ export interface ProbeOptions {
   cookiePath?: string;
 }
 
-function getCookie(name: string): string | null {
+export function getCookie(name: string): string | null {
   const match = document.cookie.match(RegExp('(^|; )' + name + '=([^;]*)'));
   return match ? decodeURIComponent(match[2]) : null;
 }
 
-function setCookie(name: string, value: string, path: string): void {
+export function setCookie(name: string, value: string, path: string): void {
   document.cookie = `${name}=${encodeURIComponent(value)};path=${path};SameSite=Lax`;
 }
 

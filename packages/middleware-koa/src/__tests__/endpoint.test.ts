@@ -9,6 +9,9 @@ function createMockStorage(): StorageAdapter {
     set: vi.fn().mockResolvedValue(undefined),
     delete: vi.fn().mockResolvedValue(undefined),
     exists: vi.fn().mockResolvedValue(false),
+    clear: vi.fn().mockResolvedValue(undefined),
+    count: vi.fn().mockResolvedValue(0),
+    keys: vi.fn().mockResolvedValue([]),
   };
 }
 
@@ -231,6 +234,7 @@ describe('createProbeEndpoint (koa)', () => {
       expect(events[0].type).toBe('bot:reject');
       const event = events[0] as Extract<DeviceRouterEvent, { type: 'bot:reject' }>;
       expect(event.signals).toEqual({});
+      expect(typeof event.durationMs).toBe('number');
     });
 
     it('emits error event on storage failure', async () => {
@@ -252,6 +256,7 @@ describe('createProbeEndpoint (koa)', () => {
       expect(event.phase).toBe('endpoint');
       expect(event.error).toBeInstanceOf(Error);
       expect((event.error as Error).message).toBe('Redis down');
+      expect(event.errorMessage).toBe('Redis down');
     });
 
     it('callback errors do not break endpoint', async () => {

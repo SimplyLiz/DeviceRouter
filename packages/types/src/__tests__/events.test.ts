@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { emitEvent } from '../events.js';
+import { emitEvent, extractErrorMessage } from '../events.js';
 import type { DeviceRouterEvent } from '../events.js';
 
 const sampleEvent: DeviceRouterEvent = {
@@ -13,6 +13,9 @@ const sampleEvent: DeviceRouterEvent = {
     useImagePlaceholders: false,
     preferServerRendering: false,
     disable3dEffects: false,
+    limitVideoQuality: false,
+    useSystemFonts: false,
+    disablePrefetch: false,
   },
   source: 'probe',
   durationMs: 5,
@@ -63,5 +66,31 @@ describe('emitEvent', () => {
     expect(() => emitEvent(cb, sampleEvent)).not.toThrow();
     expect(cb).toHaveBeenCalled();
     await new Promise((r) => setTimeout(r, 10));
+  });
+});
+
+describe('extractErrorMessage', () => {
+  it('extracts message from Error instance', () => {
+    expect(extractErrorMessage(new Error('test error'))).toBe('test error');
+  });
+
+  it('converts string to message', () => {
+    expect(extractErrorMessage('string error')).toBe('string error');
+  });
+
+  it('extracts message from plain object with message property', () => {
+    expect(extractErrorMessage({ message: 'fail', code: 42 })).toBe('fail');
+  });
+
+  it('converts object without message to string', () => {
+    expect(extractErrorMessage({ code: 42 })).toBe('[object Object]');
+  });
+
+  it('handles null', () => {
+    expect(extractErrorMessage(null)).toBe('null');
+  });
+
+  it('handles undefined', () => {
+    expect(extractErrorMessage(undefined)).toBe('undefined');
   });
 });

@@ -53,10 +53,30 @@ export class MemoryStorageAdapter implements StorageAdapter {
     return profile !== null;
   }
 
-  clear(): void {
+  async clear(): Promise<void> {
     for (const entry of this.store.values()) {
       clearTimeout(entry.timer);
     }
     this.store.clear();
+  }
+
+  async count(): Promise<number> {
+    this.evictExpired();
+    return this.store.size;
+  }
+
+  async keys(): Promise<string[]> {
+    this.evictExpired();
+    return [...this.store.keys()];
+  }
+
+  private evictExpired(): void {
+    const now = Date.now();
+    for (const [key, entry] of this.store) {
+      if (now >= entry.expiresAt) {
+        clearTimeout(entry.timer);
+        this.store.delete(key);
+      }
+    }
   }
 }

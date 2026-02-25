@@ -8,5 +8,4 @@ export interface StorageAdapter {
   clear(): Promise<void>;
   count(): Promise<number>;
   keys(): Promise<string[]>;
-  has(sessionToken: string): Promise<boolean>;
 }

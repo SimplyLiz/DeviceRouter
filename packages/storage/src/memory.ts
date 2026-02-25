@@ -70,10 +70,6 @@ export class MemoryStorageAdapter implements StorageAdapter {
     return [...this.store.keys()];
   }
 
-  async has(sessionToken: string): Promise<boolean> {
-    return this.exists(sessionToken);
-  }
-
   private evictExpired(): void {
     const now = Date.now();
     for (const [key, entry] of this.store) {

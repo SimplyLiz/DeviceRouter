@@ -115,21 +115,4 @@ describe('MemoryStorageAdapter', () => {
       expect(await adapter.keys()).toEqual(['b']);
     });
   });
-
-  describe('has', () => {
-    it('returns false for non-existent key', async () => {
-      expect(await adapter.has('missing')).toBe(false);
-    });
-
-    it('returns true for existing key', async () => {
-      await adapter.set('tok1', makeProfile('tok1'), 3600);
-      expect(await adapter.has('tok1')).toBe(true);
-    });
-
-    it('returns false after TTL expiry', async () => {
-      await adapter.set('tok1', makeProfile('tok1'), 1);
-      vi.advanceTimersByTime(1500);
-      expect(await adapter.has('tok1')).toBe(false);
-    });
-  });
 });

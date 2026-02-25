@@ -10,14 +10,23 @@
 - **`profile:store` event now carries `StoredSignals` instead of `RawSignals`** — The event previously emitted the raw probe payload (including `userAgent`/`viewport`), not what was actually stored. The `signals` field now matches the persisted data. `bot:reject` still carries `RawSignals` (it fires before stripping)
 - **Rename default cookie `dr_session` → `device-router-session`** — Self-documenting name before 1.0 locks the cookie in. If you hardcode `cookieName: 'dr_session'` in your options you are unaffected; if you rely on the default, existing sessions will reset once on deploy
 - **Remove `disableAutoplay` rendering hint** — `disableAutoplay` triggered on identical conditions to `deferHeavyComponents` (`isLowEnd || isSlowConnection || isBatteryConstrained`). Use `deferHeavyComponents` instead
+- **Remove `has()` from `StorageAdapter`** — `has()` was a redundant alias for `exists()`. Custom adapters must remove their `has()` implementation
 - **middleware-fastify: normalized return shape** — `createDeviceRouter()` now returns raw Fastify hooks instead of a `fastify-plugin` wrapped plugin. Migrate `await app.register(middleware)` → `app.addHook('preHandler', middleware)`. When using `injectProbe: true`, register the injection hook separately: `app.addHook('onSend', injectionMiddleware)`. Removed `fastify-plugin` dependency
+
+### Migration Guide
+
+If you have a custom `StorageAdapter` implementation:
+
+- Remove the `has()` method — use `exists()` instead
+- Replace any `adapter.has(token)` calls with `adapter.exists(token)`
 
 ### Features
 
 - **Composable middleware** — `createMiddleware()`, `createProbeEndpoint()`, and `createInjectionMiddleware()` are now first-class exports with full threshold validation and documentation. Use them independently for fine-grained control without the `createDeviceRouter()` factory
 - **`loadProbeScript()` utility** — New helper exported from all middleware packages that reads the minified probe bundle and optionally rewrites the endpoint URL. Pairs with `createInjectionMiddleware()` for standalone probe injection
-- **`clear()` on StorageAdapter** — `clear()` is now part of the `StorageAdapter` interface. `MemoryStorageAdapter` and `RedisStorageAdapter` both implement it. Redis implementation uses `KEYS` + `DEL` with graceful error handling
-- **StorageAdapter introspection** — New `count()`, `keys()`, and `has()` methods on `StorageAdapter` for inspecting stored profiles. `keys()` returns session tokens (not prefixed keys). All methods handle errors gracefully on Redis
+- **`clear()` on StorageAdapter** — `clear()` is now part of the `StorageAdapter` interface. `MemoryStorageAdapter` and `RedisStorageAdapter` both implement it. Redis implementation uses SCAN (when available) or KEYS + `DEL` with graceful error handling
+- **StorageAdapter introspection** — New `count()` and `keys()` methods on `StorageAdapter` for inspecting stored profiles. `keys()` returns session tokens (not prefixed keys). All methods handle errors gracefully on Redis
+- **Redis SCAN support** — `RedisStorageAdapter` uses the optional `scan()` method on the client for `clear()`, `count()`, and `keys()` operations, avoiding the blocking `KEYS` command. Falls back to `KEYS` when `scan` is not available
 - **`durationMs` on `bot:reject` event** — The `bot:reject` event now includes `durationMs` measuring validation and bot detection time, matching the pattern used by `profile:store`
 - **`errorMessage` on error events** — Error events now include a pre-extracted `errorMessage: string` field, avoiding the need to narrow the `error: unknown` field. New `extractErrorMessage()` helper exported from `@device-router/types`
 - **New rendering hints** — Three new hints: `limitVideoQuality` (slow connection or low battery), `useSystemFonts` (low-end device or slow connection), `disablePrefetch` (slow connection or low battery)

@@ -78,7 +78,11 @@ describe('extractErrorMessage', () => {
     expect(extractErrorMessage('string error')).toBe('string error');
   });
 
-  it('converts object to string', () => {
+  it('extracts message from plain object with message property', () => {
+    expect(extractErrorMessage({ message: 'fail', code: 42 })).toBe('fail');
+  });
+
+  it('converts object without message to string', () => {
     expect(extractErrorMessage({ code: 42 })).toBe('[object Object]');
   });
 

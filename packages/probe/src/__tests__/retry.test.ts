@@ -156,6 +156,47 @@ describe('runProbeWithRetry', () => {
     expect(delays[1]).toBeGreaterThan(delays[0]);
   });
 
+  it('retries on 500 server error', async () => {
+    const mockDoc = { cookie: '' };
+    Object.defineProperty(globalThis, 'document', {
+      value: mockDoc,
+      writable: true,
+      configurable: true,
+    });
+
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 500 })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ sessionToken: 'recovered' }),
+      });
+    globalThis.fetch = mockFetch;
+
+    await runProbeWithRetry({ retry: { baseDelay: 10, maxDelay: 100 } });
+
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(mockDoc.cookie).toContain('device-router-session=recovered');
+  });
+
+  it('does not retry on 400 client error', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({ ok: false, status: 400 });
+    globalThis.fetch = mockFetch;
+
+    await runProbeWithRetry({ retry: { maxRetries: 3, baseDelay: 10, maxDelay: 50 } });
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('exhausts retries on persistent 503', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({ ok: false, status: 503 });
+    globalThis.fetch = mockFetch;
+
+    await runProbeWithRetry({ retry: { maxRetries: 2, baseDelay: 10, maxDelay: 50 } });
+
+    expect(mockFetch).toHaveBeenCalledTimes(3); // initial + 2 retries
+  });
+
   it('skips if session cookie exists', async () => {
     Object.defineProperty(globalThis, 'document', {
       value: { cookie: 'device-router-session=existing' },

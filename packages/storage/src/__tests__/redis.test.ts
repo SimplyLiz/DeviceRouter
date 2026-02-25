@@ -47,6 +47,12 @@ function createMockClient() {
       const prefix = pattern.replace('*', '');
       return [...store.keys()].filter((k) => k.startsWith(prefix));
     }),
+    scan: vi.fn(async (cursor: number, ..._args: string[]) => {
+      if (cursor !== 0) return ['0', []] as [string, string[]];
+      const prefix = _args[1]?.replace('*', '') ?? '';
+      const matched = [...store.keys()].filter((k) => k.startsWith(prefix));
+      return ['0', matched] as [string, string[]];
+    }),
     _store: store,
   };
 }
@@ -136,7 +142,8 @@ describe('RedisStorageAdapter', () => {
 
       await adapter.clear();
 
-      expect(client.keys).toHaveBeenCalledWith('dr:profile:*');
+      expect(client.scan).toHaveBeenCalled();
+      expect(client.keys).not.toHaveBeenCalled();
       expect(client.del).toHaveBeenCalled();
       expect(await adapter.get('tok1')).toBeNull();
       expect(await adapter.get('tok2')).toBeNull();
@@ -146,12 +153,12 @@ describe('RedisStorageAdapter', () => {
       client.del.mockClear();
       await adapter.clear();
 
-      expect(client.keys).toHaveBeenCalledWith('dr:profile:*');
+      expect(client.scan).toHaveBeenCalled();
       expect(client.del).not.toHaveBeenCalled();
     });
 
     it('does not throw on connection error', async () => {
-      client.keys.mockRejectedValueOnce(new Error('ECONNREFUSED'));
+      client.scan.mockRejectedValueOnce(new Error('ECONNREFUSED'));
       await expect(adapter.clear()).resolves.toBeUndefined();
     });
   });
@@ -188,24 +195,49 @@ describe('RedisStorageAdapter', () => {
     });
 
     it('returns empty array on connection error', async () => {
-      client.keys.mockRejectedValueOnce(new Error('ECONNREFUSED'));
+      client.scan.mockRejectedValueOnce(new Error('ECONNREFUSED'));
       expect(await adapter.keys()).toEqual([]);
     });
   });
 
-  describe('has', () => {
-    it('returns true for existing key', async () => {
+  describe('SCAN-based operations', () => {
+    it('uses scan instead of keys when scan is available', async () => {
       await adapter.set('tok1', makeProfile('tok1'), 3600);
-      expect(await adapter.has('tok1')).toBe(true);
+      client.keys.mockClear();
+
+      await adapter.count();
+
+      expect(client.scan).toHaveBeenCalled();
+      expect(client.keys).not.toHaveBeenCalled();
     });
 
-    it('returns false for non-existent key', async () => {
-      expect(await adapter.has('missing')).toBe(false);
+    it('handles multi-page scan', async () => {
+      await adapter.set('tok1', makeProfile('tok1'), 3600);
+      await adapter.set('tok2', makeProfile('tok2'), 3600);
+
+      client.scan
+        .mockResolvedValueOnce(['42', ['dr:profile:tok1']])
+        .mockResolvedValueOnce(['0', ['dr:profile:tok2']]);
+
+      const count = await adapter.count();
+      expect(count).toBe(2);
+      expect(client.scan).toHaveBeenCalledTimes(2);
     });
 
-    it('returns false on connection error', async () => {
-      client.exists.mockRejectedValueOnce(new Error('ECONNREFUSED'));
-      expect(await adapter.has('tok1')).toBe(false);
+    it('falls back to keys when scan is absent', async () => {
+      const clientNoScan = {
+        get: client.get,
+        set: client.set,
+        del: client.del,
+        exists: client.exists,
+        keys: client.keys,
+      };
+      const fallbackAdapter = new RedisStorageAdapter({ client: clientNoScan });
+      await fallbackAdapter.set('tok1', makeProfile('tok1'), 3600);
+
+      const count = await fallbackAdapter.count();
+      expect(count).toBe(1);
+      expect(client.keys).toHaveBeenCalledWith('dr:profile:*');
     });
   });
 });

@@ -1,4 +1,6 @@
 import { collectSignals } from './signals.js';
+import { getCookie } from './probe.js';
+import { collectBattery, sendProbe, handleProbeResponse } from './_internal.js';
 import type { ProbeOptions } from './probe.js';
 
 export interface RetryOptions {
@@ -9,15 +11,6 @@ export interface RetryOptions {
 
 export interface ProbeWithRetryOptions extends ProbeOptions {
   retry?: RetryOptions;
-}
-
-function getCookie(name: string): string | null {
-  const match = document.cookie.match(RegExp('(^|; )' + name + '=([^;]*)'));
-  return match ? decodeURIComponent(match[2]) : null;
-}
-
-function setCookie(name: string, value: string, path: string): void {
-  document.cookie = `${name}=${encodeURIComponent(value)};path=${path};SameSite=Lax`;
 }
 
 function sleep(ms: number): Promise<void> {
@@ -37,34 +30,22 @@ export async function runProbeWithRetry(options: ProbeWithRetryOptions = {}): Pr
   if (getCookie(cookieName)) return;
 
   const signals = collectSignals();
-
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const bm = await (navigator as any).getBattery();
-    signals.battery = { level: bm.level, charging: bm.charging };
-  } catch {
-    // API unavailable (Firefox, Safari) — leave undefined
-  }
+  await collectBattery(signals);
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(signals),
-      });
-
+      const response = await sendProbe(signals, endpoint);
       if (response.ok) {
-        const data = (await response.json()) as { sessionToken?: string };
-        if (data.sessionToken) {
-          setCookie(cookieName, data.sessionToken, cookiePath);
-        }
+        await handleProbeResponse(response, cookieName, cookiePath);
+        return;
       }
-      return;
+      if (response.status < 500) return; // 4xx — don't retry
+      // 5xx — fall through to backoff
     } catch {
-      if (attempt >= maxRetries) return;
-      const delay = Math.min(baseDelay * 2 ** attempt + Math.random() * baseDelay, maxDelay);
-      await sleep(delay);
+      // Network error — fall through to backoff
     }
+    if (attempt >= maxRetries) return;
+    const delay = Math.min(baseDelay * 2 ** attempt + Math.random() * baseDelay, maxDelay);
+    await sleep(delay);
   }
 }

@@ -41,7 +41,9 @@ const storage = new RedisStorageAdapter({
 });
 ```
 
-The `client` option accepts any object with `get`, `set`, `del`, and `exists` methods matching the ioredis interface. This means you can use any Redis-compatible client.
+The `client` option accepts any object with `get`, `set`, `del`, `exists`, and `keys` methods matching the ioredis interface. This means you can use any Redis-compatible client.
+
+The client may also provide an optional `scan(cursor, ...args)` method. When available, `clear()`, `count()`, and `keys()` use SCAN-based iteration instead of the blocking `KEYS` command. This is recommended for production to avoid blocking the Redis event loop on large datasets.
 
 ### Custom adapter
 
@@ -73,9 +75,6 @@ class MyAdapter implements StorageAdapter {
   async keys(): Promise<string[]> {
     /* ... */
   }
-  async has(sessionToken: string): Promise<boolean> {
-    /* ... */
-  }
 }
 ```
 
@@ -83,16 +82,15 @@ class MyAdapter implements StorageAdapter {
 
 ### `StorageAdapter` interface
 
-| Method   | Signature                                                                      | Description                                    |
-| -------- | ------------------------------------------------------------------------------ | ---------------------------------------------- |
-| `get`    | `(sessionToken: string) => Promise<DeviceProfile \| null>`                     | Retrieve a profile                             |
-| `set`    | `(sessionToken: string, profile: DeviceProfile, ttl: number) => Promise<void>` | Store with TTL (seconds)                       |
-| `delete` | `(sessionToken: string) => Promise<void>`                                      | Remove a profile                               |
-| `exists` | `(sessionToken: string) => Promise<boolean>`                                   | Check if a profile exists                      |
-| `clear`  | `() => Promise<void>`                                                          | Remove all entries                             |
-| `count`  | `() => Promise<number>`                                                        | Count stored profiles                          |
-| `keys`   | `() => Promise<string[]>`                                                      | List session tokens                            |
-| `has`    | `(sessionToken: string) => Promise<boolean>`                                   | Check if a profile exists (alias for `exists`) |
+| Method   | Signature                                                                      | Description               |
+| -------- | ------------------------------------------------------------------------------ | ------------------------- |
+| `get`    | `(sessionToken: string) => Promise<DeviceProfile \| null>`                     | Retrieve a profile        |
+| `set`    | `(sessionToken: string, profile: DeviceProfile, ttl: number) => Promise<void>` | Store with TTL (seconds)  |
+| `delete` | `(sessionToken: string) => Promise<void>`                                      | Remove a profile          |
+| `exists` | `(sessionToken: string) => Promise<boolean>`                                   | Check if a profile exists |
+| `clear`  | `() => Promise<void>`                                                          | Remove all entries        |
+| `count`  | `() => Promise<number>`                                                        | Count stored profiles     |
+| `keys`   | `() => Promise<string[]>`                                                      | List session tokens       |
 
 ### `MemoryStorageAdapter`
 
@@ -101,7 +99,6 @@ Implements `StorageAdapter` plus:
 - `clear()` — Remove all entries and cancel timers
 - `count()` — Count stored profiles
 - `keys()` — List session tokens
-- `has(sessionToken)` — Check if a profile exists (alias for `exists`)
 
 ### `RedisStorageAdapter`
 

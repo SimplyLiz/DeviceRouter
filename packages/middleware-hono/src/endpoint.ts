@@ -28,14 +28,14 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
   return async (c: Context) => {
     let sessionToken: string | undefined;
     try {
+      const validationStart = performance.now();
+
       let signals: unknown;
       try {
         signals = await c.req.json();
       } catch {
         return c.json({ ok: false, error: 'Invalid probe payload' }, 400);
       }
-
-      const validationStart = performance.now();
 
       if (!isValidSignals(signals)) {
         return c.json({ ok: false, error: 'Invalid probe payload' }, 400);

@@ -13,7 +13,6 @@ function createMockStorage(): StorageAdapter {
     clear: vi.fn().mockResolvedValue(undefined),
     count: vi.fn().mockResolvedValue(0),
     keys: vi.fn().mockResolvedValue([]),
-    has: vi.fn().mockResolvedValue(false),
   };
 }
 

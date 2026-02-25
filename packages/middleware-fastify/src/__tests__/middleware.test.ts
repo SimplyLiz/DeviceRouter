@@ -17,7 +17,6 @@ function createMockStorage(): StorageAdapter {
     clear: vi.fn(async () => store.clear()),
     count: vi.fn(async () => store.size),
     keys: vi.fn(async () => [...store.keys()]),
-    has: vi.fn(async (token: string) => store.has(token)),
     _store: store,
   } as StorageAdapter & { _store: Map<string, DeviceProfile> };
 }

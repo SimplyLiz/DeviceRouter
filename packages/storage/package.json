@@ -50,7 +50,7 @@
     "@device-router/types": "workspace:*"
   },
   "peerDependencies": {
-    "ioredis": "^5.0.0"
+    "ioredis": "^5.10.0"
   },
   "peerDependenciesMeta": {
     "ioredis": {
@@ -58,6 +58,6 @@
     }
   },
   "devDependencies": {
-    "ioredis": "^5.0.0"
+    "ioredis": "^5.10.0"
   }
 }

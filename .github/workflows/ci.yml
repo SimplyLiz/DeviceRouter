@@ -69,3 +69,42 @@ jobs:
           size=$(stat -c%s packages/probe/dist/device-router-probe.min.js.gz 2>/dev/null || stat -f%z packages/probe/dist/device-router-probe.min.js.gz)
           echo "Probe gzipped size: ${size} bytes"
           [ "$size" -le 1024 ] || (echo "Probe exceeds 1 KB limit" && exit 1)
+
+  package-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+
+      - name: publint
+        run: pnpm lint:publint
+
+      - name: attw
+        run: pnpm lint:attw
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm test:e2e

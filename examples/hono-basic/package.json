@@ -12,7 +12,7 @@
     "@device-router/middleware-hono": "workspace:*",
     "@device-router/storage": "workspace:*",
     "@device-router/types": "workspace:*",
-    "@hono/node-server": "^1.13.8",
+    "@hono/node-server": "^1.19.10",
     "hono": "^4.12.3"
   },
   "devDependencies": {

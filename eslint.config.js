@@ -5,7 +5,7 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: ['**/dist/', '**/coverage/', '**/node_modules/', 'examples/', '**/scripts/'],
+    ignores: ['**/dist/', '**/coverage/', '**/node_modules/', 'examples/', '**/scripts/', 'e2e/'],
   },
   {
     rules: {

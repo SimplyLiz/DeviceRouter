@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1 (2026-03-04)
+
+### Documentation
+
+- **Privacy documentation** — Added `PRIVACY.md` and dedicated privacy guide (`docs/privacy.md`) with signal inventory, cookie details, fingerprinting risk assessment, consent integration examples, data subject rights, and regulatory guidance (GDPR, ePrivacy, CCPA, LGPD)
+
 ## 1.0.0 (2026-03-04)
 
 ### Breaking Changes

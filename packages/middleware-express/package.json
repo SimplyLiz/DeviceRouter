@@ -1,6 +1,6 @@
 {
   "name": "@device-router/middleware-express",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "Express middleware for DeviceRouter — device classification and rendering hints per request",
   "license": "MIT",

@@ -268,6 +268,7 @@ Open http://localhost:3000 — the probe runs on first load, refresh to see your
 ## Documentation
 
 - [Getting Started](docs/getting-started.md)
+- [Privacy Guide](docs/privacy.md) — Signal inventory, cookie details, consent integration, GDPR/CCPA/LGPD guidance
 - [Observability](docs/observability.md) — Logging, metrics, and monitoring hooks
 - [Deployment Guide](docs/deployment.md) — Docker, Cloudflare Workers, serverless
 - [Meta-Framework Integration](docs/meta-frameworks.md) — Next.js, Remix, SvelteKit

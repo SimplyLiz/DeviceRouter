@@ -306,45 +306,9 @@ const storage = new RedisStorageAdapter({
 
 ## Privacy and Cookie Consent
 
-DeviceRouter collects device capability signals (CPU cores, memory, GPU renderer, viewport, connection type, battery status, user agent) and links them to a session cookie. Depending on your jurisdiction, this has regulatory implications.
+DeviceRouter collects device capability signals and links them to a session cookie. Depending on your jurisdiction (EU, UK, California, Brazil, and others), this has regulatory implications — you may need to obtain user consent before loading the probe script.
 
-### Collected signals and fingerprinting
-
-The signals DeviceRouter collects overlap with known browser fingerprinting vectors. Regulators evaluate the _capability_ of the data to identify users, not just the stated intent. Even though DeviceRouter uses these signals solely for adaptive rendering, the combination of GPU renderer, hardware concurrency, device memory, viewport, and user agent can narrow down device identity — and regulators treat that as personal data.
-
-### EU: GDPR and ePrivacy Directive
-
-Two regulations apply independently:
-
-- **ePrivacy Directive (Article 5(3))** covers both setting the `device-router-session` cookie _and_ reading device signals from browser APIs. Both count as accessing information stored on terminal equipment. The "strictly necessary" exemption is interpreted narrowly by the EDPB, CNIL, and ICO — it requires that the service _cannot function_ without the data, not that it functions _better_ with it. Adaptive rendering has not been recognized as strictly necessary by any regulator.
-
-- **GDPR** applies because the collected signals in aggregate constitute personal data (Recital 30 explicitly references device identifiers and the profiles they can create). You need a lawful basis under Article 6 — consent (Article 6(1)(a)) is the most defensible option.
-
-**In practice:** implement a cookie consent mechanism before deploying DeviceRouter in the EU.
-
-### UK
-
-The UK GDPR and PECR follow the same framework as the EU. The ICO has been particularly vocal about fingerprinting-like techniques — treat the requirements as equivalent.
-
-### California (CCPA/CPRA)
-
-The collected signals qualify as personal information under CCPA. You must:
-
-- Disclose the collection in your privacy notice (notice at collection)
-- Honor access and deletion requests for stored profiles
-- If you never sell or share the data with third parties, the "Do Not Sell" opt-out does not apply, but the data is still subject to consumer rights
-
-### Brazil (LGPD)
-
-The ANPD treats cookie and fingerprinting data as personal data. Consent must be "free, informed and unequivocal." There is no "strictly necessary" carve-out equivalent to the ePrivacy Directive.
-
-### Recommendations
-
-- Obtain consent before loading the probe script in jurisdictions that require it
-- Include DeviceRouter's signal collection in your privacy policy
-- Set a reasonable TTL — shorter sessions reduce the regulatory surface
-- Use `MemoryStorageAdapter` or configure Redis key expiration so profiles are not retained beyond their useful life
-- Consider omitting high-entropy signals you do not need (e.g., if you only need CPU/memory tiers, you may not need `gpuRenderer` or `battery`)
+For a full signal inventory, fingerprinting risk assessment, cookie details, consent integration examples, and jurisdiction-specific guidance, see the [Privacy Guide](privacy.md).
 
 > **Note:** This section is informational guidance, not legal advice. Consult a qualified privacy professional for your specific deployment.
 

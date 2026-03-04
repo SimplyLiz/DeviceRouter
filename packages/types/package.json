@@ -1,6 +1,6 @@
 {
   "name": "@device-router/types",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "Core types, device classification, and rendering hint derivation for DeviceRouter",
   "license": "MIT",

@@ -13,21 +13,21 @@ pnpm add @device-router/probe
 The probe runs once per session in the browser. It collects device signals using standard browser APIs, then POSTs them to your server's probe endpoint. A session cookie prevents repeated collection.
 
 ```
-Browser                          Server
-  │                                │
-  │  collectSignals()              │
-  │  getBattery()                  │
-  │                                │
-  │  POST /device-router/probe     │
-  │  ─────────────────────────>    │
-  │  { hardwareConcurrency: 8,     │
-  │    deviceMemory: 8, ... }      │
-  │                                │
-  │  { sessionToken: "abc123" }    │
-  │  <─────────────────────────    │
-  │                                │
-  │  Set cookie: dr_session=abc123 │
-  └────────────────────────────────┘
+Browser                                      Server
+  │                                            │
+  │  collectSignals()                          │
+  │  getBattery()                              │
+  │                                            │
+  │  POST /device-router/probe                 │
+  │  ─────────────────────────────────────>    │
+  │  { hardwareConcurrency: 8,                 │
+  │    deviceMemory: 8, ... }                  │
+  │                                            │
+  │  { sessionToken: "abc123" }                │
+  │  <─────────────────────────────────────    │
+  │                                            │
+  │  Set cookie: device-router-session=abc123  │
+  └────────────────────────────────────────────┘
 ```
 
 ## Usage
@@ -60,10 +60,27 @@ import { runProbe } from '@device-router/probe';
 
 await runProbe({
   endpoint: '/device-router/probe', // default
-  cookieName: 'dr_session', // default
+  cookieName: 'device-router-session', // default
   cookiePath: '/', // default
 });
 ```
+
+### Programmatic with retry
+
+```typescript
+import { runProbeWithRetry } from '@device-router/probe';
+
+await runProbeWithRetry({
+  endpoint: '/device-router/probe',
+  retry: {
+    maxRetries: 3, // default: 3
+    baseDelay: 500, // default: 500ms
+    maxDelay: 5000, // default: 5000ms
+  },
+});
+```
+
+Uses exponential backoff with jitter on network failure. Signals are collected once before the retry loop. Does not affect the IIFE bundle size.
 
 ## Signals collected
 
@@ -92,6 +109,9 @@ The IIFE bundle is strictly capped at **1024 bytes gzipped**. This is enforced a
 - `collectSignals()` — Collect all synchronous device signals
 - `ProbeSignals` — Type for the collected signal object
 - `ProbeOptions` — Configuration type for `runProbe`
+- `runProbeWithRetry(options?)` — Run the probe with retry on failure
+- `RetryOptions` — Retry configuration type
+- `ProbeWithRetryOptions` — Configuration type for `runProbeWithRetry`
 
 Individual collectors are also exported for selective use:
 

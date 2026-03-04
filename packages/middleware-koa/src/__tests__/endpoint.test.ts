@@ -9,6 +9,9 @@ function createMockStorage(): StorageAdapter {
     set: vi.fn().mockResolvedValue(undefined),
     delete: vi.fn().mockResolvedValue(undefined),
     exists: vi.fn().mockResolvedValue(false),
+    clear: vi.fn().mockResolvedValue(undefined),
+    count: vi.fn().mockResolvedValue(0),
+    keys: vi.fn().mockResolvedValue([]),
   };
 }
 
@@ -48,7 +51,7 @@ describe('createProbeEndpoint (koa)', () => {
     expect((ctx.body as { ok: boolean }).ok).toBe(true);
     expect((ctx.body as { sessionToken: string }).sessionToken).toBeTruthy();
     expect(ctx.cookies.set).toHaveBeenCalledWith(
-      'dr_session',
+      'device-router-session',
       expect.any(String),
       expect.objectContaining({
         httpOnly: true,
@@ -65,7 +68,7 @@ describe('createProbeEndpoint (koa)', () => {
     await handler(ctx);
 
     expect(ctx.cookies.set).toHaveBeenCalledWith(
-      'dr_session',
+      'device-router-session',
       expect.any(String),
       expect.objectContaining({ secure: false }),
     );
@@ -78,7 +81,7 @@ describe('createProbeEndpoint (koa)', () => {
     await handler(ctx);
 
     expect(ctx.cookies.set).toHaveBeenCalledWith(
-      'dr_session',
+      'device-router-session',
       expect.any(String),
       expect.objectContaining({ secure: true }),
     );
@@ -86,7 +89,10 @@ describe('createProbeEndpoint (koa)', () => {
 
   it('reuses existing session token from cookie', async () => {
     const handler = createProbeEndpoint({ storage });
-    const ctx = createMockCtx({ hardwareConcurrency: 4 }, { dr_session: 'existing-tok' });
+    const ctx = createMockCtx(
+      { hardwareConcurrency: 4 },
+      { 'device-router-session': 'existing-tok' },
+    );
 
     await handler(ctx);
 
@@ -189,6 +195,30 @@ describe('createProbeEndpoint (koa)', () => {
       expect(typeof event.durationMs).toBe('number');
     });
 
+    it('strips userAgent and viewport from profile:store signals', async () => {
+      const events: DeviceRouterEvent[] = [];
+      const onEvent = vi.fn((e: DeviceRouterEvent) => {
+        events.push(e);
+      });
+
+      const handler = createProbeEndpoint({ storage, onEvent });
+      const ctx = createMockCtx({
+        hardwareConcurrency: 4,
+        userAgent: 'Mozilla/5.0 Test',
+        viewport: { width: 1920, height: 1080 },
+      });
+
+      await handler(ctx);
+
+      const event = events.find((e) => e.type === 'profile:store') as Extract<
+        DeviceRouterEvent,
+        { type: 'profile:store' }
+      >;
+      expect(event.signals).toEqual({ hardwareConcurrency: 4 });
+      expect(event.signals).not.toHaveProperty('userAgent');
+      expect(event.signals).not.toHaveProperty('viewport');
+    });
+
     it('emits bot:reject when bot detected', async () => {
       const events: DeviceRouterEvent[] = [];
       const onEvent = vi.fn((e: DeviceRouterEvent) => {
@@ -204,6 +234,7 @@ describe('createProbeEndpoint (koa)', () => {
       expect(events[0].type).toBe('bot:reject');
       const event = events[0] as Extract<DeviceRouterEvent, { type: 'bot:reject' }>;
       expect(event.signals).toEqual({});
+      expect(typeof event.durationMs).toBe('number');
     });
 
     it('emits error event on storage failure', async () => {
@@ -225,6 +256,7 @@ describe('createProbeEndpoint (koa)', () => {
       expect(event.phase).toBe('endpoint');
       expect(event.error).toBeInstanceOf(Error);
       expect((event.error as Error).message).toBe('Redis down');
+      expect(event.errorMessage).toBe('Redis down');
     });
 
     it('callback errors do not break endpoint', async () => {

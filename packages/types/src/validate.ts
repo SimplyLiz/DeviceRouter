@@ -31,19 +31,16 @@ export function validateThresholds(thresholds: TierThresholds): void {
 
   if (thresholds.connection) {
     const conn = { ...DEFAULT_CONNECTION_THRESHOLDS, ...thresholds.connection };
-    if (conn.downlink2gUpperBound <= 0)
-      errors.push('connection.downlink2gUpperBound must be positive');
-    if (conn.downlink3gUpperBound <= 0)
-      errors.push('connection.downlink3gUpperBound must be positive');
-    if (conn.downlink4gUpperBound <= 0)
-      errors.push('connection.downlink4gUpperBound must be positive');
-    if (conn.downlink2gUpperBound >= conn.downlink3gUpperBound)
+    if (conn.lowUpperBound <= 0) errors.push('connection.lowUpperBound must be positive');
+    if (conn.midUpperBound <= 0) errors.push('connection.midUpperBound must be positive');
+    if (conn.highUpperBound <= 0) errors.push('connection.highUpperBound must be positive');
+    if (conn.lowUpperBound >= conn.midUpperBound)
       errors.push(
-        `connection.downlink2gUpperBound (${conn.downlink2gUpperBound}) must be less than connection.downlink3gUpperBound (${conn.downlink3gUpperBound})`,
+        `connection.lowUpperBound (${conn.lowUpperBound}) must be less than connection.midUpperBound (${conn.midUpperBound})`,
       );
-    if (conn.downlink3gUpperBound >= conn.downlink4gUpperBound)
+    if (conn.midUpperBound >= conn.highUpperBound)
       errors.push(
-        `connection.downlink3gUpperBound (${conn.downlink3gUpperBound}) must be less than connection.downlink4gUpperBound (${conn.downlink4gUpperBound})`,
+        `connection.midUpperBound (${conn.midUpperBound}) must be less than connection.highUpperBound (${conn.highUpperBound})`,
       );
   }
 

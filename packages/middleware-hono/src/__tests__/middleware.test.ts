@@ -16,6 +16,9 @@ function createMockStorage(): StorageAdapter & { _store: Map<string, DeviceProfi
       store.delete(token);
     }),
     exists: vi.fn(async (token: string) => store.has(token)),
+    clear: vi.fn(async () => store.clear()),
+    count: vi.fn(async () => store.size),
+    keys: vi.fn(async () => [...store.keys()]),
     _store: store,
   } as StorageAdapter & { _store: Map<string, DeviceProfile> };
 }
@@ -59,7 +62,7 @@ describe('createMiddleware (hono)', () => {
     });
 
     const res = await app.request('/test', {
-      headers: { Cookie: 'dr_session=tok1' },
+      headers: { Cookie: 'device-router-session=tok1' },
     });
     const data = (await res.json()) as { cpu: string; defer: boolean; source: string };
     expect(data.cpu).toBe('high');
@@ -78,14 +81,17 @@ describe('createMiddleware (hono)', () => {
     storage._store.set('tok2', profile);
 
     const app = new Hono<DeviceRouterEnv>();
-    app.use('*', createMiddleware({ storage, thresholds: { cpu: { lowUpperBound: 6 } } }));
+    app.use(
+      '*',
+      createMiddleware({ storage, thresholds: { cpu: { lowUpperBound: 6, midUpperBound: 8 } } }),
+    );
     app.get('/test', (c) => {
       const dp = c.get('deviceProfile');
       return c.json({ cpu: dp?.tiers.cpu });
     });
 
     const res = await app.request('/test', {
-      headers: { Cookie: 'dr_session=tok2' },
+      headers: { Cookie: 'device-router-session=tok2' },
     });
     const data = (await res.json()) as { cpu: string };
     expect(data.cpu).toBe('low');
@@ -113,7 +119,7 @@ describe('createMiddleware (hono)', () => {
       const data = (await res.json()) as ClassifiedProfile;
       expect(data.source).toBe('fallback');
       expect(data.tiers.cpu).toBe('high');
-      expect(data.tiers.connection).toBe('fast');
+      expect(data.tiers.connection).toBe('high');
     });
 
     it('returns custom DeviceTiers fallback', async () => {
@@ -139,7 +145,7 @@ describe('createMiddleware (hono)', () => {
       app.get('/test', (c) => c.json(c.get('deviceProfile')));
 
       const res = await app.request('/test', {
-        headers: { Cookie: 'dr_session=expired' },
+        headers: { Cookie: 'device-router-session=expired' },
       });
       const data = (await res.json()) as ClassifiedProfile;
       expect(data.source).toBe('fallback');
@@ -237,7 +243,7 @@ describe('createMiddleware (hono)', () => {
       app.get('/test', (c) => c.json(c.get('deviceProfile')));
 
       await app.request('/test', {
-        headers: { Cookie: 'dr_session=tok1' },
+        headers: { Cookie: 'device-router-session=tok1' },
       });
 
       expect(onEvent).toHaveBeenCalledOnce();
@@ -300,7 +306,7 @@ describe('createMiddleware (hono)', () => {
       app.get('/test', (c) => c.json(c.get('deviceProfile')));
 
       const res = await app.request('/test', {
-        headers: { Cookie: 'dr_session=tok1' },
+        headers: { Cookie: 'device-router-session=tok1' },
       });
 
       expect(res.status).toBe(500);
@@ -311,6 +317,7 @@ describe('createMiddleware (hono)', () => {
       const errorEvent = event as Extract<DeviceRouterEvent, { type: 'error' }>;
       expect(errorEvent.error).toBeInstanceOf(Error);
       expect((errorEvent.error as Error).message).toBe('storage down');
+      expect(errorEvent.errorMessage).toBe('storage down');
     });
 
     it('callback errors do not break middleware', async () => {
@@ -331,7 +338,7 @@ describe('createMiddleware (hono)', () => {
       app.get('/test', (c) => c.json({ ok: true }));
 
       const res = await app.request('/test', {
-        headers: { Cookie: 'dr_session=tok1' },
+        headers: { Cookie: 'device-router-session=tok1' },
       });
 
       expect(res.status).toBe(200);

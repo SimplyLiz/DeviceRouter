@@ -18,7 +18,7 @@ A **~1 KB** client probe. One middleware call. Full device awareness on every re
 Responsive design adapts layout. DeviceRouter adapts **what you serve**.
 
 - A budget phone on 2G? Skip the heavy animations, defer non-critical components, prefer server-side rendering.
-- A flagship on fiber? Go all out — autoplay, full interactivity, rich visuals.
+- A flagship on fiber? Go all out — full interactivity, rich visuals.
 
 No user-agent sniffing. No guesswork. Real signals from real devices, classified into actionable tiers and rendering hints your server can act on immediately.
 
@@ -120,7 +120,6 @@ Based on tiers and user preferences, DeviceRouter derives actionable booleans:
 | `serveMinimalCSS`       | Low-end device                                         |
 | `reduceAnimations`      | Low-end device, prefers reduced motion, or low battery |
 | `useImagePlaceholders`  | Slow connection (2G/3G)                                |
-| `disableAutoplay`       | Low-end device, slow connection, or low battery        |
 | `preferServerRendering` | Low-end device                                         |
 | `disable3dEffects`      | No GPU or software renderer                            |
 
@@ -156,6 +155,27 @@ const { middleware, probeEndpoint, injectionMiddleware } = createDeviceRouter({
 ```
 
 No need to manually add `<script>` tags — the probe is injected before `</head>` in every HTML response.
+
+## Composable Middleware
+
+Don't need the full factory? Use the individual pieces directly:
+
+```typescript
+import {
+  createMiddleware,
+  createProbeEndpoint,
+  createInjectionMiddleware,
+  loadProbeScript,
+} from '@device-router/middleware-express';
+
+const middleware = createMiddleware({ storage, thresholds });
+const endpoint = createProbeEndpoint({ storage, ttl: 3600 });
+const injection = createInjectionMiddleware({
+  probeScript: loadProbeScript(),
+});
+```
+
+Each piece validates its own options at creation time. See the [API docs](docs/api/middleware-express.md#standalone-functions) for full option tables.
 
 ## First-Request Handling
 
@@ -224,8 +244,8 @@ new RedisStorageAdapter(redisClient, { prefix: 'dr:profile:' });
 
 Each framework has an example app that renders a product landing page adapting in real time to device capabilities:
 
-- **Full experience** (high-end device) — animated gradient hero, SVG icons, inline charts, pulsing CTA, hover transitions, autoplay visualizer
-- **Lite experience** (low-end device) — flat solid backgrounds, Unicode icons, placeholder boxes, no animations, autoplay disabled
+- **Full experience** (high-end device) — animated gradient hero, SVG icons, inline charts, pulsing CTA, hover transitions
+- **Lite experience** (low-end device) — flat solid backgrounds, Unicode icons, placeholder boxes, no animations
 
 Run any example to see it in action:
 

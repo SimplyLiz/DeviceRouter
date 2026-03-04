@@ -31,8 +31,8 @@ app.get('/device-router-probe.min.js', (_req, reply) => {
   reply.type('application/javascript').send(script);
 });
 
-// Register the device-router middleware (adds preHandler hook)
-await app.register(middleware);
+// Register the device-router preHandler hook
+app.addHook('preHandler', middleware);
 
 // Routes
 app.get('/', (req, reply) => {

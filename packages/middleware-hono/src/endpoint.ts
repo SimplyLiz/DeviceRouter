@@ -2,7 +2,7 @@ import type { Context, Handler } from 'hono';
 import { getCookie, setCookie } from 'hono/cookie';
 import type { StorageAdapter } from '@device-router/storage';
 import type { DeviceProfile, RawSignals, OnEventCallback } from '@device-router/types';
-import { isValidSignals, isBotSignals, emitEvent } from '@device-router/types';
+import { isValidSignals, isBotSignals, emitEvent, extractErrorMessage } from '@device-router/types';
 
 export interface EndpointOptions {
   storage: StorageAdapter;
@@ -17,7 +17,7 @@ export interface EndpointOptions {
 export function createProbeEndpoint(options: EndpointOptions): Handler {
   const {
     storage,
-    cookieName = 'dr_session',
+    cookieName = 'device-router-session',
     cookiePath = '/',
     cookieSecure = false,
     ttl = 86400,
@@ -28,6 +28,8 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
   return async (c: Context) => {
     let sessionToken: string | undefined;
     try {
+      const validationStart = performance.now();
+
       let signals: unknown;
       try {
         signals = await c.req.json();
@@ -43,7 +45,8 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
       sessionToken = existingToken || globalThis.crypto.randomUUID();
 
       if (rejectBots && isBotSignals(signals)) {
-        emitEvent(onEvent, { type: 'bot:reject', sessionToken, signals });
+        const durationMs = performance.now() - validationStart;
+        emitEvent(onEvent, { type: 'bot:reject', sessionToken, signals, durationMs });
         return c.json({ ok: false, error: 'Bot detected' }, 403);
       }
 
@@ -66,7 +69,12 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
       await storage.set(sessionToken, profile, ttl);
       const durationMs = performance.now() - start;
 
-      emitEvent(onEvent, { type: 'profile:store', sessionToken, signals, durationMs });
+      emitEvent(onEvent, {
+        type: 'profile:store',
+        sessionToken,
+        signals: storedSignals,
+        durationMs,
+      });
 
       setCookie(c, cookieName, sessionToken, {
         path: cookiePath,
@@ -81,6 +89,7 @@ export function createProbeEndpoint(options: EndpointOptions): Handler {
       emitEvent(onEvent, {
         type: 'error',
         error: err,
+        errorMessage: extractErrorMessage(err),
         phase: 'endpoint',
         sessionToken,
       });

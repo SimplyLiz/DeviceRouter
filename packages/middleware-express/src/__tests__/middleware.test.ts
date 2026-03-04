@@ -14,6 +14,9 @@ function createMockStorage(): StorageAdapter {
       store.delete(token);
     }),
     exists: vi.fn(async (token: string) => store.has(token)),
+    clear: vi.fn(async () => store.clear()),
+    count: vi.fn(async () => store.size),
+    keys: vi.fn(async () => [...store.keys()]),
     _store: store,
   } as StorageAdapter & { _store: Map<string, DeviceProfile> };
 }
@@ -56,7 +59,7 @@ describe('createMiddleware', () => {
 
   it('sets deviceProfile to null when profile not found', async () => {
     const mw = createMiddleware({ storage });
-    const req = createMockReq({ dr_session: 'unknown' });
+    const req = createMockReq({ 'device-router-session': 'unknown' });
     const next = vi.fn();
 
     await mw(req, createMockRes(), next);
@@ -76,7 +79,7 @@ describe('createMiddleware', () => {
     (storage as unknown as { _store: Map<string, DeviceProfile> })._store.set('tok1', profile);
 
     const mw = createMiddleware({ storage });
-    const req = createMockReq({ dr_session: 'tok1' });
+    const req = createMockReq({ 'device-router-session': 'tok1' });
     const next = vi.fn();
 
     await mw(req, createMockRes(), next);
@@ -104,7 +107,7 @@ describe('createMiddleware', () => {
   it('calls next with error on storage failure', async () => {
     storage.get = vi.fn().mockRejectedValue(new Error('Storage down'));
     const mw = createMiddleware({ storage });
-    const req = createMockReq({ dr_session: 'tok' });
+    const req = createMockReq({ 'device-router-session': 'tok' });
     const next = vi.fn();
 
     await mw(req, createMockRes(), next);
@@ -124,7 +127,7 @@ describe('createMiddleware', () => {
 
     // Default thresholds: 4 cores = mid, 4 GB = mid
     const mwDefault = createMiddleware({ storage });
-    const req1 = createMockReq({ dr_session: 'tok2' });
+    const req1 = createMockReq({ 'device-router-session': 'tok2' });
     await mwDefault(req1, createMockRes(), vi.fn());
     expect(req1.deviceProfile!.tiers.cpu).toBe('mid');
     expect(req1.deviceProfile!.tiers.memory).toBe('mid');
@@ -132,9 +135,12 @@ describe('createMiddleware', () => {
     // Custom thresholds: raise lowUpperBound to 6 → 4 cores = low
     const mwCustom = createMiddleware({
       storage,
-      thresholds: { cpu: { lowUpperBound: 6 }, memory: { lowUpperBound: 6 } },
+      thresholds: {
+        cpu: { lowUpperBound: 6, midUpperBound: 8 },
+        memory: { lowUpperBound: 6, midUpperBound: 8 },
+      },
     });
-    const req2 = createMockReq({ dr_session: 'tok2' });
+    const req2 = createMockReq({ 'device-router-session': 'tok2' });
     await mwCustom(req2, createMockRes(), vi.fn());
     expect(req2.deviceProfile!.tiers.cpu).toBe('low');
     expect(req2.deviceProfile!.tiers.memory).toBe('low');
@@ -167,7 +173,7 @@ describe('createMiddleware', () => {
       expect(req.deviceProfile!.source).toBe('fallback');
       expect(req.deviceProfile!.tiers.cpu).toBe('high');
       expect(req.deviceProfile!.tiers.memory).toBe('high');
-      expect(req.deviceProfile!.tiers.connection).toBe('fast');
+      expect(req.deviceProfile!.tiers.connection).toBe('high');
     });
 
     it('returns custom DeviceTiers fallback', async () => {
@@ -191,7 +197,7 @@ describe('createMiddleware', () => {
 
     it('falls back when cookie exists but profile not in storage', async () => {
       const mw = createMiddleware({ storage, fallbackProfile: 'conservative' });
-      const req = createMockReq({ dr_session: 'expired-token' });
+      const req = createMockReq({ 'device-router-session': 'expired-token' });
       const next = vi.fn();
 
       await mw(req, createMockRes(), next);
@@ -281,7 +287,7 @@ describe('createMiddleware', () => {
     it('classifies from headers when cookie exists but storage misses', async () => {
       const mw = createMiddleware({ storage, classifyFromHeaders: true });
       const req = createMockReq(
-        { dr_session: 'expired' },
+        { 'device-router-session': 'expired' },
         { 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) Mobile' },
       );
       const next = vi.fn();
@@ -309,7 +315,7 @@ describe('createMiddleware', () => {
       (storage as unknown as { _store: Map<string, DeviceProfile> })._store.set('tok-ev1', profile);
 
       const mw = createMiddleware({ storage, onEvent });
-      const req = createMockReq({ dr_session: 'tok-ev1' });
+      const req = createMockReq({ 'device-router-session': 'tok-ev1' });
       const next = vi.fn();
 
       await mw(req, createMockRes(), next);
@@ -381,7 +387,7 @@ describe('createMiddleware', () => {
 
       storage.get = vi.fn().mockRejectedValue(new Error('Storage down'));
       const mw = createMiddleware({ storage, onEvent });
-      const req = createMockReq({ dr_session: 'tok-err' });
+      const req = createMockReq({ 'device-router-session': 'tok-err' });
       const next = vi.fn();
 
       await mw(req, createMockRes(), next);
@@ -392,6 +398,7 @@ describe('createMiddleware', () => {
       expect(event.phase).toBe('middleware');
       expect(event.error).toBeInstanceOf(Error);
       expect((event.error as Error).message).toBe('Storage down');
+      expect(event.errorMessage).toBe('Storage down');
       expect(next).toHaveBeenCalledWith(expect.any(Error));
     });
 
@@ -413,7 +420,7 @@ describe('createMiddleware', () => {
       );
 
       const mw = createMiddleware({ storage, onEvent });
-      const req = createMockReq({ dr_session: 'tok-safe' });
+      const req = createMockReq({ 'device-router-session': 'tok-safe' });
       const next = vi.fn();
 
       await mw(req, createMockRes(), next);

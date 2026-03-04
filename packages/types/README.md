@@ -21,7 +21,7 @@ const tiers = classify({
   connection: { effectiveType: '4g', downlink: 50 },
   gpuRenderer: 'ANGLE (Apple, Apple M2 Pro, OpenGL 4.1)',
 });
-// { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'high' }
+// { cpu: 'high', memory: 'high', connection: 'high', gpu: 'high' }
 ```
 
 ### Derive rendering hints
@@ -36,9 +36,11 @@ const hints = deriveHints(tiers, signals);
 //   serveMinimalCSS: false,
 //   reduceAnimations: false,
 //   useImagePlaceholders: false,
-//   disableAutoplay: false,
 //   preferServerRendering: false,
 //   disable3dEffects: false,
+//   limitVideoQuality: false,
+//   useSystemFonts: false,
+//   disablePrefetch: false,
 // }
 ```
 
@@ -50,9 +52,11 @@ Rendering hints are derived from tiers and transient signals:
 | `serveMinimalCSS`       | Low-end device                                         |
 | `reduceAnimations`      | Low-end device, prefers reduced motion, or low battery |
 | `useImagePlaceholders`  | Slow connection (2G/3G)                                |
-| `disableAutoplay`       | Low-end device, slow connection, or low battery        |
 | `preferServerRendering` | Low-end device                                         |
 | `disable3dEffects`      | No GPU or software renderer                            |
+| `limitVideoQuality`     | Slow connection or low battery                         |
+| `useSystemFonts`        | Low-end device or slow connection                      |
+| `disablePrefetch`       | Slow connection or low battery                         |
 
 The `battery` signal bypasses tier classification — it's transient state, not a capability. When unplugged and below 15% charge, power-sensitive hints are forced on.
 
@@ -66,7 +70,7 @@ import { classify } from '@device-router/types';
 const tiers = classify(signals, {
   cpu: { lowUpperBound: 4, midUpperBound: 8 },
   memory: { midUpperBound: 8 },
-  connection: { downlink4gUpperBound: 10 },
+  connection: { highUpperBound: 10 },
   gpu: { highEndPattern: /\bRTX\b|\bGTX\b/i },
 });
 ```
@@ -103,7 +107,7 @@ if (isValidSignals(requestBody)) {
 | -------------- | ----------------- | ------------ | ----------------------------- |
 | **CPU**        | 1-2 cores         | 3-4 cores    | 5+ cores                      |
 | **Memory**     | <=2 GB            | 2-4 GB       | >4 GB                         |
-| **Connection** | 2G                | 3G / slow 4G | Fast 4G+ (>=5 Mbps)           |
+| **Connection** | 2G                | 3G / slow 4G | 4G+ (>=5 Mbps)                |
 | **GPU**        | Software renderer | Mid-range    | RTX, RX 5000+, Apple M-series |
 
 ## Exports
@@ -121,6 +125,7 @@ if (isValidSignals(requestBody)) {
 - `isBotSignals(signals)` — Detect bot/crawler/headless browser probe submissions
 - `classifyFromHeaders(headers)` — Classify from UA/Client Hints headers
 - `resolveFallback(fallback)` — Resolve a fallback profile preset or custom tiers
+- `extractErrorMessage(err)` — Extract a string message from an unknown error value
 
 ### Constants
 

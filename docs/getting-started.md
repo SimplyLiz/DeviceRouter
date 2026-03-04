@@ -62,7 +62,7 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 });
 
 app.post('/device-router/probe', probeEndpoint);
-await app.register(middleware);
+app.addHook('preHandler', middleware);
 
 app.get('/', (req, reply) => {
   const profile = req.deviceProfile;
@@ -252,7 +252,7 @@ const { middleware, probeEndpoint } = createDeviceRouter({
   thresholds: {
     cpu: { lowUpperBound: 4, midUpperBound: 8 },
     memory: { midUpperBound: 8 },
-    connection: { downlink4gUpperBound: 10 },
+    connection: { highUpperBound: 10 },
   },
 });
 ```
@@ -266,7 +266,7 @@ Thresholds are validated at startup — inverted bounds, non-positive values, or
 ```typescript
 const { middleware, probeEndpoint } = createDeviceRouter({
   storage,              // Required: StorageAdapter instance
-  cookieName: 'dr_session',   // Default: 'dr_session'
+  cookieName: 'device-router-session',   // Default: 'device-router-session'
   cookiePath: '/',            // Default: '/'
   cookieSecure: false,        // Default: false — set to true for HTTPS deployments
   ttl: 86400,                 // Default: 86400 (24 hours)
@@ -316,7 +316,7 @@ The signals DeviceRouter collects overlap with known browser fingerprinting vect
 
 Two regulations apply independently:
 
-- **ePrivacy Directive (Article 5(3))** covers both setting the `dr_session` cookie _and_ reading device signals from browser APIs. Both count as accessing information stored on terminal equipment. The "strictly necessary" exemption is interpreted narrowly by the EDPB, CNIL, and ICO — it requires that the service _cannot function_ without the data, not that it functions _better_ with it. Adaptive rendering has not been recognized as strictly necessary by any regulator.
+- **ePrivacy Directive (Article 5(3))** covers both setting the `device-router-session` cookie _and_ reading device signals from browser APIs. Both count as accessing information stored on terminal equipment. The "strictly necessary" exemption is interpreted narrowly by the EDPB, CNIL, and ICO — it requires that the service _cannot function_ without the data, not that it functions _better_ with it. Adaptive rendering has not been recognized as strictly necessary by any regulator.
 
 - **GDPR** applies because the collected signals in aggregate constitute personal data (Recital 30 explicitly references device identifiers and the profiles they can create). You need a lawful basis under Article 6 — consent (Article 6(1)(a)) is the most defensible option.
 
@@ -357,7 +357,7 @@ The middleware classifies devices into tiers based on collected signals:
 | None | —         | —      | —          | No WebGL                      |
 | Low  | 1-2 cores | ≤2 GB  | 2g         | Software renderer             |
 | Mid  | 3-4 cores | 2-4 GB | 3g, 4g     | Integrated / older discrete   |
-| High | 5+ cores  | >4 GB  | fast       | RTX, RX 5000+, Apple M-series |
+| High | 5+ cores  | >4 GB  | high       | RTX, RX 5000+, Apple M-series |
 
 ## Rendering Hints
 
@@ -367,6 +367,8 @@ Based on device tiers, the middleware provides boolean rendering hints:
 - `serveMinimalCSS` — Send reduced stylesheets
 - `reduceAnimations` — Disable or simplify animations
 - `useImagePlaceholders` — Show placeholders instead of full images
-- `disableAutoplay` — Prevent auto-playing media
 - `preferServerRendering` — Favor SSR over client-side rendering
 - `disable3dEffects` — Disable WebGL/3D content (no GPU or software renderer)
+- `limitVideoQuality` — Serve lower resolution video, skip HD streams
+- `useSystemFonts` — Skip loading custom web fonts
+- `disablePrefetch` — Don't speculatively fetch resources

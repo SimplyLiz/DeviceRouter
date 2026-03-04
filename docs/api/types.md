@@ -2,9 +2,9 @@
 
 ## Functions
 
-### `classify(signals: RawSignals): DeviceTiers`
+### `classify(signals: StoredSignals): DeviceTiers`
 
-Classifies raw device signals into capability tiers.
+Classifies device signals into capability tiers.
 
 ```typescript
 import { classify } from '@device-router/types';
@@ -14,14 +14,14 @@ const tiers = classify({
   deviceMemory: 8,
   connection: { effectiveType: '4g', downlink: 50 },
 });
-// { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'none' }
+// { cpu: 'high', memory: 'high', connection: 'high', gpu: 'none' }
 ```
 
-### `deriveHints(tiers: DeviceTiers, signals?: RawSignals): RenderingHints`
+### `deriveHints(tiers: DeviceTiers, signals?: StoredSignals): RenderingHints`
 
 Derives rendering hints from device tiers.
 
-The `battery` signal bypasses tier classification entirely — it's transient state, not a capability. When the device is unplugged and below 15% charge, `deferHeavyComponents`, `reduceAnimations`, and `disableAutoplay` are forced on to conserve power.
+The `battery` signal bypasses tier classification entirely — it's transient state, not a capability. When the device is unplugged and below 15% charge, `deferHeavyComponents` and `reduceAnimations` are forced on to conserve power.
 
 ```typescript
 import { classify, deriveHints } from '@device-router/types';
@@ -54,7 +54,7 @@ Validates custom tier thresholds after merging with defaults. Throws a descripti
 **Validation rules:**
 
 - **CPU/Memory**: `lowUpperBound` must be less than `midUpperBound`
-- **Connection**: `downlink2gUpperBound` < `downlink3gUpperBound` < `downlink4gUpperBound`
+- **Connection**: `lowUpperBound` < `midUpperBound` < `highUpperBound`
 - **GPU**: `softwarePattern` and `highEndPattern` must be `RegExp` instances
 - All numeric values must be positive (> 0)
 
@@ -85,6 +85,10 @@ if (isBotSignals(signals)) {
 }
 ```
 
+### `extractErrorMessage(err: unknown): string`
+
+Extracts a string message from an unknown error value. Returns `err.message` for `Error` instances, otherwise `String(err)`.
+
 ### `classifyFromHeaders(headers): DeviceTiers`
 
 Classifies device capabilities from HTTP request headers (User-Agent and Client Hints). Useful for first-request classification before the probe has run.
@@ -100,7 +104,7 @@ const tiers = classifyFromHeaders({
 });
 // Mobile UA → { cpu: 'low', memory: 'low', connection: '4g', gpu: 'mid' }
 // Tablet UA → { cpu: 'mid', memory: 'mid', connection: '4g', gpu: 'mid' }
-// Desktop UA → { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'mid' }
+// Desktop UA → { cpu: 'high', memory: 'high', connection: 'high', gpu: 'mid' }
 ```
 
 Client Hints refine the base classification when present:
@@ -130,7 +134,7 @@ Preset `DeviceTiers` for a conservative (low-end) assumption: `{ cpu: 'low', mem
 
 ### `OPTIMISTIC_TIERS`
 
-Preset `DeviceTiers` for an optimistic (high-end) assumption: `{ cpu: 'high', memory: 'high', connection: 'fast', gpu: 'mid' }`.
+Preset `DeviceTiers` for an optimistic (high-end) assumption: `{ cpu: 'high', memory: 'high', connection: 'high', gpu: 'mid' }`.
 
 ### `ACCEPT_CH_VALUE`
 
@@ -156,11 +160,11 @@ Custom thresholds for tier classification. All fields are optional — unset fie
 
 ### ConnectionThresholds
 
-| Field                  | Type     | Default | Description                    |
-| ---------------------- | -------- | ------- | ------------------------------ |
-| `downlink2gUpperBound` | `number` | `0.5`   | Mbps at or below → `'2g'` tier |
-| `downlink3gUpperBound` | `number` | `2`     | Mbps at or below → `'3g'` tier |
-| `downlink4gUpperBound` | `number` | `5`     | Mbps at or below → `'4g'` tier |
+| Field            | Type     | Default | Description                    |
+| ---------------- | -------- | ------- | ------------------------------ |
+| `lowUpperBound`  | `number` | `0.5`   | Mbps at or below → `'2g'` tier |
+| `midUpperBound`  | `number` | `2`     | Mbps at or below → `'3g'` tier |
+| `highUpperBound` | `number` | `5`     | Mbps at or below → `'4g'` tier |
 
 ### GpuThresholds
 
@@ -177,7 +181,7 @@ import { classify } from '@device-router/types';
 const tiers = classify(signals, {
   cpu: { lowUpperBound: 4, midUpperBound: 8 },
   memory: { midUpperBound: 8 },
-  connection: { downlink4gUpperBound: 10 },
+  connection: { highUpperBound: 10 },
   gpu: { highEndPattern: /\bRTX\b|\bGTX\b/i },
 });
 ```
@@ -224,9 +228,15 @@ type DeviceRouterEvent =
       source: ProfileSource;
       durationMs: number;
     }
-  | { type: 'profile:store'; sessionToken: string; signals: RawSignals; durationMs: number }
-  | { type: 'bot:reject'; sessionToken: string; signals: RawSignals }
-  | { type: 'error'; error: unknown; phase: 'middleware' | 'endpoint'; sessionToken?: string };
+  | { type: 'profile:store'; sessionToken: string; signals: StoredSignals; durationMs: number }
+  | { type: 'bot:reject'; sessionToken: string; signals: RawSignals; durationMs: number }
+  | {
+      type: 'error';
+      error: unknown;
+      errorMessage: string;
+      phase: 'middleware' | 'endpoint';
+      sessionToken?: string;
+    };
 ```
 
 ### `OnEventCallback`

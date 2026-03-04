@@ -35,7 +35,7 @@ export interface DeviceProfile {
 
 export type CpuTier = 'low' | 'mid' | 'high';
 export type MemoryTier = 'low' | 'mid' | 'high';
-export type ConnectionTier = '2g' | '3g' | '4g' | 'fast';
+export type ConnectionTier = '2g' | '3g' | '4g' | 'high';
 export type GpuTier = 'none' | 'low' | 'mid' | 'high';
 
 export interface DeviceTiers {
@@ -50,9 +50,11 @@ export interface RenderingHints {
   serveMinimalCSS: boolean;
   reduceAnimations: boolean;
   useImagePlaceholders: boolean;
-  disableAutoplay: boolean;
   preferServerRendering: boolean;
   disable3dEffects: boolean;
+  limitVideoQuality: boolean;
+  useSystemFonts: boolean;
+  disablePrefetch: boolean;
 }
 
 export type ProfileSource = 'probe' | 'headers' | 'fallback';

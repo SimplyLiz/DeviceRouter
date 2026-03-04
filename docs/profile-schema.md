@@ -44,7 +44,7 @@ All fields are optional — the probe collects what it can based on browser API 
 | ------------ | ------------------------------------ | ---------------------------------- |
 | `cpu`        | `'low' \| 'mid' \| 'high'`           | CPU tier based on core count       |
 | `memory`     | `'low' \| 'mid' \| 'high'`           | Memory tier based on device memory |
-| `connection` | `'2g' \| '3g' \| '4g' \| 'fast'`     | Connection tier                    |
+| `connection` | `'2g' \| '3g' \| '4g' \| 'high'`     | Connection tier                    |
 | `gpu`        | `'none' \| 'low' \| 'mid' \| 'high'` | GPU tier based on renderer string  |
 
 ## ClassifiedProfile (derived)
@@ -74,6 +74,8 @@ The full classified result attached to requests by the middleware.
 | `serveMinimalCSS`       | `boolean` | Low-end device                                         |
 | `reduceAnimations`      | `boolean` | Low-end device, prefers reduced motion, or low battery |
 | `useImagePlaceholders`  | `boolean` | Slow connection (2g/3g)                                |
-| `disableAutoplay`       | `boolean` | Low-end device, slow connection, or low battery        |
 | `preferServerRendering` | `boolean` | Low-end device                                         |
 | `disable3dEffects`      | `boolean` | No GPU or software renderer                            |
+| `limitVideoQuality`     | `boolean` | Slow connection or low battery                         |
+| `useSystemFonts`        | `boolean` | Low-end device or slow connection                      |
+| `disablePrefetch`       | `boolean` | Slow connection or low battery                         |

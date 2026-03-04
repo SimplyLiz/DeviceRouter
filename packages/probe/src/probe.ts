@@ -6,19 +6,19 @@ export interface ProbeOptions {
   cookiePath?: string;
 }
 
-function getCookie(name: string): string | null {
-  const match = document.cookie.match(new RegExp('(^|; )' + name + '=([^;]*)'));
+export function getCookie(name: string): string | null {
+  const match = document.cookie.match(RegExp('(^|; )' + name + '=([^;]*)'));
   return match ? decodeURIComponent(match[2]) : null;
 }
 
-function setCookie(name: string, value: string, path: string): void {
+export function setCookie(name: string, value: string, path: string): void {
   document.cookie = `${name}=${encodeURIComponent(value)};path=${path};SameSite=Lax`;
 }
 
 export async function runProbe(options: ProbeOptions = {}): Promise<void> {
   const {
     endpoint = '/device-router/probe',
-    cookieName = 'dr_session',
+    cookieName = 'device-router-session',
     cookiePath = '/',
   } = options;
 

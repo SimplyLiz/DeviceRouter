@@ -66,7 +66,7 @@ describe('diagnostics (fastify)', () => {
       await app.register(cookie);
 
       const { middleware } = createDeviceRouter({ storage });
-      await app.register(middleware);
+      app.addHook('preHandler', middleware);
       app.get('/test', (_req, reply) => reply.send({ ok: true }));
 
       await app.listen({ port: 0 });
@@ -94,7 +94,7 @@ describe('diagnostics (fastify)', () => {
 
       const { middleware, probeEndpoint } = createDeviceRouter({ storage });
       app.post('/device-router/probe', probeEndpoint);
-      await app.register(middleware);
+      app.addHook('preHandler', middleware);
       app.get('/test', (_req, reply) => reply.send({ ok: true }));
 
       await app.listen({ port: 0 });
@@ -128,7 +128,7 @@ describe('diagnostics (fastify)', () => {
       await app.register(cookie);
 
       const { middleware } = createDeviceRouter({ storage });
-      await app.register(middleware);
+      app.addHook('preHandler', middleware);
       app.get('/test', (_req, reply) => reply.send({ ok: true }));
 
       await app.listen({ port: 0 });
@@ -151,7 +151,7 @@ describe('diagnostics (fastify)', () => {
       await app.register(cookie);
 
       const { middleware } = createDeviceRouter({ storage });
-      await app.register(middleware);
+      app.addHook('preHandler', middleware);
       app.get('/test', (_req, reply) => reply.send({ ok: true }));
 
       await app.listen({ port: 0 });
@@ -178,7 +178,7 @@ describe('diagnostics (fastify)', () => {
       await app.register(cookie);
 
       const { middleware } = createDeviceRouter({ storage, onEvent });
-      await app.register(middleware);
+      app.addHook('preHandler', middleware);
       app.get('/test', (_req, reply) => reply.send({ ok: true }));
 
       await app.listen({ port: 0 });

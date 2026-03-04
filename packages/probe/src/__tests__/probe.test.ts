@@ -56,7 +56,7 @@ describe('runProbe', () => {
 
   it('skips probe when session cookie exists', async () => {
     Object.defineProperty(globalThis, 'document', {
-      value: { cookie: 'dr_session=abc123' },
+      value: { cookie: 'device-router-session=abc123' },
       writable: true,
       configurable: true,
     });
@@ -99,7 +99,7 @@ describe('runProbe', () => {
 
     await runProbe();
 
-    expect(mockDoc.cookie).toContain('dr_session=test-token');
+    expect(mockDoc.cookie).toContain('device-router-session=test-token');
   });
 
   it('uses custom endpoint and cookie name', async () => {

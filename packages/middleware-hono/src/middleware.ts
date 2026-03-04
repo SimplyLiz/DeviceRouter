@@ -7,6 +7,8 @@ import {
   classifyFromHeaders,
   resolveFallback,
   emitEvent,
+  extractErrorMessage,
+  validateThresholds,
 } from '@device-router/types';
 import type {
   ClassifiedProfile,
@@ -34,12 +36,14 @@ export type DeviceRouterEnv = {
 export function createMiddleware(options: MiddlewareOptions): MiddlewareHandler<DeviceRouterEnv> {
   const {
     storage,
-    cookieName = 'dr_session',
+    cookieName = 'device-router-session',
     thresholds,
     fallbackProfile,
     classifyFromHeaders: useHeaders,
     onEvent,
   } = options;
+
+  if (thresholds) validateThresholds(thresholds);
 
   return async (c: Context<DeviceRouterEnv>, next) => {
     try {
@@ -106,6 +110,7 @@ export function createMiddleware(options: MiddlewareOptions): MiddlewareHandler<
       emitEvent(onEvent, {
         type: 'error',
         error: err,
+        errorMessage: extractErrorMessage(err),
         phase: 'middleware',
         sessionToken: getCookie(c, cookieName),
       });

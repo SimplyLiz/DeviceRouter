@@ -18,8 +18,8 @@ describe('MemoryStorageAdapter', () => {
     vi.useFakeTimers();
   });
 
-  afterEach(() => {
-    adapter.clear();
+  afterEach(async () => {
+    await adapter.clear();
     vi.useRealTimers();
   });
 
@@ -70,8 +70,49 @@ describe('MemoryStorageAdapter', () => {
   it('clears all entries', async () => {
     await adapter.set('a', makeProfile('a'), 3600);
     await adapter.set('b', makeProfile('b'), 3600);
-    adapter.clear();
+    await adapter.clear();
     expect(await adapter.get('a')).toBeNull();
     expect(await adapter.get('b')).toBeNull();
+  });
+
+  describe('count', () => {
+    it('returns zero when empty', async () => {
+      expect(await adapter.count()).toBe(0);
+    });
+
+    it('returns the number of stored entries', async () => {
+      await adapter.set('a', makeProfile('a'), 3600);
+      await adapter.set('b', makeProfile('b'), 3600);
+      expect(await adapter.count()).toBe(2);
+    });
+
+    it('excludes expired entries', async () => {
+      await adapter.set('a', makeProfile('a'), 1);
+      await adapter.set('b', makeProfile('b'), 3600);
+      vi.advanceTimersByTime(1500);
+      expect(await adapter.count()).toBe(1);
+    });
+  });
+
+  describe('keys', () => {
+    it('returns empty array when empty', async () => {
+      expect(await adapter.keys()).toEqual([]);
+    });
+
+    it('returns session token keys', async () => {
+      await adapter.set('tok1', makeProfile('tok1'), 3600);
+      await adapter.set('tok2', makeProfile('tok2'), 3600);
+      const keys = await adapter.keys();
+      expect(keys).toHaveLength(2);
+      expect(keys).toContain('tok1');
+      expect(keys).toContain('tok2');
+    });
+
+    it('excludes expired entries', async () => {
+      await adapter.set('a', makeProfile('a'), 1);
+      await adapter.set('b', makeProfile('b'), 3600);
+      vi.advanceTimersByTime(1500);
+      expect(await adapter.keys()).toEqual(['b']);
+    });
   });
 });

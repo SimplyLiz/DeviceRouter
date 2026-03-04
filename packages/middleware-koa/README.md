@@ -84,21 +84,21 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 
 ## Options
 
-| Option                | Type                                   | Default           | Description                                   |
-| --------------------- | -------------------------------------- | ----------------- | --------------------------------------------- |
-| `storage`             | `StorageAdapter`                       | _(required)_      | Storage backend for profiles                  |
-| `cookieName`          | `string`                               | `'dr_session'`    | Session cookie name                           |
-| `cookiePath`          | `string`                               | `'/'`             | Cookie path                                   |
-| `cookieSecure`        | `boolean`                              | `false`           | Set `Secure` flag on the session cookie       |
-| `ttl`                 | `number`                               | `86400` (24h)     | Profile TTL in seconds                        |
-| `rejectBots`          | `boolean`                              | `true`            | Reject bot/crawler probe submissions          |
-| `thresholds`          | `TierThresholds`                       | Built-in defaults | Custom tier thresholds (validated at startup) |
-| `injectProbe`         | `boolean`                              | `false`           | Auto-inject probe into HTML                   |
-| `probePath`           | `string`                               | —                 | Custom probe endpoint path                    |
-| `probeNonce`          | `string \| ((ctx: Context) => string)` | —                 | CSP nonce for injected script                 |
-| `fallbackProfile`     | `FallbackProfile`                      | —                 | Fallback profile for first requests           |
-| `classifyFromHeaders` | `boolean`                              | `false`           | Classify from UA/Client Hints                 |
-| `onEvent`             | `OnEventCallback`                      | —                 | Observability callback for logging/metrics    |
+| Option                | Type                                   | Default                   | Description                                   |
+| --------------------- | -------------------------------------- | ------------------------- | --------------------------------------------- |
+| `storage`             | `StorageAdapter`                       | _(required)_              | Storage backend for profiles                  |
+| `cookieName`          | `string`                               | `'device-router-session'` | Session cookie name                           |
+| `cookiePath`          | `string`                               | `'/'`                     | Cookie path                                   |
+| `cookieSecure`        | `boolean`                              | `false`                   | Set `Secure` flag on the session cookie       |
+| `ttl`                 | `number`                               | `86400` (24h)             | Profile TTL in seconds                        |
+| `rejectBots`          | `boolean`                              | `true`                    | Reject bot/crawler probe submissions          |
+| `thresholds`          | `TierThresholds`                       | Built-in defaults         | Custom tier thresholds (validated at startup) |
+| `injectProbe`         | `boolean`                              | `false`                   | Auto-inject probe into HTML                   |
+| `probePath`           | `string`                               | —                         | Custom probe endpoint path                    |
+| `probeNonce`          | `string \| ((ctx: Context) => string)` | —                         | CSP nonce for injected script                 |
+| `fallbackProfile`     | `FallbackProfile`                      | —                         | Fallback profile for first requests           |
+| `classifyFromHeaders` | `boolean`                              | `false`                   | Classify from UA/Client Hints                 |
+| `onEvent`             | `OnEventCallback`                      | —                         | Observability callback for logging/metrics    |
 
 ## Observability
 
@@ -115,12 +115,38 @@ const { middleware, probeEndpoint } = createDeviceRouter({
 
 See the [Observability guide](https://github.com/SimplyLiz/DeviceRouter/blob/main/docs/observability.md) for details.
 
+## Standalone usage
+
+Use the individual pieces when you need fine-grained control over each component:
+
+```typescript
+import {
+  createMiddleware,
+  createProbeEndpoint,
+  createInjectionMiddleware,
+  loadProbeScript,
+} from '@device-router/middleware-koa';
+
+// Use only what you need
+const middleware = createMiddleware({ storage, thresholds });
+const endpoint = createProbeEndpoint({ storage, ttl: 3600 });
+const injection = createInjectionMiddleware({
+  probeScript: loadProbeScript(),
+});
+
+app.use(injection);
+app.use(middleware);
+```
+
+`loadProbeScript()` reads the `@device-router/probe` bundle and optionally rewrites the endpoint URL via `{ probePath }`. Thresholds passed to `createMiddleware()` are validated at creation time.
+
 ## Exports
 
 - `createDeviceRouter(options)` — All-in-one setup returning `{ middleware, probeEndpoint, injectionMiddleware? }`
-- `createMiddleware(options)` — Standalone middleware
+- `createMiddleware(options)` — Standalone middleware (validates thresholds)
 - `createProbeEndpoint(options)` — Standalone probe endpoint handler
 - `createInjectionMiddleware(options)` — Standalone injection middleware
+- `loadProbeScript(options?)` — Load the minified probe script for use with `createInjectionMiddleware()`
 
 ## Compatibility
 

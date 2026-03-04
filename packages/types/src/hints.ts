@@ -1,6 +1,6 @@
-import type { DeviceTiers, RenderingHints, RawSignals } from './profile.js';
+import type { DeviceTiers, RenderingHints, StoredSignals } from './profile.js';
 
-export function deriveHints(tiers: DeviceTiers, signals?: RawSignals): RenderingHints {
+export function deriveHints(tiers: DeviceTiers, signals?: StoredSignals): RenderingHints {
   const isLowEnd = tiers.cpu === 'low' || tiers.memory === 'low';
   const isSlowConnection = tiers.connection === '2g' || tiers.connection === '3g';
   const isBatteryConstrained =
@@ -11,8 +11,10 @@ export function deriveHints(tiers: DeviceTiers, signals?: RawSignals): Rendering
     serveMinimalCSS: isLowEnd,
     reduceAnimations: isLowEnd || signals?.prefersReducedMotion === true || isBatteryConstrained,
     useImagePlaceholders: isSlowConnection,
-    disableAutoplay: isLowEnd || isSlowConnection || isBatteryConstrained,
     preferServerRendering: isLowEnd,
     disable3dEffects: tiers.gpu === 'none' || tiers.gpu === 'low',
+    limitVideoQuality: isSlowConnection || isBatteryConstrained,
+    useSystemFonts: isLowEnd || isSlowConnection,
+    disablePrefetch: isSlowConnection || isBatteryConstrained,
   };
 }

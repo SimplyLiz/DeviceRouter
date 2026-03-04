@@ -20,7 +20,7 @@ export function classifyFromHeaders(headers: Record<string, string | undefined>)
   } else if (TABLET_UA.test(ua)) {
     tiers = { cpu: 'mid', memory: 'mid', connection: '4g', gpu: 'mid' };
   } else {
-    tiers = { cpu: 'high', memory: 'high', connection: 'fast', gpu: 'mid' };
+    tiers = { cpu: 'high', memory: 'high', connection: 'high', gpu: 'mid' };
   }
 
   if (deviceMemory) {

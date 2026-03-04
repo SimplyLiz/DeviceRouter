@@ -1,6 +1,6 @@
 {
   "name": "@device-router/storage",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Storage adapters (memory, Redis) for persisting device profiles in DeviceRouter",
   "license": "MIT",
@@ -50,7 +50,7 @@
     "@device-router/types": "workspace:*"
   },
   "peerDependencies": {
-    "ioredis": "^5.0.0"
+    "ioredis": "^5.10.0"
   },
   "peerDependenciesMeta": {
     "ioredis": {
@@ -58,6 +58,6 @@
     }
   },
   "devDependencies": {
-    "ioredis": "^5.0.0"
+    "ioredis": "^5.10.0"
   }
 }

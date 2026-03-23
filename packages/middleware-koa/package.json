@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "@device-router/probe": "workspace:*",
-    "@types/koa": "^3.0.1",
+    "@types/koa": "^3.0.2",
     "koa": "^3.1.2"
   }
 }

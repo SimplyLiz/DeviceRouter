@@ -12,10 +12,10 @@
     "@device-router/middleware-koa": "workspace:*",
     "@device-router/storage": "workspace:*",
     "@device-router/types": "workspace:*",
-    "koa": "^3.1.2"
+    "koa": "^3.2.0"
   },
   "devDependencies": {
-    "@types/koa": "^3.0.1",
+    "@types/koa": "^3.0.2",
     "tsx": "^4.0.0"
   }
 }
